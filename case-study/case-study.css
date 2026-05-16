@@ -1,0 +1,63 @@
+/* case-study/case-study.css */
+@import url('../design-system/base.css');
+
+.cs-page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 80px 32px 120px;
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.cs-eyebrow {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--brand); margin-bottom: var(--s-4);
+}
+
+.cs-title {
+  font-size: 48px; line-height: 1.05; font-weight: 600;
+  letter-spacing: -0.02em; margin-bottom: var(--s-3);
+}
+
+.cs-deck {
+  font-size: 20px; line-height: 1.45; color: var(--text-secondary);
+  margin-bottom: var(--s-9);
+}
+
+.cs-meta {
+  display: flex; gap: var(--s-7); margin-bottom: var(--s-9);
+  font-size: 13px; color: var(--text-tertiary);
+}
+.cs-meta dt { font-weight: 600; color: var(--text-secondary); }
+
+.cs-section { margin-top: var(--s-9); }
+.cs-section h2 {
+  font-size: 28px; font-weight: 600; line-height: 1.15;
+  letter-spacing: -0.01em; margin-bottom: var(--s-5);
+}
+.cs-section h3 {
+  font-size: 20px; font-weight: 600; margin-top: var(--s-7); margin-bottom: var(--s-3);
+}
+.cs-section p { margin-bottom: var(--s-4); }
+.cs-section p + p { margin-top: var(--s-4); }
+.cs-section ul, .cs-section ol { padding-left: 22px; margin-bottom: var(--s-4); }
+.cs-section li { margin-bottom: var(--s-2); }
+
+.cs-pull {
+  font-size: 22px; line-height: 1.4; font-weight: 500;
+  color: var(--text); border-left: 3px solid var(--brand);
+  padding: 8px 0 8px 20px; margin: var(--s-7) 0;
+}
+
+.cs-figure {
+  margin: var(--s-7) 0;
+  border-radius: var(--r-md); overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.cs-figure iframe { display: block; width: 100%; border: none; height: 720px; background: var(--bg); }
+.cs-figure-caption { font-size: 13px; color: var(--text-secondary);
+  padding: var(--s-3) var(--s-4); border-top: 1px solid var(--hairline);
+  background: var(--card); }
+
+.cs-refs { font-size: 13px; color: var(--text-secondary); }
+.cs-refs li { margin-bottom: var(--s-3); }
