@@ -1,0 +1,80 @@
+/* =========================================================
+   ADHD MODE · DESIGN TOKENS
+   Single source of truth. Imported by every screen and the
+   working prototype. Mirror exists in tokens.json (W3C format)
+   for Figma import via the Tokens Studio plugin.
+   ========================================================= */
+
+:root {
+  /* ---------- COLOR ---------- */
+  --bg:              #f4f2ee;
+  --card:            #ffffff;
+  --brand:           #0a66c2;
+  --brand-hover:     #004182;
+  --brand-tint:      rgba(10, 102, 194, 0.04);
+  --text:            rgba(0, 0, 0, 0.9);
+  --text-secondary:  rgba(0, 0, 0, 0.6);
+  --text-tertiary:   rgba(0, 0, 0, 0.45);
+  --hairline:        rgba(0, 0, 0, 0.06);
+  --skip-grey:       rgba(0, 0, 0, 0.42);
+  --skip-tint:       rgba(0, 0, 0, 0.06);
+  --shadow:          0 0 0 1px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-hover:    0 0 0 1px rgba(0,0,0,0.10), 0 6px 16px rgba(0,0,0,0.06);
+  --shadow-drag:     0 0 0 1px rgba(0,0,0,0.10), 0 12px 32px rgba(0,0,0,0.12);
+
+  /* Reaction accents (background tints for hover/commit states) */
+  --react-insightful: #fef3c7;
+  --react-support:    #ffedd5;
+  --react-love:       #fee2e2;
+  --react-celebrate:  #e0e7ff;
+
+  /* ---------- TYPOGRAPHY ---------- */
+  --font-sans: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
+  --fs-display:   32px;
+  --fs-heading:   20px;
+  --fs-body:      14px;
+  --fs-small:     13px;
+  --fs-meta:      12px;
+  --fs-tiny:      11px;
+  --lh-tight:     1.15;
+  --lh-base:      1.4;
+  --lh-loose:     1.6;
+  --tracking-tight: -0.015em;
+  --tracking-wide:   0.04em;
+
+  /* ---------- SPACE ---------- */
+  --s-1:  4px;
+  --s-2:  8px;
+  --s-3:  12px;
+  --s-4:  16px;
+  --s-5:  20px;
+  --s-6:  24px;
+  --s-7:  32px;
+  --s-8:  40px;
+  --s-9:  56px;
+
+  /* ---------- RADIUS ---------- */
+  --r-sm:   4px;
+  --r-md:   8px;
+  --r-lg:   12px;
+  --r-pill: 999px;
+
+  /* ---------- MOTION ---------- */
+  --d-fast:   150ms;
+  --d-base:   240ms;
+  --d-slow:   400ms;
+  --d-page:   600ms;
+  --ease-out:     cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out:  cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring:  cubic-bezier(0.34, 1.56, 0.64, 1);
+  --lift-sm:  4px;
+  --lift-md:  8px;
+  --lift-lg:  16px;
+  --stagger-tight:  40ms;
+  --stagger-loose:  80ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  /* Out of scope for the portfolio prototype; LinkedIn doesn't yet ship
+     a fully tokenized dark mode for the feed. Note for future work. */
+}
