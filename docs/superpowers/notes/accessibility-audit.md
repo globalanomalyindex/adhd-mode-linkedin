@@ -43,3 +43,17 @@ Open each file below in Chrome DevTools, run Lighthouse > Accessibility, target 
 ### Color contrast (WCAG AA)
 - Body text vs cream background (`--text` on `--bg`): visually verify or use a contrast checker
 - Secondary text vs cream background (`--text-secondary` on `--bg`): visually verify
+
+## Cross-browser smoke test (manual)
+
+Open `prototype/index.html` in each of these browsers and verify:
+- Chrome (macOS): drag, magnification, long-press picker, animations all work
+- Safari (macOS): same checks
+- Firefox (macOS): same checks (Pointer Events supported since Firefox 59)
+
+For mobile/touch testing:
+- From project root: `npx serve .` (note the network URL printed)
+- Open URL on a phone connected to the same WiFi
+- Test drag, react, long-press on touch
+
+If any browser shows issues, document them and triage. Pointer Events should work across all modern browsers.
