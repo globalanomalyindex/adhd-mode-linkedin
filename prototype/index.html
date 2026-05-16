@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>ADHD Mode · Prototype</title>
+<style>
+  @import url('../design-system/base.css');
+
+  html, body { height: 100%; overflow: hidden; touch-action: none; }
+  #app { height: 100vh; display: flex; justify-content: center; align-items: center;
+    padding: 24px; }
+
+  .stage { width: 100%; max-width: 420px; height: min(720px, 95vh); position: relative; }
+
+  .panel { position: absolute; inset: 0; display: none;
+    background: var(--card); border-radius: var(--r-md); box-shadow: var(--shadow);
+    overflow: hidden; }
+  .panel.active { display: block; animation: fade-in var(--d-slow) var(--ease-out) forwards; }
+
+  @keyframes fade-in { from { opacity: 0; transform: translateY(var(--lift-md)); } to { opacity: 1; transform: none; } }
+
+  .session { position: absolute; inset: 0; display: none; flex-direction: column;
+    background: var(--bg); border-radius: var(--r-md); overflow: hidden; }
+  .session.active { display: flex; }
+
+  .session-topbar {
+    background: var(--card); padding: 12px 16px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--hairline); font-size: var(--fs-small);
+  }
+  .session-topbar .mode-marker { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); }
+  .session-topbar .mode-marker .dot { width: 6px; height: 6px; border-radius: 50%;
+    background: var(--brand); }
+  .session-topbar .mode-marker .label { color: var(--text); font-weight: 600; }
+  .session-topbar .meta { color: var(--text-tertiary); font-variant-numeric: tabular-nums;
+    display: flex; gap: 12px; }
+
+  .skip-arc {
+    position: absolute; top: 56px; left: 50%; transform: translateX(-50%);
+    width: 160px; height: 24px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.04), transparent);
+    border-radius: 0 0 200px 200px; pointer-events: none;
+    transition: width var(--d-base) var(--ease-out),
+                height var(--d-base) var(--ease-out),
+                background var(--d-base) var(--ease-out);
+  }
+  .skip-arc.active {
+    width: 320px; height: 110px;
+    background: radial-gradient(ellipse at top, rgba(0,0,0,0.2), transparent 70%);
+  }
+  .skip-arc .label {
+    position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
+    background: var(--skip-grey); color: #fff; font-size: 12px; font-weight: 600;
+    padding: 5px 12px; border-radius: 14px; opacity: 0;
+    transition: opacity var(--d-fast) var(--ease-in-out);
+  }
+  .skip-arc.active .label { opacity: 1; }
+
+  .card-stage { flex: 1; position: relative; padding: 80px 16px 100px; }
+
+  .card-host {
+    position: absolute; inset: 80px 16px 100px;
+    display: flex; align-items: flex-start; justify-content: center;
+  }
+  .card {
+    width: 100%; background: var(--card); border-radius: var(--r-lg);
+    padding: 18px 20px 22px;
+    box-shadow: var(--shadow); cursor: grab;
+    transition: box-shadow var(--d-base) var(--ease-out);
+    user-select: none; touch-action: none;
+  }
+  .card.dragging { box-shadow: var(--shadow-drag); cursor: grabbing; }
+  .card-author { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .card-avatar { width: 40px; height: 40px; border-radius: var(--r-pill);
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
+  .card-name { font-size: 14px; font-weight: 600; line-height: 1.2; }
+  .card-role { font-size: var(--fs-meta); color: var(--text-secondary); }
+  .card-tldr-pill {
+    display: inline-block; background: #eef3f8; color: var(--brand);
+    font-size: 10px; font-weight: 600; letter-spacing: 0.05em;
+    padding: 3px 8px; border-radius: 8px; margin-bottom: 10px;
+  }
+  .card-content { font-size: var(--fs-small); line-height: var(--lh-loose); color: var(--text);
+    white-space: pre-wrap; }
+  .card-progress { display: flex; gap: 4px; margin-top: 16px; }
+  .card-progress .pip { height: 3px; flex: 1; background: var(--hairline); border-radius: 2px;
+    transition: background var(--d-base) var(--ease-in-out); }
+  .card-progress .pip.filled { background: var(--brand); }
+  .card-page-label { font-size: 10px; color: var(--text-tertiary);
+    letter-spacing: 0.04em; margin-top: 6px; }
+  .card-react-preview {
+    position: absolute; top: 12px; right: 14px;
+    background: var(--brand); color: #fff; font-size: 9px; font-weight: 700;
+    padding: 3px 8px; border-radius: 8px; letter-spacing: 0.04em;
+    opacity: 0; transition: opacity var(--d-fast) var(--ease-in-out);
+  }
+  .card-react-preview.visible { opacity: 1; }
+
+  .react-tray {
+    position: absolute; left: 16px; right: 16px; bottom: 14px;
+    background: var(--card); border-radius: 22px; padding: 10px 6px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    display: flex; justify-content: space-around; align-items: center;
+    z-index: 2;
+  }
+  .react {
+    font-size: 22px; padding: 6px; border-radius: 50%;
+    transform-origin: center; transition: transform var(--d-base) var(--ease-spring),
+                background var(--d-fast) var(--ease-in-out);
+    background: transparent;
+  }
+  .react.highlighted { background: var(--brand-tint); }
+
+  .end-shell { padding: 24px; text-align: center; }
+  .end-shell h1 { font-size: 28px; font-weight: 600; margin: var(--s-6) 0 var(--s-3); }
+  .end-stats { display: grid; grid-template-columns: 1fr 1fr 1fr;
+    border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline);
+    margin: var(--s-6) 0; }
+  .end-stat { padding: 16px 8px; border-right: 1px solid var(--hairline); }
+  .end-stat:last-child { border-right: none; }
+  .end-stat .num { font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .end-stat .lbl { font-size: var(--fs-meta); color: var(--text-secondary); margin-top: 4px; }
+  .end-actions { display: flex; justify-content: space-between; align-items: center;
+    margin-top: var(--s-6); padding: 0 8px; }
+
+  .setup-mode {
+    border: 1.5px solid var(--hairline); border-radius: var(--r-md);
+    padding: 14px 10px; font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: all var(--d-fast) var(--ease-in-out);
+  }
+  .setup-mode:hover, .setup-mode.selected {
+    border-color: var(--brand); background: var(--brand-tint);
+  }
+  .setup-duration {
+    flex: 1; border: 1.5px solid var(--hairline); border-radius: var(--r-pill);
+    padding: 10px; font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: all var(--d-fast) var(--ease-in-out);
+  }
+  .setup-duration:hover { border-color: var(--brand); color: var(--brand); }
+  .setup-duration.selected { border-color: var(--brand); background: var(--brand); color: #fff; }
+
+  .picker { position: absolute; inset: 0; z-index: 10; display: flex;
+    align-items: flex-end; }
+  .picker-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.32);
+    animation: fade-in var(--d-base) var(--ease-out) forwards; opacity: 0; }
+  .picker-sheet { position: relative; width: 100%; background: var(--card);
+    border-radius: var(--r-lg) var(--r-lg) 0 0; padding: 18px 16px;
+    animation: sheet-in var(--d-slow) var(--ease-out) forwards;
+    transform: translateY(100%); }
+  @keyframes sheet-in { to { transform: translateY(0); } }
+  .picker-title { font-size: var(--fs-meta); font-weight: 600; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--text-secondary); margin-bottom: 12px; }
+  .picker-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .picker-btn { padding: 14px 12px; border: 1.5px solid var(--hairline);
+    border-radius: var(--r-md); font-size: 14px; font-weight: 600;
+    text-align: left; transition: all var(--d-fast) var(--ease-in-out); }
+  .picker-btn:hover { border-color: var(--brand); background: var(--brand-tint); }
+  .picker-close { width: 100%; margin-top: 14px; padding: 12px;
+    border-radius: var(--r-pill); border: 1.5px solid var(--hairline);
+    font-size: 14px; font-weight: 600; color: var(--text-secondary);
+    transition: all var(--d-fast) var(--ease-in-out); }
+  .picker-close:hover { color: var(--brand); border-color: var(--brand); }
+</style>
+</head>
+<body>
+  <div id="app">
+    <div class="stage">
+
+      <div class="panel active" data-state="entry">
+        <div style="padding: 32px 24px;">
+          <h2 style="font-size: 22px; font-weight: 600; margin-bottom: 8px;">A calmer way to use LinkedIn.</h2>
+          <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 24px;">
+            Bounded time. Reactions guide what comes back.
+          </p>
+          <button class="btn-primary" id="start-setup-btn">Start a focus session</button>
+        </div>
+      </div>
+
+      <div class="panel" data-state="setup">
+        <div style="padding: 32px 24px;">
+          <h2 style="font-size: 22px; font-weight: 600; margin-bottom: 16px;">Set up</h2>
+          <div style="font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px;">MODE</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px;">
+            <button class="setup-mode selected" data-mode="focus">Focus</button>
+            <button class="setup-mode" data-mode="reengage">Re-engage</button>
+          </div>
+          <div style="font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px;">LENGTH</div>
+          <div style="display: flex; gap: 8px; margin-bottom: 28px;">
+            <button class="setup-duration" data-min="5">5</button>
+            <button class="setup-duration selected" data-min="12">12</button>
+            <button class="setup-duration" data-min="20">20</button>
+          </div>
+          <button class="btn-primary" id="begin-btn">Begin</button>
+        </div>
+      </div>
+
+      <div class="session" data-state="active">
+        <div class="session-topbar">
+          <div class="mode-marker">
+            <span class="dot"></span>
+            <span class="label" id="mode-label">Focus</span>
+          </div>
+          <div class="meta">
+            <span id="time-remaining">12:00</span>
+            <span id="card-progress">1/12</span>
+            <span id="queue-count">↻ 0</span>
+          </div>
+        </div>
+        <div class="card-stage">
+          <div class="skip-arc">
+            <div class="label">Moved on</div>
+          </div>
+          <div class="card-host" id="card-host"></div>
+        </div>
+        <div class="react-tray" id="react-tray">
+          <div class="react" data-r="like" role="button" tabindex="0" aria-label="React with Like">👍</div>
+          <div class="react" data-r="celebrate" role="button" tabindex="0" aria-label="React with Celebrate">🎉</div>
+          <div class="react" data-r="support" role="button" tabindex="0" aria-label="React with Support">🤝</div>
+          <div class="react" data-r="love" role="button" tabindex="0" aria-label="React with Love">❤️</div>
+          <div class="react" data-r="insightful" role="button" tabindex="0" aria-label="React with Insightful">💡</div>
+          <div class="react" data-r="funny" role="button" tabindex="0" aria-label="React with Funny">😄</div>
+        </div>
+      </div>
+
+      <div class="panel" data-state="end">
+        <div class="end-shell">
+          <div style="font-size: 12px; color: var(--text-secondary);">Focus session · Ended</div>
+          <h1>Done.</h1>
+          <div class="end-stats">
+            <div class="end-stat"><div class="num" id="end-seen">0</div><div class="lbl">Posts seen</div></div>
+            <div class="end-stat"><div class="num" id="end-react">0</div><div class="lbl">Reactions</div></div>
+            <div class="end-stat"><div class="num" id="end-queue">0</div><div class="lbl">Will resurface</div></div>
+          </div>
+          <div class="end-actions">
+            <button class="btn-text" id="restart-btn">Start another</button>
+            <button class="btn-primary" id="close-btn">Close LinkedIn</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="picker" id="picker" hidden>
+        <div class="picker-backdrop"></div>
+        <div class="picker-sheet">
+          <div class="picker-title">React to this post</div>
+          <div class="picker-grid">
+            <button class="picker-btn" data-r="like">👍 Like</button>
+            <button class="picker-btn" data-r="celebrate">🎉 Celebrate</button>
+            <button class="picker-btn" data-r="support">🤝 Support</button>
+            <button class="picker-btn" data-r="love">❤️ Love</button>
+            <button class="picker-btn" data-r="insightful">💡 Insightful</button>
+            <button class="picker-btn" data-r="funny">😄 Funny</button>
+          </div>
+          <button class="picker-close" id="picker-close">Cancel</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="sr-live" aria-live="polite" aria-atomic="true"
+    style="position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;"></div>
+
+  <script type="module" src="./prototype.js"></script>
+</body>
+</html>
