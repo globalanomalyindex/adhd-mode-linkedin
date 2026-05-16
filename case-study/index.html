@@ -6,27 +6,82 @@
 <title>ADHD Mode for LinkedIn, Case Study</title>
 <link rel="stylesheet" href="./case-study.css" />
 </head>
-<body>
-<article class="cs-page">
+<body class="cs-body">
 
-  <!-- Cover -->
-  <header>
-    <div class="cs-eyebrow">Portfolio · Product Design</div>
-    <h1 class="cs-title">ADHD Mode for LinkedIn</h1>
-    <p class="cs-deck">The credible version of a wellbeing promise. A Focus Session, built on LinkedIn's own primitives, designed for people whose attention works differently.</p>
-    <dl class="cs-meta">
-      <div><dt>Role</dt><dd>Sole designer</dd></div>
-      <div><dt>Duration</dt><dd>Three weeks</dd></div>
-      <div><dt>Deliverables</dt><dd>Working prototype, Figma-ready spec, case study</dd></div>
-    </dl>
-  </header>
+<!-- HERO -->
+<section class="cs-hero">
+  <div class="cs-hero-top">
+    <div class="cs-hero-mark">
+      <div class="cs-hero-mark-dot">af</div>
+      <div class="cs-hero-mark-text">Chris Fiore <span>·  Product designer</span></div>
+    </div>
+    <nav class="cs-hero-nav">
+      <a href="#walkthrough">Walkthrough</a>
+      <a href="#mechanics">Mechanics</a>
+      <a href="#deliverables">Deliverables</a>
+    </nav>
+  </div>
+
+  <div class="cs-hero-body">
+    <div class="cs-eyebrow">Portfolio · Product Design · 2026</div>
+    <h1 class="cs-title">ADHD Mode<br/>for LinkedIn<span class="cs-title-accent">.</span></h1>
+    <p class="cs-deck">The credible version of a wellbeing promise. A bounded Focus Session, built on LinkedIn's own primitives, designed for people whose attention works differently.</p>
+  </div>
+
+  <div class="cs-hero-foot">
+    <div class="cs-meta-item">
+      <div class="cs-meta-label">Role</div>
+      <div class="cs-meta-value">Sole designer</div>
+    </div>
+    <div class="cs-meta-item">
+      <div class="cs-meta-label">Duration</div>
+      <div class="cs-meta-value">Three weeks</div>
+    </div>
+    <div class="cs-meta-item">
+      <div class="cs-meta-label">Deliverables</div>
+      <div class="cs-meta-value">Prototype, Figma, case study</div>
+    </div>
+    <div class="cs-meta-item">
+      <div class="cs-meta-label">Research base</div>
+      <div class="cs-meta-value">Becker 2022, Barkley, Ebbinghaus, Fitts</div>
+    </div>
+  </div>
+</section>
+
+<article class="cs-page">
 
   <!-- Section 1: Executive summary -->
   <section class="cs-section">
+    <div class="cs-eyebrow-mini">01 · Summary</div>
     <h2>Executive summary</h2>
     <p>LinkedIn and its peers publicly commit to caring about user wellbeing. ADHD Mode is what that promise looks like when it is designed seriously: a bounded Focus Session, embedded inside LinkedIn's native surface, that reshapes the feed around how ADHD and Cognitive Disengagement Syndrome (CDS) cognition actually works.</p>
     <p>The design hinges on three load-bearing ideas: bounded sessions instead of infinite scroll, LinkedIn reactions used as a personal spaced-repetition engine, and a vertical gesture grammar that respects existing scroll muscle memory. Long posts are reflowed into TL;DR-first paged cards. Sessions end with a closure ritual that gives users permission to leave.</p>
     <p>Two sub-modes (Focus for scattered-but-energetic days, Re-engage for foggy days) adjust pacing and density. The design preserves every revenue-relevant signal LinkedIn already collects.</p>
+  </section>
+
+  <!-- DELIVERABLES STRIP (prominent, near the top) -->
+  <section class="cs-section" id="deliverables">
+    <div class="cs-deliverables">
+      <h3>Deliverables, one page each</h3>
+      <dl>
+        <div class="cs-deliverable-row">
+          <dt>Working prototype</dt>
+          <dd>Real drag physics, magnification, reactions wired to a private spaced-repetition queue. <a href="../prototype/index.html">Open in browser  →</a></dd>
+        </div>
+        <div class="cs-deliverable-row">
+          <dt>Figma file</dt>
+          <dd>Cover, design system, six polished mobile frames, and a flow board. <a href="https://www.figma.com/design/ZFEmkHeen3nXUy6ogyGQW0" target="_blank" rel="noopener">Open in Figma  →</a></dd>
+        </div>
+        <div class="cs-deliverable-row">
+          <dt>Figma-ready spec</dt>
+          <dd>W3C Design Tokens JSON plus component and screen specs for handoff. <a href="../figma-spec/components.md">View spec package  →</a></dd>
+        </div>
+        <div class="cs-deliverable-row">
+          <dt>Design specification</dt>
+          <dd>Full research-grounded spec with citations, principles, and trade-offs. <a href="../docs/superpowers/specs/2026-05-16-adhd-mode-linkedin-design.md">View spec  →</a></dd>
+        </div>
+      </dl>
+    </div>
   </section>
 
   <!-- Section 2: The hook -->
@@ -87,7 +142,8 @@
   </section>
 
   <!-- Section 6: Product walkthrough -->
-  <section class="cs-section">
+  <section class="cs-section" id="walkthrough">
+    <div class="cs-eyebrow-mini">06 · Walkthrough</div>
     <h2>Product walkthrough</h2>
 
     <h3>Entry point</h3>
@@ -127,24 +183,25 @@
   </section>
 
   <!-- Section 7: Mechanic deep-dive, Reactions as spaced repetition -->
-  <section class="cs-section">
+  <section class="cs-section" id="mechanics">
+    <div class="cs-eyebrow-mini">07 · Mechanic deep-dive</div>
     <h2>Mechanic deep-dive: LinkedIn reactions as spaced repetition</h2>
     <p>The most distinctive move in the design. LinkedIn already has six reactions: Like, Celebrate, Support, Love, Insightful, Funny. Inside ADHD Mode they keep their social function (the notification still fires, the author still hears about it) and quietly take on a second function: scheduling the post into a private resurface queue.</p>
 
-    <table style="width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 14px;">
+    <table class="cs-table">
       <thead>
-        <tr style="border-bottom: 1px solid var(--hairline);">
-          <th style="text-align: left; padding: 12px 0;">Reaction</th>
-          <th style="text-align: left;">Social signal</th>
-          <th style="text-align: left;">Resurface behavior</th>
+        <tr>
+          <th>Reaction</th>
+          <th>Social signal</th>
+          <th>Resurface behavior</th>
         </tr>
       </thead>
       <tbody>
-        <tr style="border-bottom: 1px solid var(--hairline);"><td>💡 Insightful</td><td>Standard</td><td>~3 days, then spaced (SM-2 style)</td></tr>
-        <tr style="border-bottom: 1px solid var(--hairline);"><td>🤝 Support</td><td>Standard</td><td>~1 week</td></tr>
-        <tr style="border-bottom: 1px solid var(--hairline);"><td>❤️ Love</td><td>Standard</td><td>~2 weeks</td></tr>
-        <tr style="border-bottom: 1px solid var(--hairline);"><td>🎉 Celebrate</td><td>Standard</td><td>Surfaces on next profile visit</td></tr>
-        <tr style="border-bottom: 1px solid var(--hairline);"><td>👍 Like, 😄 Funny</td><td>Standard</td><td>No resurface</td></tr>
+        <tr><td>💡 Insightful</td><td>Standard</td><td>~3 days, then spaced (SM-2 style)</td></tr>
+        <tr><td>🤝 Support</td><td>Standard</td><td>~1 week</td></tr>
+        <tr><td>❤️ Love</td><td>Standard</td><td>~2 weeks</td></tr>
+        <tr><td>🎉 Celebrate</td><td>Standard</td><td>Surfaces on next profile visit</td></tr>
+        <tr><td>👍 Like, 😄 Funny</td><td>Standard</td><td>No resurface</td></tr>
         <tr><td><em>No reaction</em></td><td>None</td><td>No resurface, no penalty</td></tr>
       </tbody>
     </table>
@@ -237,5 +294,31 @@
   </section>
 
 </article>
+
+<footer class="cs-foot">
+  <p>ADHD Mode for LinkedIn  ·  Chris Fiore  ·  2026</p>
+  <p>Built with HTML, CSS, vanilla JavaScript, and Source Sans 3. No build step. <a href="../README.md" style="color: var(--brand);">View repository</a>.</p>
+</footer>
+
+<script>
+  // Scroll-reveal sections. Uses IntersectionObserver with one-shot reveal.
+  // prefers-reduced-motion is handled in CSS (sections render visible immediately).
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) {
+          e.target.classList.add('cs-visible');
+          io.unobserve(e.target);
+        }
+      }
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.05 });
+
+    document.querySelectorAll('.cs-section').forEach(s => io.observe(s));
+  } else {
+    // Fallback: show everything immediately
+    document.querySelectorAll('.cs-section').forEach(s => s.classList.add('cs-visible'));
+  }
+</script>
+
 </body>
 </html>

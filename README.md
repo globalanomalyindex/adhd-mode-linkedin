@@ -6,10 +6,11 @@ A portfolio piece by Chris Fiore. A research-grounded "Focus Session" feature de
 
 | Artifact | Where to look |
 |---|---|
+| Case study writeup | `case-study/index.html` |
 | Working interactive prototype | `prototype/index.html` |
+| Figma file | [figma.com/design/ZFEmkHeen3nXUy6ogyGQW0](https://www.figma.com/design/ZFEmkHeen3nXUy6ogyGQW0) |
 | Static screens (production fidelity) | `screens/` |
 | Figma-ready specification | `figma-spec/` |
-| Case study writeup | `case-study/index.html` |
 | Design specification | `docs/superpowers/specs/2026-05-16-adhd-mode-linkedin-design.md` |
 
 ## Running
