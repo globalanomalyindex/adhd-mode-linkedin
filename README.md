@@ -4,14 +4,14 @@ A portfolio piece by Chris Fiore. Designs a research-grounded "Focus Session" fe
 
 ## Contents
 
-- `docs/superpowers/specs/` , design specification
-- `docs/superpowers/plans/` , implementation plan
-- `design-system/` , tokens (CSS + W3C JSON)
-- `lib/` , pure logic modules with Vitest tests
-- `screens/` , static high-fidelity screens
-- `prototype/` , working interactive prototype
-- `figma-spec/` , Figma-ready specification package
-- `case-study/` , case study writeup
+- `docs/superpowers/specs/` - design specification
+- `docs/superpowers/plans/` - implementation plan
+- `design-system/` - tokens (CSS + W3C JSON)
+- `lib/` - pure logic modules with Vitest tests
+- `screens/` - static high-fidelity screens
+- `prototype/` - working interactive prototype
+- `figma-spec/` - Figma-ready specification package
+- `case-study/` - case study writeup
 
 ## Running
 
