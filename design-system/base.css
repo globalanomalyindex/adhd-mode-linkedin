@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,300..700;1,400..600&display=swap');
+@import url('./tokens.css');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'kern', 'liga';
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+}
+
+/* Primitive: card surface */
+.surface-card {
+  background: var(--card);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow);
+}
+
+/* Primitive: button styles */
+.btn-primary {
+  background: var(--brand);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 10px 24px;
+  border-radius: var(--r-pill);
+  transition: background var(--d-fast) var(--ease-in-out),
+              transform var(--d-fast) var(--ease-out),
+              box-shadow var(--d-base) var(--ease-out);
+}
+.btn-primary:hover {
+  background: var(--brand-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(10, 102, 194, 0.25);
+}
+.btn-primary:active { transform: translateY(0); }
+
+.btn-text {
+  color: var(--brand);
+  font-weight: 600;
+  padding: 8px 4px;
+  position: relative;
+  transition: color var(--d-fast) var(--ease-in-out);
+}
+.btn-text::after {
+  content: '';
+  position: absolute;
+  left: 4px; right: 4px; bottom: 4px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--d-base) var(--ease-out);
+}
+.btn-text:hover { color: var(--brand-hover); }
+.btn-text:hover::after { transform: scaleX(1); }
+
+/* Reduced motion: opacity-only fallback */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
