@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ADHD Mode · Check-in</title>
+<style>
+  @import url('../design-system/base.css');
+
+  body { padding: 56px 24px; display: flex; justify-content: center; }
+  .card {
+    width: 100%; max-width: 440px; background: var(--card);
+    border-radius: var(--r-md); box-shadow: var(--shadow);
+    padding: var(--s-7) var(--s-6);
+    text-align: center;
+    opacity: 0; transform: translateY(var(--lift-md)) scale(0.96);
+    animation: card-in var(--d-slow) var(--ease-out) 80ms forwards;
+  }
+  @keyframes card-in { to { opacity: 1; transform: none; } }
+
+  .progress-ring { margin: 0 auto var(--s-5); width: 64px; height: 64px;
+    position: relative; }
+  .progress-ring svg { transform: rotate(-90deg); }
+  .progress-ring .label { position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; color: var(--text); }
+
+  h1 { font-size: 24px; font-weight: 600; line-height: var(--lh-tight); }
+  p { font-size: var(--fs-small); color: var(--text-secondary);
+    margin-top: var(--s-3); margin-bottom: var(--s-7); }
+
+  .actions { display: flex; flex-direction: column; gap: var(--s-2); }
+  .btn-stack {
+    width: 100%; padding: 12px 18px; border-radius: var(--r-pill);
+    font-size: 14px; font-weight: 600;
+    transition: all var(--d-fast) var(--ease-in-out);
+  }
+  .btn-stack.primary { background: var(--brand); color: #fff; }
+  .btn-stack.primary:hover { background: var(--brand-hover); transform: translateY(-1px); }
+  .btn-stack.secondary { background: transparent; border: 1.5px solid var(--hairline); color: var(--text); }
+  .btn-stack.secondary:hover { border-color: var(--brand); color: var(--brand); }
+  .btn-stack.tertiary { background: transparent; color: var(--text-secondary); }
+  .btn-stack.tertiary:hover { color: var(--brand); }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="progress-ring">
+      <svg width="64" height="64">
+        <circle cx="32" cy="32" r="28" fill="none" stroke="var(--hairline)" stroke-width="3"/>
+        <circle cx="32" cy="32" r="28" fill="none" stroke="var(--brand)" stroke-width="3"
+          stroke-dasharray="175.93" stroke-dashoffset="58.6" stroke-linecap="round"/>
+      </svg>
+      <div class="label">12/12</div>
+    </div>
+
+    <h1>You've seen 12 posts.</h1>
+    <p>You're at the cap you set. Keep going, wrap, or pause for now.</p>
+
+    <div class="actions">
+      <button class="btn-stack primary">Wrap up</button>
+      <button class="btn-stack secondary">Keep going for 5 more minutes</button>
+      <button class="btn-stack tertiary">Pause and come back later</button>
+    </div>
+  </div>
+</body>
+</html>
