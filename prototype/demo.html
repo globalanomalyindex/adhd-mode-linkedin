@@ -330,21 +330,6 @@
   .card.show-tap-hints .tap-hint-left,
   .card.show-tap-hints .tap-hint-right { opacity: 1; }
 
-  /* ============ Goo (metaball) layer ============ */
-  .goo-layer {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    filter: url(#goo);
-    z-index: 9;
-  }
-  .blob {
-    position: absolute;
-    border-radius: 999px;
-    will-change: transform, width, height, opacity, background;
-    opacity: 0;
-  }
-
   /* ============ Floating reaction preview ============ */
   .react-preview {
     position: absolute;
@@ -816,16 +801,6 @@
 </head>
 <body>
 
-<svg width="0" height="0" style="position:absolute;">
-  <defs>
-    <filter id="goo">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="11" result="blur" />
-      <feColorMatrix in="blur" mode="matrix"
-        values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10" result="goo" />
-    </filter>
-  </defs>
-</svg>
-
 <button class="reset-btn" id="reset">↻ Restart</button>
 
 <div class="stage">
@@ -887,11 +862,6 @@
 
           </div>
         </div>
-      </div>
-
-      <div class="goo-layer">
-        <div class="blob" id="blob-bubble"></div>
-        <div class="blob" id="blob-shadow"></div>
       </div>
 
       <div class="react-preview" id="react-preview">
@@ -1203,9 +1173,6 @@
   const reactPreviewEmoji = $('#react-preview-emoji');
   const reactPreviewLabel = $('#react-preview-label');
 
-  const blobBubble = $('#blob-bubble');
-  const blobShadow = $('#blob-shadow');
-
   // ============================================================
   // STATE
   // ============================================================
@@ -1408,34 +1375,16 @@
     }
     return best;
   }
-  function updateBlobsAndPreview(t, nearestIcon, reaction) {
+  function updatePreview(t, nearestIcon, reaction) {
     const screenRect = screen.getBoundingClientRect();
-    const cardRect = card.getBoundingClientRect();
     const iconRect = nearestIcon.getBoundingClientRect();
-    const color = REACTION_COLOR[reaction];
 
-    const bubbleSize = 60 + 70 * t;
-    const bubbleCenterX = iconRect.left + iconRect.width / 2 - screenRect.left;
-    const bubbleCenterY = iconRect.top - 18 - 50 * t - screenRect.top;
-    blobBubble.style.background = color;
-    blobBubble.style.width  = bubbleSize + 'px';
-    blobBubble.style.height = bubbleSize + 'px';
-    blobBubble.style.transform =
-      `translate(${(bubbleCenterX - bubbleSize/2).toFixed(2)}px, ${(bubbleCenterY - bubbleSize/2).toFixed(2)}px)`;
-    blobBubble.style.opacity = (0.85 + 0.15 * t).toFixed(2);
-
-    const cardBottomX = cardRect.left + cardRect.width / 2 - screenRect.left;
-    const cardBottomY = cardRect.bottom - 18 - screenRect.top;
-    const shadowSize = 36 + 60 * t;
-    blobShadow.style.background = color;
-    blobShadow.style.width  = shadowSize + 'px';
-    blobShadow.style.height = (shadowSize * 0.82) + 'px';
-    blobShadow.style.transform =
-      `translate(${(cardBottomX - shadowSize/2).toFixed(2)}px, ${(cardBottomY - shadowSize*0.4 + 20*t).toFixed(2)}px)`;
-    blobShadow.style.opacity = (0.6 + 0.4 * t).toFixed(2);
-
-    reactPreview.style.left = bubbleCenterX + 'px';
-    reactPreview.style.top  = bubbleCenterY + 'px';
+    // Position the floating preview centered horizontally on the nearest
+    // tray icon, lifted above it; rises with proximity.
+    const previewX = iconRect.left + iconRect.width / 2 - screenRect.left;
+    const previewY = iconRect.top - 18 - 50 * t - screenRect.top;
+    reactPreview.style.left = previewX + 'px';
+    reactPreview.style.top  = previewY + 'px';
     reactPreviewEmoji.style.fontSize = (54 + 28 * t) + 'px';
 
     if (reactPreviewEmoji.textContent !== REACTION_EMOJI[reaction]) {
@@ -1463,8 +1412,6 @@
         el.classList.remove('nearest');
       }
       reactPreview.classList.remove('visible');
-      blobBubble.style.opacity = '0';
-      blobShadow.style.opacity = '0';
       return;
     }
     if (inReactZone) {
@@ -1493,7 +1440,7 @@
         }
       }
       reactPreview.classList.add('visible');
-      updateBlobsAndPreview(t, nearest, reaction);
+      updatePreview(t, nearest, reaction);
       return;
     }
     // idle held
@@ -1504,8 +1451,6 @@
       el.classList.remove('nearest');
     }
     reactPreview.classList.remove('visible');
-    blobBubble.style.opacity = '0';
-    blobShadow.style.opacity = '0';
   }
   function clearFeedback() {
     skipArc.classList.remove('armed');
@@ -1515,8 +1460,6 @@
       el.classList.remove('nearest');
     }
     reactPreview.classList.remove('visible');
-    blobBubble.style.opacity = '0';
-    blobShadow.style.opacity = '0';
   }
 
   function flashAura(color) {
