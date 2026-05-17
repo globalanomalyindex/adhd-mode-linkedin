@@ -28,6 +28,15 @@
 
     --ease-out:     cubic-bezier(0.16, 1, 0.3, 1);
     --ease-spring:  cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    /* Reaction colors */
+    --c-like:        #2563eb;
+    --c-celebrate:   #6366f1;
+    --c-support:     #ea580c;
+    --c-love:        #dc2626;
+    --c-insightful:  #b45309;
+    --c-funny:       #ca8a04;
+    --c-skip:        #6b7280;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -75,7 +84,7 @@
     width: 116px; height: 26px;
     background: #000;
     border-radius: 14px;
-    z-index: 10;
+    z-index: 30;
   }
   .device-screen {
     width: 100%; height: 100%;
@@ -94,6 +103,8 @@
     align-items: center;
     border-bottom: 1px solid var(--hairline);
     font-size: 13px;
+    position: relative;
+    z-index: 4;
   }
   .topbar-left { display: flex; align-items: center; gap: 8px; color: var(--text-2); }
   .topbar-dot {
@@ -115,24 +126,6 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* ============ Auto-cycle progress (Stories-style) ============ */
-  .cycle-bar {
-    position: absolute;
-    top: 102px; left: 28px; right: 28px;
-    height: 3px;
-    background: rgba(0, 0, 0, 0.08);
-    border-radius: 999px;
-    overflow: hidden;
-    z-index: 3;
-  }
-  .cycle-bar-fill {
-    position: absolute; top: 0; left: 0; bottom: 0;
-    width: 0%;
-    background: linear-gradient(to right, var(--brand), #4d8fd6);
-    border-radius: 999px;
-    transition: width 0.16s linear;
-  }
-
   /* ============ Skip arc ============ */
   .skip-arc {
     position: absolute;
@@ -146,7 +139,7 @@
       height 0.32s var(--ease-out),
       background 0.32s var(--ease-out),
       top 0.32s var(--ease-out);
-    z-index: 1;
+    z-index: 3;
   }
   .skip-arc.armed {
     width: 340px;
@@ -170,13 +163,13 @@
   }
   .skip-arc.armed .skip-badge { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  /* ============ Card (shorter, soft horizontal rectangle) ============ */
+  /* ============ Card stage ============ */
   .card-stage {
     position: absolute;
     top: 130px; left: 18px; right: 18px;
     height: 330px;
     display: flex; align-items: stretch;
-    z-index: 2;
+    z-index: 10;
   }
 
   .card {
@@ -193,7 +186,7 @@
     touch-action: none;
     cursor: grab;
     position: relative;
-    transform-origin: center 35%;
+    transform-origin: center 50%;
     display: flex; flex-direction: column;
   }
   .card.dragging { cursor: grabbing; }
@@ -220,25 +213,57 @@
     overflow: hidden;
   }
 
-  .card-tag {
+  /* ============ Goo (metaball) layer ============ */
+  .goo-layer {
     position: absolute;
-    top: -10px; right: 18px;
-    padding: 4px 10px;
-    border-radius: 999px;
-    background: var(--brand);
-    color: #fff;
-    font-size: 10px; font-weight: 700;
-    letter-spacing: 0.06em;
-    opacity: 0;
-    transform: translateY(-4px) scale(0.92);
-    transition: opacity 0.2s ease, transform 0.32s var(--ease-out);
-    box-shadow: 0 6px 16px rgba(10, 102, 194, 0.25);
+    inset: 0;
     pointer-events: none;
-    white-space: nowrap;
+    filter: url(#goo);
+    z-index: 9; /* behind card (z 10) so card sits on top */
   }
-  .card-tag.visible { opacity: 1; transform: translateY(0) scale(1); }
+  .blob {
+    position: absolute;
+    border-radius: 999px;
+    will-change: transform, width, height, opacity, background;
+    opacity: 0;
+  }
 
-  /* ============ Comment chip ============ */
+  /* ============ Floating reaction preview (emoji + label) ============ */
+  .react-preview {
+    position: absolute;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 12;
+    display: flex; flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    transition: opacity 0.2s var(--ease-out);
+    transform: translate(-50%, -50%);
+    will-change: opacity, transform;
+  }
+  .react-preview.visible { opacity: 1; }
+  .react-preview-emoji {
+    font-size: 64px;
+    line-height: 1;
+    filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.22));
+    transition: transform 0.2s var(--ease-spring);
+    will-change: transform;
+  }
+  .react-preview-label {
+    background: var(--ink);
+    color: #fff;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  }
+  .react-preview-label.resurface { background: var(--coral); }
+  .react-preview-label.resurface::after { content: ' · resurfaces'; opacity: 0.7; }
+
+  /* ============ Comment chip (cycling) ============ */
   .comment-chip {
     position: absolute;
     top: 478px;
@@ -253,17 +278,33 @@
     align-items: center;
     gap: 12px;
     cursor: pointer;
-    transition: transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out), background 0.2s var(--ease-out);
-    z-index: 2;
+    transition:
+      transform 0.28s var(--ease-out),
+      box-shadow 0.2s var(--ease-out),
+      background 0.2s var(--ease-out),
+      opacity 0.28s var(--ease-out);
+    z-index: 5;
   }
-  .comment-chip:hover, .comment-chip:active {
+  .comment-chip.hidden {
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+  }
+  .comment-chip.swap-out {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  .comment-chip.swap-in {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  .comment-chip:not(.hidden):not(.swap-out):not(.swap-in):hover {
     transform: translateY(-1px);
     box-shadow:
       0 1px 0 rgba(0,0,0,0.04),
       0 10px 28px rgba(0, 0, 0, 0.08);
     background: #fafafa;
   }
-  .comment-chip:active { transform: translateY(0); }
 
   .comment-avatar {
     width: 30px; height: 30px;
@@ -294,54 +335,25 @@
     display: flex; align-items: center; gap: 3px;
     flex-shrink: 0;
   }
-  .comment-replies-arrow {
-    transition: transform 0.2s var(--ease-out);
-  }
-  .comment-chip:hover .comment-replies-arrow { transform: translateX(2px); }
+  .comment-replies-arrow { transition: transform 0.2s var(--ease-out); }
+  .comment-chip:not(.hidden):hover .comment-replies-arrow { transform: translateX(2px); }
 
-  /* ============ Floating reaction preview (during drag) ============ */
-  .react-preview {
+  .comment-dots {
     position: absolute;
-    bottom: 140px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px) scale(0.7);
-    pointer-events: none;
-    opacity: 0;
-    transition:
-      opacity 0.2s var(--ease-out),
-      transform 0.32s var(--ease-spring);
-    z-index: 5;
-    display: flex; flex-direction: column;
-    align-items: center;
-    gap: 8px;
+    top: -10px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 4px;
+    transition: opacity 0.28s var(--ease-out);
   }
-  .react-preview.visible {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0) scale(1);
+  .comment-dots.hidden { opacity: 0; }
+  .comment-dots .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.18);
+    transition: background 0.2s ease, transform 0.2s ease;
   }
-  .react-preview-emoji {
-    font-size: 76px;
-    line-height: 1;
-    filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.18));
-    transition: transform 0.2s var(--ease-spring);
-  }
-  .react-preview-label {
-    background: var(--ink);
-    color: #fff;
-    font-size: 12px; font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 6px 14px;
-    border-radius: 999px;
-    white-space: nowrap;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
-  }
-  .react-preview-label.resurface {
-    background: var(--coral);
-  }
-  .react-preview-label.resurface::after {
-    content: ' · resurfaces';
-    opacity: 0.7;
+  .comment-dots .dot.active {
+    background: var(--brand);
+    transform: scale(1.3);
   }
 
   /* ============ Reaction tray ============ */
@@ -358,11 +370,8 @@
     box-shadow:
       0 1px 0 rgba(0,0,0,0.04),
       0 8px 22px rgba(0, 0, 0, 0.08);
-    z-index: 2;
+    z-index: 5;
     transition: opacity 0.24s var(--ease-out);
-  }
-  .tray.dragging-react {
-    opacity: 1;
   }
   .tray-icon {
     font-size: 22px;
@@ -377,11 +386,8 @@
     will-change: transform;
     cursor: pointer;
   }
-  .tray.dragging-react .tray-icon { opacity: 0.25; }
-  .tray.dragging-react .tray-icon.nearest {
-    opacity: 1;
-    background: var(--brand-tint);
-  }
+  .tray.dragging-react .tray-icon { opacity: 0.22; }
+  .tray.dragging-react .tray-icon.nearest { opacity: 1; }
 
   /* ============ Comment thread sheet ============ */
   .sheet-backdrop {
@@ -392,7 +398,7 @@
     -webkit-backdrop-filter: blur(0px);
     pointer-events: none;
     transition: background 0.32s var(--ease-out), backdrop-filter 0.32s var(--ease-out);
-    z-index: 20;
+    z-index: 28;
   }
   .sheet-backdrop.open {
     background: rgba(0, 0, 0, 0.4);
@@ -403,8 +409,7 @@
 
   .sheet {
     position: absolute;
-    left: 12px; right: 12px;
-    bottom: 12px;
+    left: 12px; right: 12px; bottom: 12px;
     max-height: 78%;
     background: var(--card);
     border-radius: 26px;
@@ -414,7 +419,7 @@
       0 0 0 1px rgba(0, 0, 0, 0.04);
     transform: translateY(110%);
     transition: transform 0.4s var(--ease-out);
-    z-index: 21;
+    z-index: 29;
     display: flex; flex-direction: column;
   }
   .sheet.open { transform: translateY(0); }
@@ -446,32 +451,13 @@
     transition: background 0.18s ease;
   }
   .sheet-close:hover { background: rgba(0, 0, 0, 0.1); }
-
   .sheet-content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-
-  .sheet-original {
-    display: flex; gap: 12px;
-    padding: 10px 4px;
-  }
-  .sheet-original-avatar {
-    width: 36px; height: 36px;
-    border-radius: 999px;
-    flex-shrink: 0;
-  }
+  .sheet-original { display: flex; gap: 12px; padding: 10px 4px; }
+  .sheet-original-avatar { width: 36px; height: 36px; border-radius: 999px; flex-shrink: 0; }
   .sheet-original-body { flex: 1; }
-  .sheet-original-author {
-    font-size: 13px; font-weight: 600; color: var(--text);
-  }
-  .sheet-original-text {
-    font-size: 14px; line-height: 1.5; color: var(--text);
-    margin-top: 4px;
-  }
-  .sheet-original-meta {
-    font-size: 11px; color: var(--text-3);
-    margin-top: 6px;
-    display: flex; gap: 12px;
-  }
-
+  .sheet-original-author { font-size: 13px; font-weight: 600; color: var(--text); }
+  .sheet-original-text { font-size: 14px; line-height: 1.5; color: var(--text); margin-top: 4px; }
+  .sheet-original-meta { font-size: 11px; color: var(--text-3); margin-top: 6px; display: flex; gap: 12px; }
   .sheet-replies {
     padding-left: 18px;
     border-left: 2px solid var(--hairline);
@@ -480,18 +466,28 @@
     display: flex; flex-direction: column;
     gap: 14px;
   }
-  .reply {
-    display: flex; gap: 10px;
-  }
-  .reply-avatar {
-    width: 26px; height: 26px;
-    border-radius: 999px;
-    flex-shrink: 0;
-  }
-  .reply-body { flex: 1; }
+  .reply { display: flex; gap: 10px; }
+  .reply-avatar { width: 26px; height: 26px; border-radius: 999px; flex-shrink: 0; }
   .reply-author { font-size: 12px; font-weight: 600; color: var(--text); }
   .reply-text { font-size: 13px; line-height: 1.45; color: var(--text-2); margin-top: 2px; }
   .reply-meta { font-size: 10px; color: var(--text-3); margin-top: 4px; }
+
+  /* ============ Screen-perimeter aura ============ */
+  .aura {
+    position: absolute; inset: 0;
+    border-radius: 40px;
+    pointer-events: none;
+    z-index: 26;
+    box-shadow: inset 0 0 0 0 transparent;
+  }
+  .aura.pulse {
+    animation: auraPulse 1s var(--ease-out) forwards;
+  }
+  @keyframes auraPulse {
+    0%   { box-shadow: inset 0 0 0 0 transparent; }
+    25%  { box-shadow: inset 0 0 80px 14px var(--aura-color, rgba(10,102,194,0.5)); }
+    100% { box-shadow: inset 0 0 0 0 transparent; }
+  }
 
   /* ============ Footer hint ============ */
   .hint {
@@ -509,7 +505,7 @@
   .reset-btn {
     position: absolute;
     top: 14px; left: 14px;
-    z-index: 30;
+    z-index: 50;
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
@@ -528,6 +524,7 @@
   @media (prefers-reduced-motion: reduce) {
     .card.idle-wobble { animation: none; }
     .topbar-dot { animation: none; }
+    .aura.pulse { animation: none; }
   }
 
   @media (max-width: 480px) {
@@ -537,6 +534,17 @@
 </style>
 </head>
 <body>
+
+<!-- SVG goo filter (off-screen) -->
+<svg width="0" height="0" style="position:absolute;">
+  <defs>
+    <filter id="goo">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="11" result="blur" />
+      <feColorMatrix in="blur" mode="matrix"
+        values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10" result="goo" />
+    </filter>
+  </defs>
+</svg>
 
 <button class="reset-btn" id="reset">↻ Restart</button>
 
@@ -556,15 +564,12 @@
         </div>
       </div>
 
-      <div class="cycle-bar"><div class="cycle-bar-fill" id="cycle-fill"></div></div>
-
       <div class="skip-arc" id="skip-arc">
         <div class="skip-badge">Moved on</div>
       </div>
 
       <div class="card-stage">
         <div class="card idle-wobble" id="card">
-          <div class="card-tag" id="card-tag">LIKE</div>
           <div class="card-author">
             <div class="card-avatar" id="avatar"></div>
             <div>
@@ -575,6 +580,20 @@
           <div class="card-content" id="content">Loading...</div>
         </div>
       </div>
+
+      <!-- Goo blob layer (behind card, in front of bg) -->
+      <div class="goo-layer">
+        <div class="blob" id="blob-bubble"></div>
+        <div class="blob" id="blob-shadow"></div>
+      </div>
+
+      <!-- Floating reaction preview (above goo, follows nearest reaction) -->
+      <div class="react-preview" id="react-preview">
+        <div class="react-preview-emoji" id="react-preview-emoji">👍</div>
+        <div class="react-preview-label" id="react-preview-label">LIKE</div>
+      </div>
+
+      <div class="comment-dots" id="comment-dots"></div>
 
       <div class="comment-chip" id="comment-chip">
         <div class="comment-avatar" id="comment-avatar"></div>
@@ -588,11 +607,6 @@
         </div>
       </div>
 
-      <div class="react-preview" id="react-preview">
-        <div class="react-preview-emoji" id="react-preview-emoji">👍</div>
-        <div class="react-preview-label" id="react-preview-label">LIKE</div>
-      </div>
-
       <div class="tray" id="tray">
         <div class="tray-icon" data-r="like">👍</div>
         <div class="tray-icon" data-r="celebrate">🎉</div>
@@ -601,6 +615,9 @@
         <div class="tray-icon" data-r="insightful">💡</div>
         <div class="tray-icon" data-r="funny">😄</div>
       </div>
+
+      <!-- Screen-perimeter aura (pulses on commit) -->
+      <div class="aura" id="aura"></div>
 
       <div class="sheet-backdrop" id="sheet-backdrop"></div>
       <div class="sheet" id="sheet">
@@ -632,9 +649,9 @@
   <div class="hint" id="hint">
     <span class="hint-arrow">↑</span> skip
     <span style="margin: 0 8px; opacity: 0.5;">·</span>
-    <span class="hint-arrow">↓</span> drag to <span class="hint-coral">react</span>
+    drag <span class="hint-arrow">↓</span> close to <span class="hint-coral">react</span>
     <span style="margin: 0 8px; opacity: 0.5;">·</span>
-    tap the comment to expand
+    tap a comment to expand
   </div>
 </div>
 
@@ -642,7 +659,7 @@
   'use strict';
 
   // ============================================================
-  // POSTS with comments + replies
+  // POSTS: each has 3 cycling comments
   // ============================================================
   const POSTS = [
     {
@@ -650,102 +667,119 @@
       role: "VP Engineering at Stripe",
       avatar: ["#dbeafe", "#bfdbfe"],
       content: "I almost quit my job last year.\n\nWhat saved me was learning that my job isn't to remove ambiguity. It IS the job. Make decisions faster than feels comfortable. Tell people what you don't know. Give them a framework to move forward without you.",
-      comment: {
-        avatar: ["#fde68a", "#fcd34d"],
-        author: "Jamie L.",
-        role: "Director of Engineering",
-        text: "This hits. I had the exact same parking-lot moment last fall. Saving this for the next time I forget.",
-        time: "1h",
-        likes: "12 reactions",
-        replies: [
-          { avatar: ["#dbeafe", "#bfdbfe"], author: "Maya Chen", text: "Thank you, Jamie. You're not alone.", time: "45m" },
-          { avatar: ["#ddd6fe", "#c4b5fd"], author: "Tom Reeves", text: "I needed to read this today. Genuinely.", time: "30m" },
-        ],
-      },
+      comments: [
+        { avatar: ["#fde68a", "#fcd34d"], author: "Jamie L.", text: "This hits. I had the exact same parking-lot moment last fall.", time: "1h", likes: "12 reactions",
+          replies: [
+            { avatar: ["#dbeafe", "#bfdbfe"], author: "Maya Chen", text: "Thank you, Jamie. You're not alone.", time: "45m" },
+            { avatar: ["#ddd6fe", "#c4b5fd"], author: "Tom Reeves", text: "I needed to read this today.", time: "30m" },
+          ] },
+        { avatar: ["#bbf7d0", "#86efac"], author: "Priya Nair", text: "Saving this to re-read every Sunday night.", time: "50m", likes: "8 reactions",
+          replies: [
+            { avatar: ["#dbeafe", "#bfdbfe"], author: "Maya Chen", text: "That made me smile. Thank you.", time: "40m" },
+          ] },
+        { avatar: ["#ddd6fe", "#c4b5fd"], author: "David Chu", text: "The framework piece is the hardest. Curious how you do it on a Tuesday.", time: "20m", likes: "5 reactions",
+          replies: [
+            { avatar: ["#dbeafe", "#bfdbfe"], author: "Maya Chen", text: "Honestly, badly half the time. Then we iterate the framework.", time: "12m" },
+            { avatar: ["#fecaca", "#fca5a5"], author: "Lin Wei", text: "+1 to badly. Same here.", time: "8m" },
+          ] },
+      ],
     },
     {
       author: "James Park",
       role: "Former PM at Meta · #OpenToWork",
       avatar: ["#fecaca", "#fca5a5"],
       content: "Today I was part of the layoffs at Meta. After 6 years, I'm officially looking. If you have any leads in product roles at scale, I'd love to hear from you. Thank you to everyone who has already reached out.",
-      comment: {
-        avatar: ["#bbf7d0", "#86efac"],
-        author: "Sarah K.",
-        role: "VP Product at a startup you've heard of",
-        text: "Sending strength. We have an opening that might fit. DMing you now.",
-        time: "2h",
-        likes: "47 reactions",
-        replies: [
-          { avatar: ["#fecaca", "#fca5a5"], author: "James Park", text: "Thank you, Sarah. Will reply tonight.", time: "1h" },
-          { avatar: ["#fde68a", "#fcd34d"], author: "Lin Wei", text: "Same situation here. Solidarity.", time: "1h" },
-          { avatar: ["#e5e7eb", "#d1d5db"], author: "+8 others", text: "are also reaching out", time: "" },
-        ],
-      },
+      comments: [
+        { avatar: ["#bbf7d0", "#86efac"], author: "Sarah K.", text: "Sending strength. We have an opening that might fit. DMing you now.", time: "2h", likes: "47 reactions",
+          replies: [
+            { avatar: ["#fecaca", "#fca5a5"], author: "James Park", text: "Thank you, Sarah. Will reply tonight.", time: "1h" },
+          ] },
+        { avatar: ["#fde68a", "#fcd34d"], author: "Lin Wei", text: "Same situation here. Solidarity.", time: "1h", likes: "23 reactions",
+          replies: [
+            { avatar: ["#fecaca", "#fca5a5"], author: "James Park", text: "Solidarity right back. Let's stay in touch.", time: "55m" },
+          ] },
+        { avatar: ["#ddd6fe", "#c4b5fd"], author: "Maya Chen", text: "We're hiring senior PMs at Stripe if you want a referral.", time: "30m", likes: "61 reactions",
+          replies: [
+            { avatar: ["#fecaca", "#fca5a5"], author: "James Park", text: "Yes please. Thank you, Maya.", time: "25m" },
+            { avatar: ["#bbf7d0", "#86efac"], author: "Tom Reeves", text: "Stripe PM team is great, James. Worth a look.", time: "18m" },
+          ] },
+      ],
     },
     {
       author: "Priya Nair",
       role: "Writer at The Atlantic",
       avatar: ["#fde68a", "#fcd34d"],
       content: "My grandmother's last recipe, before her hands forgot. I'm putting it on the internet so our family always has it.\n\nTake the rice. Wash it three times. Add cardamom, not too much. The trick is the slowness.",
-      comment: {
-        avatar: ["#ddd6fe", "#c4b5fd"],
-        author: "Alex P.",
-        role: "Photographer",
-        text: "Crying at my desk. My grandmother had a similar one with saffron. I'd forgotten until just now.",
-        time: "3h",
-        likes: "204 reactions",
-        replies: [
-          { avatar: ["#fde68a", "#fcd34d"], author: "Priya Nair", text: "Saffron is the soul of it. ❤", time: "2h" },
-        ],
-      },
+      comments: [
+        { avatar: ["#ddd6fe", "#c4b5fd"], author: "Alex P.", text: "Crying at my desk. My grandmother had a similar one with saffron.", time: "3h", likes: "204 reactions",
+          replies: [
+            { avatar: ["#fde68a", "#fcd34d"], author: "Priya Nair", text: "Saffron is the soul of it. ❤", time: "2h" },
+          ] },
+        { avatar: ["#dbeafe", "#bfdbfe"], author: "Maya Chen", text: "Going to make this for my mom on Sunday. Thank you for sharing it.", time: "1h", likes: "88 reactions",
+          replies: [
+            { avatar: ["#fde68a", "#fcd34d"], author: "Priya Nair", text: "Please tell me how it turns out.", time: "50m" },
+          ] },
+        { avatar: ["#bbf7d0", "#86efac"], author: "Roya Ahmadi", text: "The trick is the slowness. Saving this whole line.", time: "20m", likes: "47 reactions",
+          replies: [
+            { avatar: ["#fde68a", "#fcd34d"], author: "Priya Nair", text: "It really is.", time: "15m" },
+          ] },
+      ],
     },
     {
       author: "Sara Kim",
       role: "Senior Designer at Figma",
       avatar: ["#ddd6fe", "#c4b5fd"],
       content: "Three things I've learned about hiring senior designers, after running 60+ portfolio reviews this year:\n\n1. Show the rejected options.\n2. Name your trade-offs out loud.\n3. Stop apologizing for incomplete work.",
-      comment: {
-        avatar: ["#bbf7d0", "#86efac"],
-        author: "David Chu",
-        role: "Director at Adobe",
-        text: "This is the most useful thing I've read about design hiring this year. Saving for our whole team.",
-        time: "5h",
-        likes: "89 reactions",
-        replies: [
-          { avatar: ["#ddd6fe", "#c4b5fd"], author: "Sara Kim", text: "Means a lot from you, David.", time: "4h" },
-          { avatar: ["#fde68a", "#fcd34d"], author: "Hana Suzuki", text: "+1, sharing internally.", time: "3h" },
-        ],
-      },
+      comments: [
+        { avatar: ["#bbf7d0", "#86efac"], author: "David Chu", text: "Most useful thing I've read about design hiring this year.", time: "5h", likes: "89 reactions",
+          replies: [
+            { avatar: ["#ddd6fe", "#c4b5fd"], author: "Sara Kim", text: "Means a lot from you, David.", time: "4h" },
+          ] },
+        { avatar: ["#fde68a", "#fcd34d"], author: "Hana Suzuki", text: "+1, sharing internally.", time: "3h", likes: "32 reactions",
+          replies: [
+            { avatar: ["#ddd6fe", "#c4b5fd"], author: "Sara Kim", text: "Thanks, Hana.", time: "2h" },
+          ] },
+        { avatar: ["#fecaca", "#fca5a5"], author: "Ben Olsen", text: "Number 3 is the hardest one. Going to work on this.", time: "1h", likes: "21 reactions",
+          replies: [
+            { avatar: ["#ddd6fe", "#c4b5fd"], author: "Sara Kim", text: "It's hard for me too. We're all working on it.", time: "55m" },
+          ] },
+      ],
     },
   ];
 
   const REACTION_NAMES = {
-    like: 'LIKE',
-    celebrate: 'CELEBRATE',
-    support: 'SUPPORT',
-    love: 'LOVE',
-    insightful: 'INSIGHTFUL',
-    funny: 'FUNNY',
+    like:'LIKE', celebrate:'CELEBRATE', support:'SUPPORT',
+    love:'LOVE', insightful:'INSIGHTFUL', funny:'FUNNY',
   };
   const REACTION_EMOJI = {
-    like: '👍', celebrate: '🎉', support: '🤝',
-    love: '❤️', insightful: '💡', funny: '😄',
+    like:'👍', celebrate:'🎉', support:'🤝', love:'❤️', insightful:'💡', funny:'😄',
   };
+  const REACTION_COLOR = {
+    like:'#2563eb', celebrate:'#6366f1', support:'#ea580c',
+    love:'#dc2626', insightful:'#b45309', funny:'#ca8a04',
+  };
+  const REACTION_AURA = {
+    like:'rgba(37, 99, 235, 0.45)', celebrate:'rgba(99, 102, 241, 0.45)',
+    support:'rgba(234, 88, 12, 0.45)', love:'rgba(220, 38, 38, 0.5)',
+    insightful:'rgba(180, 83, 9, 0.5)', funny:'rgba(202, 138, 4, 0.45)',
+  };
+  const SKIP_AURA = 'rgba(107, 114, 128, 0.4)';
   const RESURFACE = new Set(['insightful', 'support', 'love']);
 
   // ============================================================
   // ELEMENTS
   // ============================================================
-  const $ = sel => document.querySelector(sel);
-  const $$ = sel => Array.from(document.querySelectorAll(sel));
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
 
+  const screen = $('.device-screen');
   const card = $('#card');
-  const cardTag = $('#card-tag');
   const tray = $('#tray');
   const trayIcons = $$('.tray-icon');
   const skipArc = $('#skip-arc');
   const hint = $('#hint');
   const resetBtn = $('#reset');
+  const aura = $('#aura');
 
   const elAuthor = $('#author-name');
   const elRole = $('#author-role');
@@ -754,14 +788,13 @@
   const metaCount = $('#meta-count');
   const metaQueue = $('#meta-queue');
 
-  // Comment chip
   const chip = $('#comment-chip');
   const chipAvatar = $('#comment-avatar');
   const chipAuthor = $('#comment-author');
   const chipText = $('#comment-text');
   const chipReplyCount = $('#comment-reply-count');
+  const chipDots = $('#comment-dots');
 
-  // Comment sheet
   const sheet = $('#sheet');
   const sheetBackdrop = $('#sheet-backdrop');
   const sheetClose = $('#sheet-close');
@@ -772,21 +805,18 @@
   const sheetOrigLikes = $('#sheet-orig-likes');
   const sheetReplies = $('#sheet-replies');
 
-  // Reaction preview
   const reactPreview = $('#react-preview');
   const reactPreviewEmoji = $('#react-preview-emoji');
   const reactPreviewLabel = $('#react-preview-label');
 
-  // Auto-cycle
-  const cycleFill = $('#cycle-fill');
-
-  // Cycle parameters
-  const CYCLE_MS = 10000;
+  const blobBubble = $('#blob-bubble');
+  const blobShadow = $('#blob-shadow');
 
   // ============================================================
   // STATE
   // ============================================================
   let postIdx = 0;
+  let commentIdx = 0;
   let queueCount = 0;
   let dragging = false;
   let dragStart = null;
@@ -795,19 +825,20 @@
   let committing = false;
   let sheetOpen = false;
 
-  // Auto-cycle state
-  let cycleStart = 0;
-  let cyclePaused = 0;       // when paused, total ms paused
-  let cyclePauseTime = null; // when pause started, or null
-  let cycleRAF = null;
+  // Comment-cycle state
+  const COMMENT_CYCLE_MS = 5500;
+  const COMMENT_SWAP_MS = 280;
+  let commentTimer = null;
+
+  // Activation thresholds
+  const ACTIVATION_DIST = 60;   // dy below which reactions stay idle
+  const COMMIT_DIST     = 130;  // dy at which the react commits on release
+  const COMMIT_VEL      = 0.85; // px/ms vertical velocity that also commits
 
   class Spring {
     constructor(value, stiffness = 220, damping = 22) {
-      this.value = value;
-      this.target = value;
-      this.velocity = 0;
-      this.stiffness = stiffness;
-      this.damping = damping;
+      this.value = value; this.target = value; this.velocity = 0;
+      this.stiffness = stiffness; this.damping = damping;
     }
     set(v) { this.value = v; this.velocity = 0; this.target = v; }
     setValue(v) { this.value = v; }
@@ -836,13 +867,24 @@
     elRole.textContent = p.role;
     elAvatar.style.background = `linear-gradient(135deg, ${p.avatar[0]}, ${p.avatar[1]})`;
     elContent.textContent = p.content;
+    renderCommentDots(p.comments.length);
+  }
 
-    // Comment chip
-    chipAvatar.style.background = `linear-gradient(135deg, ${p.comment.avatar[0]}, ${p.comment.avatar[1]})`;
-    chipAuthor.textContent = p.comment.author;
-    chipText.textContent = p.comment.text;
-    const replyN = p.comment.replies.length;
-    chipReplyCount.textContent = replyN === 1 ? '1 reply' : `${replyN} replies`;
+  function renderCommentDots(n) {
+    chipDots.innerHTML = '';
+    for (let i = 0; i < n; i++) {
+      const d = document.createElement('div');
+      d.className = 'dot' + (i === commentIdx ? ' active' : '');
+      chipDots.appendChild(d);
+    }
+  }
+
+  function renderComment(c) {
+    chipAvatar.style.background = `linear-gradient(135deg, ${c.avatar[0]}, ${c.avatar[1]})`;
+    chipAuthor.textContent = c.author;
+    chipText.textContent = c.text;
+    const n = c.replies.length;
+    chipReplyCount.textContent = n === 1 ? '1 reply' : `${n} replies`;
   }
 
   function updateMeta() {
@@ -850,7 +892,9 @@
     metaQueue.textContent = `↻ ${queueCount}`;
   }
 
+  // Initial render
   renderPost(0);
+  renderComment(POSTS[0].comments[0]);
   updateMeta();
 
   // ============================================================
@@ -877,47 +921,48 @@
   requestAnimationFrame(frame);
 
   // ============================================================
-  // AUTO-CYCLE
+  // COMMENT AUTO-CYCLE (cycles comments, not posts)
   // ============================================================
-  function startCycle() {
-    cycleStart = performance.now();
-    cyclePaused = 0;
-    cyclePauseTime = null;
-    if (cycleRAF) cancelAnimationFrame(cycleRAF);
-    tickCycle();
+  function startCommentCycle() {
+    stopCommentCycle();
+    commentTimer = setTimeout(advanceComment, COMMENT_CYCLE_MS);
   }
-  function pauseCycle() {
-    if (cyclePauseTime !== null) return; // already paused
-    cyclePauseTime = performance.now();
+  function stopCommentCycle() {
+    if (commentTimer) { clearTimeout(commentTimer); commentTimer = null; }
   }
-  function resumeCycle() {
-    if (cyclePauseTime === null) return;
-    cyclePaused += performance.now() - cyclePauseTime;
-    cyclePauseTime = null;
-  }
-  function tickCycle() {
-    if (committing || sheetOpen) {
-      cycleRAF = requestAnimationFrame(tickCycle);
+  function advanceComment() {
+    if (sheetOpen || dragging || committing) {
+      // resume when free
+      commentTimer = setTimeout(advanceComment, 500);
       return;
     }
-    const now = performance.now();
-    const effective = cyclePauseTime !== null ? cyclePauseTime : now;
-    const elapsed = effective - cycleStart - cyclePaused;
-    const pct = Math.min(elapsed / CYCLE_MS, 1);
-    cycleFill.style.width = (pct * 100).toFixed(2) + '%';
-    if (pct >= 1) {
-      autoAdvance();
-      return;
-    }
-    cycleRAF = requestAnimationFrame(tickCycle);
+    const p = POSTS[postIdx];
+    chip.classList.add('swap-out');
+    setTimeout(() => {
+      commentIdx = (commentIdx + 1) % p.comments.length;
+      renderComment(p.comments[commentIdx]);
+      renderCommentDots(p.comments.length);
+      chip.classList.remove('swap-out');
+      chip.classList.add('swap-in');
+      requestAnimationFrame(() => {
+        chip.classList.remove('swap-in');
+      });
+      startCommentCycle();
+    }, COMMENT_SWAP_MS);
   }
-  function autoAdvance() {
-    committing = true;
-    // Soft fade-up exit (gentler than a manual skip)
-    sY.setVelocity(-300);
-    sY.setTarget(-280);
-    sOpacity.setTarget(0);
-    setTimeout(nextPost, 320);
+  startCommentCycle();
+
+  // Hide comment chip + dots while held
+  function setHeld(isHeld) {
+    if (isHeld) {
+      chip.classList.add('hidden');
+      chipDots.classList.add('hidden');
+      stopCommentCycle();
+    } else {
+      chip.classList.remove('hidden');
+      chipDots.classList.remove('hidden');
+      if (!sheetOpen) startCommentCycle();
+    }
   }
 
   // ============================================================
@@ -935,11 +980,8 @@
   }
 
   // ============================================================
-  // GESTURE CLASSIFICATION  +  FEEDBACK
+  // GESTURE + METABALL FEEDBACK
   // ============================================================
-  const COMMIT_DIST = 90;
-  const COMMIT_VEL = 0.7;
-
   function nearestReactionForX(absX) {
     let best = trayIcons[0], bestD = Infinity;
     for (const el of trayIcons) {
@@ -951,69 +993,117 @@
     return best;
   }
 
+  function updateBlobsAndPreview(t, nearestIcon, reaction) {
+    // t = 0 (just activated) to 1 (at commit distance)
+    const screenRect = screen.getBoundingClientRect();
+    const cardRect = card.getBoundingClientRect();
+    const iconRect = nearestIcon.getBoundingClientRect();
+
+    const color = REACTION_COLOR[reaction];
+
+    // Reaction bubble: anchored above the nearest tray icon, grows + rises toward card
+    const bubbleSize = 60 + 70 * t; // 60 to 130
+    const bubbleCenterX = iconRect.left + iconRect.width / 2 - screenRect.left;
+    const bubbleCenterY = iconRect.top - 18 - 50 * t - screenRect.top;
+    blobBubble.style.background = color;
+    blobBubble.style.width  = bubbleSize + 'px';
+    blobBubble.style.height = bubbleSize + 'px';
+    blobBubble.style.transform =
+      `translate(${(bubbleCenterX - bubbleSize/2).toFixed(2)}px, ${(bubbleCenterY - bubbleSize/2).toFixed(2)}px)`;
+    blobBubble.style.opacity = (0.85 + 0.15 * t).toFixed(2);
+
+    // Card-shadow: anchored at the bottom-center of the card, extends down toward bubble
+    const cardBottomX = cardRect.left + cardRect.width / 2 - screenRect.left;
+    const cardBottomY = cardRect.bottom - 18 - screenRect.top;
+    const shadowSize = 36 + 60 * t;
+    blobShadow.style.background = color;
+    blobShadow.style.width  = shadowSize + 'px';
+    blobShadow.style.height = (shadowSize * 0.82) + 'px';
+    blobShadow.style.transform =
+      `translate(${(cardBottomX - shadowSize/2).toFixed(2)}px, ${(cardBottomY - shadowSize*0.4 + 20*t).toFixed(2)}px)`;
+    blobShadow.style.opacity = (0.6 + 0.4 * t).toFixed(2);
+
+    // Floating reaction preview: emoji + label sits centered on the bubble
+    reactPreview.style.left = bubbleCenterX + 'px';
+    reactPreview.style.top  = bubbleCenterY + 'px';
+    reactPreviewEmoji.style.fontSize = (54 + 28 * t) + 'px';
+
+    if (reactPreviewEmoji.textContent !== REACTION_EMOJI[reaction]) {
+      reactPreviewEmoji.textContent = REACTION_EMOJI[reaction];
+      reactPreviewEmoji.style.transform = 'scale(0.82)';
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        reactPreviewEmoji.style.transform = 'scale(1)';
+      }));
+    }
+    reactPreviewLabel.textContent = REACTION_NAMES[reaction];
+    reactPreviewLabel.classList.toggle('resurface', RESURFACE.has(reaction));
+  }
+
   function updateDestinationFeedback(dx, dy, clientX) {
-    if (dy < -10 && Math.abs(dy) > Math.abs(dx) * 0.6) {
-      // SKIP zone
+    const upward = dy < -10 && Math.abs(dy) > Math.abs(dx) * 0.6;
+    const downward = dy > 0;
+    const inReactZone = downward && dy >= ACTIVATION_DIST;
+
+    if (upward) {
+      // SKIP
       const progress = Math.min(Math.abs(dy) / COMMIT_DIST, 1);
-      if (progress > 0.6) skipArc.classList.add('armed');
+      if (progress > 0.55) skipArc.classList.add('armed');
       else skipArc.classList.remove('armed');
       tray.classList.remove('dragging-react');
       for (const el of trayIcons) {
-        el.style.transform = `scale(${1 - 0.06 * progress})`;
+        el.style.transform = `scale(${1 - 0.05 * progress})`;
         el.classList.remove('nearest');
       }
-      cardTag.classList.remove('visible');
       reactPreview.classList.remove('visible');
-    } else if (dy > 10) {
-      // REACT zone
+      blobBubble.style.opacity = '0';
+      blobShadow.style.opacity = '0';
+      return;
+    }
+
+    if (inReactZone) {
+      // REACT zone (proximity activated)
       skipArc.classList.remove('armed');
       tray.classList.add('dragging-react');
 
       const nearest = nearestReactionForX(clientX);
-      const nearestR = nearest.dataset.r;
+      const reaction = nearest.dataset.r;
       const radius = 100;
+
+      // proximity t (0 at ACTIVATION_DIST, 1 at COMMIT_DIST)
+      const t = Math.max(0, Math.min(1, (dy - ACTIVATION_DIST) / (COMMIT_DIST - ACTIVATION_DIST)));
 
       for (const el of trayIcons) {
         const r = el.getBoundingClientRect();
         const cx = r.left + r.width / 2;
         const d = Math.abs(clientX - cx);
-        const t = Math.max(0, 1 - d / radius);
-        const eased = 1 - Math.pow(1 - t, 2);
+        const lt = Math.max(0, 1 - d / radius);
+        const eased = 1 - Math.pow(1 - lt, 2);
         if (el === nearest) {
-          const scale = 1 + 1.5 * eased; // peak 2.5x
-          el.style.transform = `scale(${scale.toFixed(3)}) translateY(${(-14 * eased).toFixed(2)}px)`;
+          const peak = 1 + 1.6 * eased * (0.5 + 0.5 * t);
+          el.style.transform = `scale(${peak.toFixed(3)}) translateY(${(-14 * eased * t).toFixed(2)}px)`;
           el.classList.add('nearest');
         } else {
-          const scale = 0.85 + 0.05 * eased;
-          el.style.transform = `scale(${scale.toFixed(3)})`;
+          const s = 0.82 + 0.05 * eased;
+          el.style.transform = `scale(${s.toFixed(3)})`;
           el.classList.remove('nearest');
         }
       }
 
-      // Floating preview
-      cardTag.classList.remove('visible');
       reactPreview.classList.add('visible');
-      if (reactPreviewEmoji.textContent !== REACTION_EMOJI[nearestR]) {
-        reactPreviewEmoji.textContent = REACTION_EMOJI[nearestR];
-        // tiny pop when reaction changes
-        reactPreviewEmoji.style.transform = 'scale(0.86)';
-        requestAnimationFrame(() => requestAnimationFrame(() => {
-          reactPreviewEmoji.style.transform = 'scale(1)';
-        }));
-      }
-      reactPreviewLabel.textContent = REACTION_NAMES[nearestR];
-      reactPreviewLabel.classList.toggle('resurface', RESURFACE.has(nearestR));
-    } else {
-      // idle
-      skipArc.classList.remove('armed');
-      tray.classList.remove('dragging-react');
-      for (const el of trayIcons) {
-        el.style.transform = '';
-        el.classList.remove('nearest');
-      }
-      cardTag.classList.remove('visible');
-      reactPreview.classList.remove('visible');
+      updateBlobsAndPreview(t, nearest, reaction);
+      return;
     }
+
+    // idle (held but not in either commit direction yet)
+    skipArc.classList.remove('armed');
+    tray.classList.remove('dragging-react');
+    for (const el of trayIcons) {
+      el.style.transform = '';
+      el.classList.remove('nearest');
+    }
+    reactPreview.classList.remove('visible');
+    blobBubble.style.opacity = '0';
+    blobShadow.style.opacity = '0';
   }
 
   function clearFeedback() {
@@ -1023,8 +1113,20 @@
       el.style.transform = '';
       el.classList.remove('nearest');
     }
-    cardTag.classList.remove('visible');
     reactPreview.classList.remove('visible');
+    blobBubble.style.opacity = '0';
+    blobShadow.style.opacity = '0';
+  }
+
+  // ============================================================
+  // AURA PULSE
+  // ============================================================
+  function flashAura(color) {
+    aura.style.setProperty('--aura-color', color);
+    aura.classList.remove('pulse');
+    void aura.offsetWidth; // force reflow to restart animation
+    aura.classList.add('pulse');
+    setTimeout(() => aura.classList.remove('pulse'), 1050);
   }
 
   // ============================================================
@@ -1036,7 +1138,8 @@
     card.classList.add('dragging');
     card.classList.remove('idle-wobble');
     hint.style.opacity = '0.3';
-    pauseCycle();
+    setHeld(true);
+    sScale.setTarget(0.94);  // SHRINK ON HOLD
     try { card.setPointerCapture(e.pointerId); } catch {}
     dragStart = { x: e.clientX, y: e.clientY };
     samples.length = 0;
@@ -1059,10 +1162,6 @@
     const rotFromVel = clamp(vel.vx * 6, -3.5, 3.5);
     sRot.setTarget(rotFromPos + rotFromVel);
 
-    const speed = Math.hypot(vel.vx, vel.vy);
-    const scaleTarget = 1 - clamp(speed * 0.06, 0, 0.04);
-    sScale.setTarget(scaleTarget);
-
     pos = { x: dx, y: dy };
     updateDestinationFeedback(dx, dy, e.clientX);
     e.preventDefault();
@@ -1078,7 +1177,7 @@
     const dx = pos.x, dy = pos.y;
 
     const upCommit   = (dy < -COMMIT_DIST) || (vel.vy < -COMMIT_VEL);
-    const downCommit = (dy > COMMIT_DIST)  || (vel.vy > COMMIT_VEL);
+    const downCommit = ((dy > COMMIT_DIST) || (vel.vy > COMMIT_VEL)) && dy >= ACTIVATION_DIST;
 
     if (upCommit) {
       commitSkip(vel);
@@ -1089,9 +1188,9 @@
       sX.setVelocity(vel.vx * 1000);
       sY.setVelocity(vel.vy * 1000);
       sX.setTarget(0); sY.setTarget(0);
-      sRot.setTarget(0); sScale.setTarget(1);
+      sRot.setTarget(0); sScale.setTarget(1);  // restore from shrink
       clearFeedback();
-      resumeCycle();
+      setHeld(false);
       setTimeout(() => { if (!dragging) card.classList.add('idle-wobble'); }, 1200);
     }
   }
@@ -1099,6 +1198,7 @@
   function commitSkip(vel) {
     committing = true;
     clearFeedback();
+    flashAura(SKIP_AURA);
     sY.setVelocity(Math.min(vel.vy * 1000, -1400));
     sY.setTarget(-900);
     sRot.setTarget(sRot.value + (Math.random() > 0.5 ? -4 : 4));
@@ -1109,12 +1209,13 @@
   function commitReaction(reaction, vel) {
     committing = true;
     clearFeedback();
+    flashAura(REACTION_AURA[reaction]);
     if (RESURFACE.has(reaction)) {
       queueCount += 1;
       updateMeta();
     }
     sScale.setTarget(1.04);
-    setTimeout(() => sScale.setTarget(1), 110);
+    setTimeout(() => sScale.setTarget(0.94), 110); // back near 0.94 because still 'committing'
     sY.setVelocity(Math.max(vel.vy * 1000, 1400));
     sY.setTarget(900);
     sOpacity.setTarget(0);
@@ -1123,7 +1224,9 @@
 
   function nextPost() {
     postIdx = (postIdx + 1) % POSTS.length;
+    commentIdx = 0;
     renderPost(postIdx);
+    renderComment(POSTS[postIdx].comments[0]);
     updateMeta();
     sX.set(0);
     sY.set(40);
@@ -1137,8 +1240,8 @@
     });
     committing = false;
     pos = { x: 0, y: 0 };
+    setHeld(false);
     setTimeout(() => { if (!dragging) card.classList.add('idle-wobble'); }, 1600);
-    startCycle();
   }
 
   card.addEventListener('pointerdown', onPointerDown);
@@ -1146,7 +1249,7 @@
   card.addEventListener('pointerup', onPointerUp);
   card.addEventListener('pointercancel', onPointerUp);
 
-  // Tray tap fallback
+  // Tray click fallback
   for (const el of trayIcons) {
     el.addEventListener('click', () => {
       if (committing || dragging || sheetOpen) return;
@@ -1157,14 +1260,17 @@
   // ============================================================
   // COMMENT SHEET
   // ============================================================
-  chip.addEventListener('click', openSheet);
+  chip.addEventListener('click', () => {
+    if (chip.classList.contains('hidden')) return;
+    openSheet();
+  });
 
   function openSheet() {
     if (sheetOpen) return;
     sheetOpen = true;
-    pauseCycle();
+    stopCommentCycle();
     const p = POSTS[postIdx];
-    const c = p.comment;
+    const c = p.comments[commentIdx];
 
     sheetOrigAvatar.style.background = `linear-gradient(135deg, ${c.avatar[0]}, ${c.avatar[1]})`;
     sheetOrigAuthor.textContent = c.author;
@@ -1174,22 +1280,13 @@
 
     sheetReplies.innerHTML = '';
     for (const r of c.replies) {
-      const div = document.createElement('div');
-      div.className = 'reply';
-      const av = document.createElement('div');
-      av.className = 'reply-avatar';
+      const div = document.createElement('div'); div.className = 'reply';
+      const av = document.createElement('div'); av.className = 'reply-avatar';
       av.style.background = `linear-gradient(135deg, ${r.avatar[0]}, ${r.avatar[1]})`;
-      const body = document.createElement('div');
-      body.className = 'reply-body';
-      const au = document.createElement('div');
-      au.className = 'reply-author';
-      au.textContent = r.author;
-      const tx = document.createElement('div');
-      tx.className = 'reply-text';
-      tx.textContent = r.text;
-      const mt = document.createElement('div');
-      mt.className = 'reply-meta';
-      mt.textContent = r.time;
+      const body = document.createElement('div'); body.className = 'reply-body';
+      const au = document.createElement('div'); au.className = 'reply-author'; au.textContent = r.author;
+      const tx = document.createElement('div'); tx.className = 'reply-text'; tx.textContent = r.text;
+      const mt = document.createElement('div'); mt.className = 'reply-meta'; mt.textContent = r.time;
       body.appendChild(au); body.appendChild(tx);
       if (r.time) body.appendChild(mt);
       div.appendChild(av); div.appendChild(body);
@@ -1205,7 +1302,7 @@
     sheetOpen = false;
     sheet.classList.remove('open');
     sheetBackdrop.classList.remove('open');
-    resumeCycle();
+    if (!dragging) startCommentCycle();
   }
 
   sheetClose.addEventListener('click', closeSheet);
@@ -1214,14 +1311,12 @@
   resetBtn.addEventListener('click', () => {
     closeSheet();
     postIdx = -1;
+    commentIdx = 0;
     queueCount = 0;
     nextPost();
   });
 
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
-
-  // Kick off the first cycle
-  startCycle();
 </script>
 </body>
 </html>
