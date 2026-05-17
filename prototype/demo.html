@@ -155,6 +155,8 @@
   .skip-arc.armed .skip-badge { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   /* ============ Card stage ============ */
+  /* Card sits BELOW the tray (z-index 10 < tray 15) so dragging the
+     post down tucks it under the reactions instead of covering them. */
   .card-stage {
     position: absolute;
     top: 130px; left: 18px; right: 18px;
@@ -313,20 +315,20 @@
   }
   .profile-btn-secondary:hover { background: var(--brand-tint); }
 
-  /* Hint zones for tap-the-sides (invisible, click-through but help with hit-testing) */
+  /* Hint zones for tap-the-sides. Two halves, soft gradients shown on press. */
   .tap-hint-left, .tap-hint-right {
     position: absolute;
     top: 0; bottom: 0;
-    width: 14px;
+    width: 50%;
     opacity: 0;
     transition: opacity 0.24s var(--ease-out);
     pointer-events: none;
     z-index: 1;
   }
   .tap-hint-left  { left: 0;
-    background: linear-gradient(to right, rgba(10, 102, 194, 0.10), transparent); }
+    background: linear-gradient(to right, rgba(10, 102, 194, 0.10), transparent 70%); }
   .tap-hint-right { right: 0;
-    background: linear-gradient(to left,  rgba(10, 102, 194, 0.10), transparent); }
+    background: linear-gradient(to left,  rgba(10, 102, 194, 0.10), transparent 70%); }
   .card.show-tap-hints .tap-hint-left,
   .card.show-tap-hints .tap-hint-right { opacity: 1; }
 
@@ -335,7 +337,7 @@
     position: absolute;
     pointer-events: none;
     opacity: 0;
-    z-index: 12;
+    z-index: 20; /* above the tray (15) so the label pill never clips */
     display: flex; flex-direction: column;
     align-items: center;
     gap: 10px;
@@ -385,7 +387,7 @@
       box-shadow 0.2s var(--ease-out),
       background 0.2s var(--ease-out),
       opacity 0.28s var(--ease-out);
-    z-index: 5;
+    z-index: 15;
   }
   .comment-chip.hidden {
     opacity: 0;
@@ -436,7 +438,7 @@
     top: 468px; left: 50%; transform: translateX(-50%);
     display: flex; gap: 4px;
     transition: opacity 0.28s var(--ease-out);
-    z-index: 5;
+    z-index: 15;
   }
   .comment-dots.hidden { opacity: 0; }
   .comment-dots .dot {
@@ -464,7 +466,7 @@
       opacity 0.28s var(--ease-out),
       border-color 0.2s ease,
       background 0.2s ease;
-    z-index: 5;
+    z-index: 15;
   }
   .compose-prompt:hover {
     background: rgba(255, 255, 255, 1);
@@ -508,7 +510,9 @@
     box-shadow:
       0 1px 0 rgba(0,0,0,0.04),
       0 8px 22px rgba(0, 0, 0, 0.08);
-    z-index: 5;
+    /* Tray sits ABOVE the card stage (z-index 10) so the post
+       always tucks behind it on a deep drag, keeping reactions visible. */
+    z-index: 15;
     transition: opacity 0.24s var(--ease-out);
   }
   .tray-icon {
@@ -1551,19 +1555,18 @@
   }
 
   function handleTap(clientX) {
+    // Two zones (no middle no-op): left half = back, right half = forward.
     const cardRect = card.getBoundingClientRect();
-    const relX = clientX - cardRect.left;
-    const third = cardRect.width / 3;
-    if (relX <= third) {
-      // LEFT tap
+    const midX = cardRect.left + cardRect.width / 2;
+    if (clientX < midX) {
+      // LEFT half
       if (viewState === 'profile') setView('post');
       else wiggleCard('left');
-    } else if (relX >= third * 2) {
-      // RIGHT tap
+    } else {
+      // RIGHT half
       if (viewState === 'post') setView('profile');
       else wiggleCard('right');
     }
-    // middle tap: no-op
   }
 
   function commitSkip(vel) {
