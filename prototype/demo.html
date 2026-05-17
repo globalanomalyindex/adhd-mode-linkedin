@@ -117,42 +117,70 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* ============ Skip arc ============ */
-  .skip-arc {
+  /* ============ Skip target (Move on) ============ */
+  /* Circular liquid-glass target at the top. Scales + activates with proximity. */
+  .skip-target {
     position: absolute;
-    top: 112px; left: 50%; transform: translateX(-50%);
-    width: 180px; height: 26px;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.05), transparent);
-    border-radius: 0 0 220px 220px;
+    top: 102px; left: 50%;
+    width: 56px; height: 56px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow:
+      0 8px 24px rgba(0, 0, 0, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    display: flex; align-items: center; justify-content: center;
+    transform: translateX(-50%) scale(1);
+    opacity: 0.35;
     pointer-events: none;
+    z-index: 12;
     transition:
-      width 0.32s var(--ease-out),
-      height 0.32s var(--ease-out),
-      background 0.32s var(--ease-out),
-      top 0.32s var(--ease-out);
-    z-index: 3;
+      background 0.28s var(--ease-out),
+      border-color 0.28s var(--ease-out),
+      box-shadow 0.32s var(--ease-out),
+      color 0.24s var(--ease-out);
+    will-change: transform, opacity, background;
+    color: rgba(0, 0, 0, 0.55);
   }
-  .skip-arc.armed {
-    width: 340px;
-    height: 130px;
-    top: 102px;
-    background: radial-gradient(ellipse at top, rgba(0,0,0,0.24), transparent 70%);
-  }
-  .skip-badge {
-    position: absolute;
-    top: 44px; left: 50%;
-    transform: translateX(-50%) translateY(-8px);
-    background: rgba(0, 0, 0, 0.7);
+  .skip-target.armed {
+    background: rgba(64, 64, 67, 0.88);
+    border-color: rgba(255, 255, 255, 0.18);
+    box-shadow:
+      0 16px 42px rgba(0, 0, 0, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
     color: #fff;
-    font-size: 12px; font-weight: 600;
-    padding: 5px 14px;
-    border-radius: 14px;
+  }
+  .skip-target-icon {
+    width: 24px; height: 24px;
+    transition: transform 0.24s var(--ease-spring);
+    will-change: transform;
+  }
+  .skip-target.armed .skip-target-icon { transform: scale(1.15); }
+
+  .skip-label {
+    position: absolute;
+    top: 178px; left: 50%;
+    transform: translateX(-50%) translateY(-4px);
+    background: rgba(40, 40, 43, 0.92);
+    color: #fff;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 999px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.18);
     opacity: 0;
-    transition: opacity 0.2s ease, transform 0.32s var(--ease-out);
+    transition: opacity 0.2s, transform 0.32s var(--ease-out);
     pointer-events: none;
+    z-index: 20;
     white-space: nowrap;
   }
-  .skip-arc.armed .skip-badge { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .skip-label.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 
   /* ============ Card stage ============ */
   /* Card sits BELOW the tray (z-index 10 < tray 15) so dragging the
@@ -365,19 +393,22 @@
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
   }
   .react-preview-label.resurface { background: var(--coral); }
-  .react-preview-label.resurface::after { content: ' · resurfaces'; opacity: 0.7; }
 
   /* ============ Comment chip (cycling) ============ */
   .comment-chip {
     position: absolute;
     top: 478px;
     left: 18px; right: 18px;
-    background: var(--card);
+    background: rgba(255, 255, 255, 0.66);
+    backdrop-filter: blur(36px) saturate(180%);
+    -webkit-backdrop-filter: blur(36px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.45);
     border-radius: 14px;
     padding: 12px 14px;
     box-shadow:
       0 1px 0 rgba(0,0,0,0.04),
-      0 6px 20px rgba(0, 0, 0, 0.05);
+      0 10px 28px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.55);
     display: flex;
     align-items: center;
     gap: 12px;
@@ -400,8 +431,9 @@
     transform: translateY(-1px);
     box-shadow:
       0 1px 0 rgba(0,0,0,0.04),
-      0 10px 28px rgba(0, 0, 0, 0.08);
-    background: #fafafa;
+      0 14px 36px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    background: rgba(255, 255, 255, 0.78);
   }
 
   .comment-avatar {
@@ -453,8 +485,10 @@
   .compose-prompt {
     position: absolute;
     top: 542px; left: 18px; right: 18px;
-    background: rgba(255, 255, 255, 0.7);
-    border: 1px dashed rgba(0, 0, 0, 0.14);
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(36px) saturate(180%);
+    -webkit-backdrop-filter: blur(36px) saturate(180%);
+    border: 1px dashed rgba(0, 0, 0, 0.18);
     border-radius: 14px;
     padding: 9px 14px;
     display: flex;
@@ -465,12 +499,18 @@
       transform 0.28s var(--ease-out),
       opacity 0.28s var(--ease-out),
       border-color 0.2s ease,
-      background 0.2s ease;
+      background 0.2s ease,
+      box-shadow 0.2s ease;
     z-index: 15;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
   }
   .compose-prompt:hover {
-    background: rgba(255, 255, 255, 1);
+    background: rgba(255, 255, 255, 0.85);
     border-color: var(--brand);
+    border-style: solid;
+    box-shadow:
+      0 10px 28px rgba(10, 102, 194, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.65);
   }
   .compose-prompt.hidden {
     opacity: 0;
@@ -501,7 +541,10 @@
     position: absolute;
     left: 18px; right: 18px;
     bottom: 26px;
-    background: var(--card);
+    background: rgba(255, 255, 255, 0.62);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.45);
     border-radius: 999px;
     padding: 10px 6px;
     display: flex;
@@ -509,7 +552,8 @@
     align-items: center;
     box-shadow:
       0 1px 0 rgba(0,0,0,0.04),
-      0 8px 22px rgba(0, 0, 0, 0.08);
+      0 14px 36px rgba(0, 0, 0, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
     /* Tray sits ABOVE the card stage (z-index 10) so the post
        always tucks behind it on a deep drag, keeping reactions visible. */
     z-index: 15;
@@ -823,9 +867,12 @@
         </div>
       </div>
 
-      <div class="skip-arc" id="skip-arc">
-        <div class="skip-badge">Moved on</div>
+      <div class="skip-target" id="skip-target">
+        <svg class="skip-target-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 15l6-6 6 6"/>
+        </svg>
       </div>
+      <div class="skip-label" id="skip-label">Move on</div>
 
       <div class="card-stage">
         <div class="card idle-wobble" id="card">
@@ -1123,7 +1170,8 @@
   const cardPages = $('#card-pages');
   const tray = $('#tray');
   const trayIcons = $$('.tray-icon');
-  const skipArc = $('#skip-arc');
+  const skipTarget = $('#skip-target');
+  const skipLabel = $('#skip-label');
   const hint = $('#hint');
   const resetBtn = $('#reset');
   const aura = $('#aura');
@@ -1401,6 +1449,29 @@
     reactPreviewLabel.textContent = REACTION_NAMES[reaction];
     reactPreviewLabel.classList.toggle('resurface', RESURFACE.has(reaction));
   }
+  // Tighter lateral falloff so the closest icon really is the only one growing,
+  // and gate the magnification by vertical proximity so far-from-tray drags
+  // don't trigger full-size growth.
+  const REACT_RADIUS = 50;
+
+  function updateSkipTarget(progress) {
+    // progress 0..1 along the way to commit
+    const scale = (1 + 0.85 * progress).toFixed(3);
+    const opacity = (0.35 + 0.65 * progress).toFixed(2);
+    skipTarget.style.transform = `translateX(-50%) scale(${scale})`;
+    skipTarget.style.opacity = opacity;
+    if (progress > 0.55) skipTarget.classList.add('armed');
+    else skipTarget.classList.remove('armed');
+    if (progress > 0.25) skipLabel.classList.add('visible');
+    else skipLabel.classList.remove('visible');
+  }
+  function clearSkipTarget() {
+    skipTarget.style.transform = 'translateX(-50%) scale(1)';
+    skipTarget.style.opacity = '0.35';
+    skipTarget.classList.remove('armed');
+    skipLabel.classList.remove('visible');
+  }
+
   function updateDestinationFeedback(dx, dy, clientX) {
     const upward = dy < -10 && Math.abs(dy) > Math.abs(dx) * 0.6;
     const downward = dy > 0;
@@ -1408,8 +1479,7 @@
 
     if (upward) {
       const progress = Math.min(Math.abs(dy) / COMMIT_DIST, 1);
-      if (progress > 0.55) skipArc.classList.add('armed');
-      else skipArc.classList.remove('armed');
+      updateSkipTarget(progress);
       tray.classList.remove('dragging-react');
       for (const el of trayIcons) {
         el.style.transform = `scale(${1 - 0.05 * progress})`;
@@ -1419,26 +1489,28 @@
       return;
     }
     if (inReactZone) {
-      skipArc.classList.remove('armed');
+      clearSkipTarget();
       tray.classList.add('dragging-react');
 
       const nearest = nearestReactionForX(clientX);
       const reaction = nearest.dataset.r;
-      const radius = 100;
       const t = Math.max(0, Math.min(1, (dy - ACTIVATION_DIST) / (COMMIT_DIST - ACTIVATION_DIST)));
 
       for (const el of trayIcons) {
         const r = el.getBoundingClientRect();
         const cx = r.left + r.width / 2;
         const d = Math.abs(clientX - cx);
-        const lt = Math.max(0, 1 - d / radius);
-        const eased = 1 - Math.pow(1 - lt, 2);
+        const lt = Math.max(0, 1 - d / REACT_RADIUS);
+        // Quadratic falloff: tight, only the icon directly under the thumb grows
+        const eased = lt * lt;
         if (el === nearest) {
-          const peak = 1 + 1.6 * eased * (0.5 + 0.5 * t);
+          // Tie growth strength to vertical proximity (t) so a barely-entered
+          // react zone shows a hint, full magnification at the commit line.
+          const peak = 1 + 1.6 * eased * t;
           el.style.transform = `scale(${peak.toFixed(3)}) translateY(${(-14 * eased * t).toFixed(2)}px)`;
           el.classList.add('nearest');
         } else {
-          const s = 0.82 + 0.05 * eased;
+          const s = 0.85 + 0.05 * eased;
           el.style.transform = `scale(${s.toFixed(3)})`;
           el.classList.remove('nearest');
         }
@@ -1448,7 +1520,7 @@
       return;
     }
     // idle held
-    skipArc.classList.remove('armed');
+    clearSkipTarget();
     tray.classList.remove('dragging-react');
     for (const el of trayIcons) {
       el.style.transform = '';
@@ -1457,7 +1529,7 @@
     reactPreview.classList.remove('visible');
   }
   function clearFeedback() {
-    skipArc.classList.remove('armed');
+    clearSkipTarget();
     tray.classList.remove('dragging-react');
     for (const el of trayIcons) {
       el.style.transform = '';
@@ -1618,10 +1690,110 @@
   card.addEventListener('pointerup', onPointerUp);
   card.addEventListener('pointercancel', onPointerUp);
 
+  // Tray long-press preview: hold an icon to grow it + show the floating label.
+  // Quick taps commit immediately. Releasing on the same icon while in preview
+  // commits; releasing off cancels. Sliding to another icon swaps the preview.
+  const TRAY_HOLD_MS = 200;
+  const TRAY_MOVE_THRESHOLD = 8;
+  let trayHoldTimer = null;
+  let trayPressActive = false;
+  let trayPressStart = null;
+  let trayPreviewIcon = null;
+
+  function showTrayPreview(icon) {
+    trayPreviewIcon = icon;
+    tray.classList.add('dragging-react');
+    const reaction = icon.dataset.r;
+    for (const el of trayIcons) {
+      if (el === icon) {
+        el.style.transform = 'scale(2.5) translateY(-14px)';
+        el.classList.add('nearest');
+      } else {
+        el.style.transform = 'scale(0.85)';
+        el.classList.remove('nearest');
+      }
+    }
+    // Reuse the floating preview UI
+    const screenRect = screen.getBoundingClientRect();
+    const iconRect = icon.getBoundingClientRect();
+    reactPreview.style.left = (iconRect.left + iconRect.width/2 - screenRect.left) + 'px';
+    reactPreview.style.top  = (iconRect.top - 68 - screenRect.top) + 'px';
+    reactPreviewEmoji.textContent = REACTION_EMOJI[reaction];
+    reactPreviewEmoji.style.fontSize = '74px';
+    reactPreviewLabel.textContent = REACTION_NAMES[reaction];
+    reactPreviewLabel.classList.toggle('resurface', RESURFACE.has(reaction));
+    reactPreview.classList.add('visible');
+  }
+  function clearTrayPreview() {
+    trayPreviewIcon = null;
+    tray.classList.remove('dragging-react');
+    for (const el of trayIcons) {
+      el.style.transform = '';
+      el.classList.remove('nearest');
+    }
+    reactPreview.classList.remove('visible');
+  }
+
+  function iconAtPoint(x, y) {
+    const el = document.elementFromPoint(x, y);
+    if (!el) return null;
+    return trayIcons.find(i => i === el || i.contains(el)) || null;
+  }
+
   for (const el of trayIcons) {
-    el.addEventListener('click', () => {
+    el.addEventListener('pointerdown', (e) => {
       if (committing || dragging || sheetOpen || composeOpen) return;
-      commitReaction(el.dataset.r, { vx: 0, vy: 1.6 });
+      trayPressActive = true;
+      trayPressStart = { x: e.clientX, y: e.clientY };
+      try { el.setPointerCapture(e.pointerId); } catch {}
+      trayHoldTimer = setTimeout(() => {
+        if (trayPressActive) showTrayPreview(el);
+      }, TRAY_HOLD_MS);
+      e.preventDefault();
+    });
+
+    el.addEventListener('pointermove', (e) => {
+      if (!trayPressActive) return;
+      // If moving while preview is active, swap to whichever icon is under
+      if (trayPreviewIcon) {
+        const under = iconAtPoint(e.clientX, e.clientY);
+        if (under && under !== trayPreviewIcon) {
+          showTrayPreview(under);
+        }
+      } else {
+        // If we've moved past the threshold before the timer fires, cancel
+        // the long-press so we don't accidentally trigger preview after a slide.
+        const moved = Math.hypot(e.clientX - trayPressStart.x, e.clientY - trayPressStart.y);
+        if (moved > TRAY_MOVE_THRESHOLD) {
+          clearTimeout(trayHoldTimer);
+        }
+      }
+    });
+
+    el.addEventListener('pointerup', (e) => {
+      if (!trayPressActive) return;
+      trayPressActive = false;
+      clearTimeout(trayHoldTimer);
+      if (trayPreviewIcon) {
+        // Commit only if released on an icon
+        const under = iconAtPoint(e.clientX, e.clientY);
+        const targetIcon = under || trayPreviewIcon;
+        const wasOnIcon = !!under;
+        clearTrayPreview();
+        if (wasOnIcon) commitReaction(targetIcon.dataset.r, { vx: 0, vy: 1.6 });
+      } else {
+        // Quick tap (no preview) commits immediately
+        const moved = Math.hypot(e.clientX - trayPressStart.x, e.clientY - trayPressStart.y);
+        if (moved < TRAY_MOVE_THRESHOLD) {
+          commitReaction(el.dataset.r, { vx: 0, vy: 1.6 });
+        }
+      }
+    });
+
+    el.addEventListener('pointercancel', () => {
+      trayPressActive = false;
+      clearTimeout(trayHoldTimer);
+      if (trayPreviewIcon) clearTrayPreview();
     });
   }
 
