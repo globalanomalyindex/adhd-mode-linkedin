@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>ADHD Mode · Interactive demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    /* LinkedIn-native palette inside the device */
+    --bg:           #f4f2ee;
+    --card:         #ffffff;
+    --text:         rgba(0, 0, 0, 0.92);
+    --text-2:       rgba(0, 0, 0, 0.6);
+    --text-3:       rgba(0, 0, 0, 0.45);
+    --hairline:     rgba(0, 0, 0, 0.06);
+    --brand:        #0a66c2;
+    --brand-tint:   rgba(10, 102, 194, 0.04);
+
+    /* Demo chrome (outside the device, matches case study) */
+    --paper:        #f4f2ee;
+    --coral:        #c4523a;
+    --coral-soft:   #e8b9ad;
+    --ink:          #171717;
+    --device-bg:    #0d0d0e;
+    --device-rim:   #1f1f22;
+
+    --ease-out:     cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    touch-action: none;
+  }
+
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+    background:
+      radial-gradient(circle at 50% 100%, rgba(196, 82, 58, 0.06), transparent 55%),
+      radial-gradient(circle at 0% 0%, rgba(10, 102, 194, 0.04), transparent 50%),
+      var(--paper);
+  }
+
+  /* ========== Device frame ========== */
+  .stage {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 24px;
+  }
+
+  .device {
+    width: 396px; height: 836px;
+    background: var(--device-bg);
+    border-radius: 52px;
+    padding: 12px;
+    box-shadow:
+      0 0 0 2px var(--device-rim),
+      0 40px 96px rgba(0, 0, 0, 0.22),
+      0 12px 28px rgba(0, 0, 0, 0.12);
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .device::before {
+    /* dynamic island */
+    content: '';
+    position: absolute;
+    top: 18px; left: 50%;
+    transform: translateX(-50%);
+    width: 116px; height: 26px;
+    background: #000;
+    border-radius: 14px;
+    z-index: 5;
+  }
+
+  .device-screen {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    border-radius: 40px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ========== Topbar ========== */
+  .topbar {
+    background: var(--card);
+    padding: 56px 18px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--hairline);
+    font-size: 13px;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 8px; color: var(--text-2); }
+  .topbar-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--brand);
+    box-shadow: 0 0 0 0 rgba(10, 102, 194, 0.35);
+    animation: pulse 2.4s var(--ease-out) infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(10, 102, 194, 0.35); }
+    50%      { box-shadow: 0 0 0 5px rgba(10, 102, 194, 0); }
+  }
+  .topbar-label { color: var(--text); font-weight: 600; }
+  .topbar-meta {
+    color: var(--text-3);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    display: flex; gap: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ========== Skip arc ========== */
+  .skip-arc {
+    position: absolute;
+    top: 102px;
+    left: 50%; transform: translateX(-50%);
+    width: 180px; height: 30px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.04), transparent);
+    border-radius: 0 0 220px 220px;
+    pointer-events: none;
+    transition: width 0.32s var(--ease-out), height 0.32s var(--ease-out), background 0.32s var(--ease-out), top 0.32s var(--ease-out);
+    z-index: 1;
+  }
+  .skip-arc.armed {
+    width: 340px;
+    height: 120px;
+    top: 92px;
+    background: radial-gradient(ellipse at top, rgba(0,0,0,0.24), transparent 70%);
+  }
+  .skip-badge {
+    position: absolute;
+    top: 40px; left: 50%;
+    transform: translateX(-50%) translateY(-8px);
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    font-size: 12px; font-weight: 600;
+    padding: 5px 14px;
+    border-radius: 14px;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.32s var(--ease-out);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .skip-arc.armed .skip-badge {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ========== Card stage ========== */
+  .card-stage {
+    position: absolute;
+    top: 108px; left: 0; right: 0; bottom: 110px;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    padding: 32px 18px 0;
+  }
+
+  .card {
+    width: 100%;
+    background: var(--card);
+    border-radius: 16px;
+    padding: 20px 22px 22px;
+    box-shadow:
+      0 1px 0 rgba(0,0,0,0.04),
+      0 8px 24px rgba(0, 0, 0, 0.08);
+    will-change: transform, opacity;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    cursor: grab;
+    position: relative;
+    transform-origin: center 30%;
+  }
+  .card.dragging { cursor: grabbing; }
+  .card.idle-wobble {
+    animation: idleWobble 4s var(--ease-out) infinite;
+  }
+  @keyframes idleWobble {
+    0%, 88%, 100% { transform: translateY(0) rotate(0); }
+    92%           { transform: translateY(-3px) rotate(-0.6deg); }
+    96%           { transform: translateY(0) rotate(0.4deg); }
+  }
+
+  .card-author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .card-avatar {
+    width: 44px; height: 44px;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+  .card-author-name {
+    font-size: 14px; font-weight: 600; color: var(--text);
+    line-height: 1.2;
+  }
+  .card-author-role {
+    font-size: 12px; color: var(--text-2);
+    margin-top: 2px;
+  }
+
+  .card-content {
+    font-size: 14px; line-height: 1.55; color: var(--text);
+    white-space: pre-wrap;
+  }
+
+  .card-tag {
+    position: absolute;
+    top: -10px;
+    right: 18px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--brand);
+    color: #fff;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.06em;
+    opacity: 0;
+    transform: translateY(-4px) scale(0.92);
+    transition: opacity 0.2s ease, transform 0.32s var(--ease-out);
+    box-shadow: 0 6px 16px rgba(10, 102, 194, 0.25);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .card-tag.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  .card-tag[data-r="insightful"] { background: #b45309; box-shadow: 0 6px 16px rgba(180, 83, 9, 0.25); }
+  .card-tag[data-r="support"]    { background: #c2410c; box-shadow: 0 6px 16px rgba(194, 65, 12, 0.25); }
+  .card-tag[data-r="love"]       { background: #be123c; box-shadow: 0 6px 16px rgba(190, 18, 60, 0.25); }
+  .card-tag[data-r="celebrate"]  { background: #4338ca; box-shadow: 0 6px 16px rgba(67, 56, 202, 0.25); }
+
+  /* ========== Reaction tray ========== */
+  .tray {
+    position: absolute;
+    left: 18px; right: 18px;
+    bottom: 26px;
+    background: var(--card);
+    border-radius: 999px;
+    padding: 10px 6px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow:
+      0 1px 0 rgba(0,0,0,0.04),
+      0 8px 22px rgba(0, 0, 0, 0.08);
+    z-index: 2;
+  }
+  .tray-icon {
+    font-size: 22px;
+    line-height: 1;
+    padding: 8px;
+    border-radius: 999px;
+    transform-origin: center;
+    transition:
+      transform 0.18s var(--ease-out),
+      background 0.18s var(--ease-out);
+    will-change: transform;
+  }
+
+  /* ========== Footer hint ========== */
+  .hint {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: rgba(0, 0, 0, 0.5);
+    text-align: center;
+    transition: opacity 0.3s ease;
+  }
+  .hint .hint-coral { color: var(--coral); font-weight: 500; }
+  .hint .hint-arrow { display: inline-block; margin: 0 6px; transform: translateY(1px); }
+
+  /* ========== Reset link ========== */
+  .reset-btn {
+    position: absolute;
+    top: 14px; left: 14px;
+    z-index: 12;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; font-weight: 500;
+    letter-spacing: 0.06em;
+    padding: 6px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .reset-btn:hover { background: var(--coral); color: #fff; border-color: var(--coral); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card.idle-wobble { animation: none; }
+    .topbar-dot { animation: none; }
+  }
+
+  @media (max-width: 480px) {
+    body { padding: 16px 8px; }
+    .device { width: 90vw; max-width: 396px; height: auto; aspect-ratio: 396 / 836; }
+  }
+</style>
+</head>
+<body>
+
+<button class="reset-btn" id="reset">↻ Restart</button>
+
+<div class="stage">
+  <div class="device">
+    <div class="device-screen">
+
+      <div class="topbar">
+        <div class="topbar-left">
+          <span class="topbar-dot"></span>
+          <span class="topbar-label">Focus</span>
+        </div>
+        <div class="topbar-meta">
+          <span id="meta-time">11:42</span>
+          <span id="meta-count">1/4</span>
+          <span id="meta-queue">↻ 0</span>
+        </div>
+      </div>
+
+      <div class="skip-arc" id="skip-arc">
+        <div class="skip-badge">Moved on</div>
+      </div>
+
+      <div class="card-stage">
+        <div class="card idle-wobble" id="card">
+          <div class="card-tag" id="card-tag">LIKE</div>
+          <div class="card-author">
+            <div class="card-avatar" id="avatar"></div>
+            <div>
+              <div class="card-author-name" id="author-name">Maya Chen</div>
+              <div class="card-author-role" id="author-role">VP Engineering at Stripe</div>
+            </div>
+          </div>
+          <div class="card-content" id="content">Loading...</div>
+        </div>
+      </div>
+
+      <div class="tray" id="tray">
+        <div class="tray-icon" data-r="like">👍</div>
+        <div class="tray-icon" data-r="celebrate">🎉</div>
+        <div class="tray-icon" data-r="support">🤝</div>
+        <div class="tray-icon" data-r="love">❤️</div>
+        <div class="tray-icon" data-r="insightful">💡</div>
+        <div class="tray-icon" data-r="funny">😄</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hint" id="hint">
+    <span class="hint-arrow">↑</span> drag to skip
+    <span style="margin: 0 12px; opacity: 0.5;">·</span>
+    drag <span class="hint-arrow">↓</span> to <span class="hint-coral">react</span>
+  </div>
+</div>
+
+<script>
+  'use strict';
+
+  // ============================================================
+  // POSTS (4 short ones that cycle)
+  // ============================================================
+  const POSTS = [
+    {
+      author: "Maya Chen",
+      role: "VP Engineering at Stripe",
+      avatar: ["#dbeafe", "#bfdbfe"],
+      content: "I almost quit my job last year.\n\nWhat saved me was learning that my job isn't to remove ambiguity. It IS the job. Three things that means: make decisions faster than feels comfortable, tell people what you don't know, give them a framework to move forward without you.",
+    },
+    {
+      author: "James Park",
+      role: "Former PM at Meta · #OpenToWork",
+      avatar: ["#fecaca", "#fca5a5"],
+      content: "Today I was part of the layoffs at Meta. After 6 years, I'm officially looking. If you have any leads in product roles at scale, I would love to hear from you. Thank you to everyone who has already reached out.",
+    },
+    {
+      author: "Priya Nair",
+      role: "Writer at The Atlantic",
+      avatar: ["#fde68a", "#fcd34d"],
+      content: "My grandmother's last recipe, before her hands forgot. I'm putting it on the internet so our family always has it.\n\nTake the rice. Wash it three times. Add cardamom, not too much. The trick is the slowness.",
+    },
+    {
+      author: "Sara Kim",
+      role: "Senior Designer at Figma",
+      avatar: ["#ddd6fe", "#c4b5fd"],
+      content: "Three things I've learned about hiring senior designers, after running 60+ portfolio reviews this year:\n\n1. Show the rejected options.\n2. Name your trade-offs out loud.\n3. Stop apologizing for incomplete work.",
+    },
+  ];
+
+  // ============================================================
+  // ELEMENTS
+  // ============================================================
+  const card = document.getElementById('card');
+  const cardTag = document.getElementById('card-tag');
+  const tray = document.getElementById('tray');
+  const trayIcons = Array.from(tray.querySelectorAll('.tray-icon'));
+  const skipArc = document.getElementById('skip-arc');
+  const hint = document.getElementById('hint');
+  const resetBtn = document.getElementById('reset');
+
+  const elAuthor = document.getElementById('author-name');
+  const elRole = document.getElementById('author-role');
+  const elAvatar = document.getElementById('avatar');
+  const elContent = document.getElementById('content');
+  const metaCount = document.getElementById('meta-count');
+  const metaQueue = document.getElementById('meta-queue');
+  const metaTime = document.getElementById('meta-time');
+
+  const REACTIONS = ['like', 'celebrate', 'support', 'love', 'insightful', 'funny'];
+  const RESURFACE = new Set(['insightful', 'support', 'love']);
+
+  // ============================================================
+  // STATE
+  // ============================================================
+  let postIdx = 0;
+  let queueCount = 0;
+  let dragging = false;
+  let dragStart = null;
+  let samples = [];
+  let pos = { x: 0, y: 0 };
+  let committing = false;
+
+  // Spring class: simple critically-damped-ish spring (mass=1)
+  class Spring {
+    constructor(value, stiffness = 220, damping = 22) {
+      this.value = value;
+      this.target = value;
+      this.velocity = 0;
+      this.stiffness = stiffness;
+      this.damping = damping;
+    }
+    set(v) { this.value = v; this.velocity = 0; this.target = v; }
+    setValue(v) { this.value = v; }
+    setVelocity(v) { this.velocity = v; }
+    setTarget(t) { this.target = t; }
+    step(dt) {
+      const force = -this.stiffness * (this.value - this.target);
+      const damp = -this.damping * this.velocity;
+      this.velocity += (force + damp) * dt;
+      this.value += this.velocity * dt;
+    }
+  }
+
+  const sX = new Spring(0, 260, 24);
+  const sY = new Spring(0, 260, 24);
+  const sRot = new Spring(0, 220, 18);
+  const sScale = new Spring(1, 280, 22);
+  const sOpacity = new Spring(1, 200, 24);
+
+  // ============================================================
+  // RENDER
+  // ============================================================
+  function renderPost(p) {
+    elAuthor.textContent = p.author;
+    elRole.textContent = p.role;
+    elAvatar.style.background = `linear-gradient(135deg, ${p.avatar[0]}, ${p.avatar[1]})`;
+    elContent.textContent = p.content;
+  }
+
+  function updateMeta() {
+    metaCount.textContent = `${postIdx + 1}/${POSTS.length}`;
+    metaQueue.textContent = `↻ ${queueCount}`;
+  }
+
+  renderPost(POSTS[0]);
+  updateMeta();
+
+  // ============================================================
+  // RENDER LOOP
+  // ============================================================
+  let lastT = performance.now();
+  function frame(now) {
+    const dt = Math.min((now - lastT) / 1000, 0.05);
+    lastT = now;
+
+    if (!dragging) {
+      sX.step(dt);
+      sY.step(dt);
+    }
+    sRot.step(dt);
+    sScale.step(dt);
+    sOpacity.step(dt);
+
+    card.style.transform =
+      `translate(${sX.value.toFixed(2)}px, ${sY.value.toFixed(2)}px) ` +
+      `rotate(${sRot.value.toFixed(2)}deg) ` +
+      `scale(${sScale.value.toFixed(3)})`;
+    card.style.opacity = sOpacity.value.toFixed(3);
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  // ============================================================
+  // VELOCITY TRACKER
+  // ============================================================
+  function pushSample(x, y, t) {
+    samples.push({ x, y, t });
+    while (samples.length > 6) samples.shift();
+  }
+  function currentVelocity() {
+    if (samples.length < 2) return { vx: 0, vy: 0 };
+    const a = samples[0];
+    const b = samples[samples.length - 1];
+    const dt = Math.max(1, b.t - a.t);
+    return { vx: (b.x - a.x) / dt, vy: (b.y - a.y) / dt }; // px / ms
+  }
+
+  // ============================================================
+  // GESTURE CLASSIFICATION
+  // ============================================================
+  const COMMIT_DIST = 90;     // px in either direction
+  const COMMIT_VEL  = 0.7;    // px / ms (vertical)
+  const TRAY_RECT_GETTER = () => tray.getBoundingClientRect();
+  const VIEW = () => ({ width: card.parentElement.parentElement.clientWidth });
+
+  function nearestReactionForX(absX) {
+    // Map absolute X to nearest tray icon by center distance
+    let best = trayIcons[0], bestD = Infinity;
+    for (const el of trayIcons) {
+      const r = el.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const d = Math.abs(absX - cx);
+      if (d < bestD) { bestD = d; best = el; }
+    }
+    return best;
+  }
+
+  function magnificationDistance(absX, el) {
+    const r = el.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    return Math.abs(absX - cx);
+  }
+
+  function updateDestinationFeedback(dx, dy, clientX) {
+    if (dy < -10 && Math.abs(dy) > Math.abs(dx) * 0.6) {
+      // skip zone
+      const progress = Math.min(Math.abs(dy) / COMMIT_DIST, 1);
+      if (progress > 0.6) skipArc.classList.add('armed');
+      else skipArc.classList.remove('armed');
+      // dim reactions
+      for (const el of trayIcons) {
+        el.style.transform = `scale(${1 - 0.06 * progress})`;
+        el.style.background = '';
+      }
+      cardTag.classList.remove('visible');
+    } else if (dy > 10) {
+      skipArc.classList.remove('armed');
+      // react zone, magnify nearest, apply Fitts-style falloff
+      const nearest = nearestReactionForX(clientX);
+      for (const el of trayIcons) {
+        const d = magnificationDistance(clientX, el);
+        const radius = 80;
+        const t = Math.max(0, 1 - d / radius);
+        // ease-out
+        const eased = 1 - Math.pow(1 - t, 2);
+        const scale = 1 + 0.9 * eased;
+        el.style.transform = `scale(${scale.toFixed(3)}) translateY(${(-8 * eased).toFixed(2)}px)`;
+        el.style.background = el === nearest && eased > 0.4 ? 'rgba(10, 102, 194, 0.06)' : '';
+      }
+      // card tag preview
+      const r = nearest.dataset.r;
+      cardTag.dataset.r = r;
+      cardTag.textContent = r.toUpperCase();
+      cardTag.style.background = nearest.dataset.r ? '' : '';
+      if (Math.abs(dy) > 30) cardTag.classList.add('visible');
+      else cardTag.classList.remove('visible');
+    } else {
+      // idle
+      skipArc.classList.remove('armed');
+      for (const el of trayIcons) {
+        el.style.transform = '';
+        el.style.background = '';
+      }
+      cardTag.classList.remove('visible');
+    }
+  }
+
+  function clearFeedback() {
+    skipArc.classList.remove('armed');
+    for (const el of trayIcons) {
+      el.style.transform = '';
+      el.style.background = '';
+    }
+    cardTag.classList.remove('visible');
+  }
+
+  // ============================================================
+  // INTERACTION
+  // ============================================================
+  function onPointerDown(e) {
+    if (committing) return;
+    dragging = true;
+    card.classList.add('dragging');
+    card.classList.remove('idle-wobble');
+    hint.style.opacity = '0.3';
+    try { card.setPointerCapture(e.pointerId); } catch {}
+    dragStart = { x: e.clientX, y: e.clientY };
+    samples.length = 0;
+    pushSample(e.clientX, e.clientY, performance.now());
+    // Stop any springs in progress on X/Y
+    sX.setVelocity(0); sY.setVelocity(0);
+    e.preventDefault();
+  }
+
+  function onPointerMove(e) {
+    if (!dragging) return;
+    const dx = e.clientX - dragStart.x;
+    const dy = e.clientY - dragStart.y;
+    pushSample(e.clientX, e.clientY, performance.now());
+
+    // Position follows finger directly
+    sX.setValue(dx);
+    sY.setValue(dy);
+
+    // Rotation: position-based + velocity-based wobble
+    const vel = currentVelocity();
+    const rotFromPos = clamp(dx * 0.06, -10, 10);
+    const rotFromVel = clamp(vel.vx * 6, -3.5, 3.5);
+    sRot.setTarget(rotFromPos + rotFromVel);
+
+    // Scale: subtle pulse on velocity bursts
+    const speed = Math.hypot(vel.vx, vel.vy);
+    const scaleTarget = 1 - clamp(speed * 0.06, 0, 0.04);
+    sScale.setTarget(scaleTarget);
+
+    pos = { x: dx, y: dy };
+    updateDestinationFeedback(dx, dy, e.clientX);
+    e.preventDefault();
+  }
+
+  function onPointerUp(e) {
+    if (!dragging) return;
+    dragging = false;
+    card.classList.remove('dragging');
+    hint.style.opacity = '';
+
+    const vel = currentVelocity();
+    const dx = pos.x, dy = pos.y;
+
+    const upCommit   = (dy < -COMMIT_DIST) || (vel.vy < -COMMIT_VEL);
+    const downCommit = (dy > COMMIT_DIST)  || (vel.vy > COMMIT_VEL);
+
+    if (upCommit) {
+      commitSkip(vel);
+    } else if (downCommit) {
+      const nearest = nearestReactionForX(e.clientX);
+      commitReaction(nearest.dataset.r, vel);
+    } else {
+      // Spring back
+      sX.setVelocity(vel.vx * 1000);
+      sY.setVelocity(vel.vy * 1000);
+      sX.setTarget(0); sY.setTarget(0);
+      sRot.setTarget(0); sScale.setTarget(1);
+      clearFeedback();
+      setTimeout(() => { if (!dragging) card.classList.add('idle-wobble'); }, 1200);
+    }
+  }
+
+  function commitSkip(vel) {
+    committing = true;
+    clearFeedback();
+    // Carry velocity into the spring's velocity, push target far up, also fade
+    sY.setVelocity(Math.min(vel.vy * 1000, -1400));
+    sY.setTarget(-900);
+    sRot.setTarget(sRot.value + (Math.random() > 0.5 ? -4 : 4));
+    sOpacity.setTarget(0);
+    setTimeout(nextPost, 320);
+  }
+
+  function commitReaction(reaction, vel) {
+    committing = true;
+    clearFeedback();
+    if (RESURFACE.has(reaction)) {
+      queueCount += 1;
+      updateMeta();
+    }
+    // Quick "react" pulse on the card (subtle scale bump), then fly down
+    sScale.setTarget(1.04);
+    setTimeout(() => sScale.setTarget(1), 110);
+    sY.setVelocity(Math.max(vel.vy * 1000, 1400));
+    sY.setTarget(900);
+    sOpacity.setTarget(0);
+    setTimeout(nextPost, 320);
+  }
+
+  function nextPost() {
+    postIdx = (postIdx + 1) % POSTS.length;
+    renderPost(POSTS[postIdx]);
+    updateMeta();
+    // Reset card state from off-screen for entrance
+    sX.set(0);
+    sY.set(60);
+    sRot.set(0);
+    sScale.set(0.96);
+    sOpacity.set(0);
+    requestAnimationFrame(() => {
+      sY.setTarget(0);
+      sScale.setTarget(1);
+      sOpacity.setTarget(1);
+    });
+    committing = false;
+    pos = { x: 0, y: 0 };
+    setTimeout(() => { if (!dragging) card.classList.add('idle-wobble'); }, 1600);
+  }
+
+  card.addEventListener('pointerdown', onPointerDown);
+  card.addEventListener('pointermove', onPointerMove);
+  card.addEventListener('pointerup', onPointerUp);
+  card.addEventListener('pointercancel', onPointerUp);
+
+  // Click on a tray icon = static fallback react
+  for (const el of trayIcons) {
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', () => {
+      if (committing || dragging) return;
+      commitReaction(el.dataset.r, { vx: 0, vy: 1.6 });
+    });
+  }
+
+  resetBtn.addEventListener('click', () => {
+    postIdx = -1;
+    queueCount = 0;
+    nextPost();
+  });
+
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+</script>
+</body>
+</html>
