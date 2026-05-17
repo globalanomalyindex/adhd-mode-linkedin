@@ -3,18 +3,27 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ADHD Mode for LinkedIn, Case Study</title>
+<title>ADHD Mode for LinkedIn  ·  A case study by Chris Fiore</title>
 <link rel="stylesheet" href="./case-study.css" />
 </head>
 <body class="cs-body">
 
+<!-- STICKY NAV (appears on scroll past hero) -->
+<nav class="cs-sticky-nav" id="sticky-nav" aria-hidden="true">
+  <div class="cs-sticky-mark">Chris Fiore  ·  ADHD Mode</div>
+  <div class="cs-sticky-section" id="sticky-section">Summary</div>
+  <div class="cs-sticky-anchors">
+    <a href="#deliverables">Deliverables</a>
+    <a href="#walkthrough">Walkthrough</a>
+    <a href="#mechanics">Mechanics</a>
+    <a href="#refs">References</a>
+  </div>
+</nav>
+
 <!-- HERO -->
 <section class="cs-hero">
   <div class="cs-hero-top">
-    <div class="cs-hero-mark">
-      <div class="cs-hero-mark-dot">af</div>
-      <div class="cs-hero-mark-text">Chris Fiore <span>·  Product designer</span></div>
-    </div>
+    <div class="cs-hero-mark">Chris Fiore, Product designer</div>
     <nav class="cs-hero-nav">
       <a href="#walkthrough">Walkthrough</a>
       <a href="#mechanics">Mechanics</a>
@@ -23,8 +32,8 @@
   </div>
 
   <div class="cs-hero-body">
-    <div class="cs-eyebrow">Portfolio · Product Design · 2026</div>
-    <h1 class="cs-title">ADHD Mode<br/>for LinkedIn<span class="cs-title-accent">.</span></h1>
+    <div class="cs-eyebrow">Portfolio  ·  Product design  ·  2026</div>
+    <h1 class="cs-title">ADHD Mode<br/>for <span class="cs-title-italic">LinkedIn</span><span class="cs-title-dot">.</span></h1>
     <p class="cs-deck">The credible version of a wellbeing promise. A bounded Focus Session, built on LinkedIn's own primitives, designed for people whose attention works differently.</p>
   </div>
 
@@ -50,260 +59,374 @@
 
 <article class="cs-page">
 
-  <!-- Section 1: Executive summary -->
-  <section class="cs-section">
-    <div class="cs-eyebrow-mini">01 · Summary</div>
-    <h2>Executive summary</h2>
-    <p>LinkedIn and its peers publicly commit to caring about user wellbeing. ADHD Mode is what that promise looks like when it is designed seriously: a bounded Focus Session, embedded inside LinkedIn's native surface, that reshapes the feed around how ADHD and Cognitive Disengagement Syndrome (CDS) cognition actually works.</p>
-    <p>The design hinges on three load-bearing ideas: bounded sessions instead of infinite scroll, LinkedIn reactions used as a personal spaced-repetition engine, and a vertical gesture grammar that respects existing scroll muscle memory. Long posts are reflowed into TL;DR-first paged cards. Sessions end with a closure ritual that gives users permission to leave.</p>
-    <p>Two sub-modes (Focus for scattered-but-energetic days, Re-engage for foggy days) adjust pacing and density. The design preserves every revenue-relevant signal LinkedIn already collects.</p>
+  <!-- 01 Summary -->
+  <section class="cs-section" data-title="Summary">
+    <aside class="cs-section-aside">
+      <span class="cs-section-num">01</span>
+      <span class="cs-section-kicker">Summary</span>
+    </aside>
+    <div class="cs-section-body">
+      <h2>Executive <em>summary</em></h2>
+      <p>LinkedIn and its peers publicly commit to caring about user wellbeing. ADHD Mode is what that promise looks like when it is designed seriously: a bounded Focus Session, embedded inside LinkedIn's native surface, that reshapes the feed around how ADHD and Cognitive Disengagement Syndrome (CDS) cognition actually works.</p>
+      <p>The design hinges on three load-bearing ideas: bounded sessions instead of infinite scroll, LinkedIn reactions used as a personal spaced-repetition engine, and a vertical gesture grammar that respects existing scroll muscle memory. Long posts are reflowed into TL;DR-first paged cards. Sessions end with a closure ritual that gives users permission to leave.</p>
+      <p>Two sub-modes (Focus for scattered-but-energetic days, Re-engage for foggy days) adjust pacing and density. The design preserves every revenue-relevant signal LinkedIn already collects.</p>
+    </div>
   </section>
 
-  <!-- DELIVERABLES STRIP (prominent, near the top) -->
-  <section class="cs-section" id="deliverables">
-    <div class="cs-deliverables">
-      <h3>Deliverables, one page each</h3>
-      <dl>
-        <div class="cs-deliverable-row">
-          <dt>Working prototype</dt>
-          <dd>Real drag physics, magnification, reactions wired to a private spaced-repetition queue. <a href="../prototype/index.html">Open in browser  →</a></dd>
+  <!-- 02 Hook -->
+  <section class="cs-section" data-title="The hook" id="hook">
+    <aside class="cs-section-aside">
+      <span class="cs-section-num">02</span>
+      <span class="cs-section-kicker">The hook</span>
+    </aside>
+    <div class="cs-section-body">
+      <h2>Selective attention <em>on LinkedIn</em></h2>
+      <p>Before you read another sentence, look at this feed for five seconds. Then close your eyes.</p>
+
+      <div class="cs-figure">
+        <iframe src="../screens/before-feed-annotated.html" title="Annotated LinkedIn feed" loading="lazy"></iframe>
+        <div class="cs-figure-caption">A realistic LinkedIn home feed, annotated with nine attention-cost vectors on a single screen.</div>
+      </div>
+
+      <p>How many posts mentioned hiring? Did you see the layoff? What color was the second profile photo? How many notification badges were there?</p>
+
+      <p class="cs-pull">You had <em>neurotypical</em> attention and you still missed most of it. This is what people with ADHD and CDS navigate every time they open the app.</p>
+    </div>
+  </section>
+
+  <!-- 03 Problem -->
+  <section class="cs-section" data-title="The problem">
+    <aside class="cs-section-aside">
+      <span class="cs-section-num">03</span>
+      <span class="cs-section-kicker">The problem</span>
+    </aside>
+    <div class="cs-section-body">
+      <h2>The wellbeing-<em>promise gap</em></h2>
+      <p>Major platforms have made public commitments to user wellbeing. Instagram's "Take a Break," screen-time tools across iOS and Android, LinkedIn's own member wellbeing pages. These commitments exist alongside product surfaces optimized for indefinite engagement: infinite scroll, autoplay, escalating notification counts, algorithmically novel content, reaction counts that anchor judgment before evaluation.</p>
+      <p>For attention-typical users the gap between promise and product is uncomfortable. For ADHD and CDS users it is exclusionary. These users are required to use LinkedIn for professional reasons (job search, network maintenance, industry awareness) and are then confronted with a surface that is structurally hostile to how their attention works.</p>
+      <p>ADHD Mode is the credible version of the wellbeing promise. Not an attack on the business model. Not a competing app. Not a punishing time-limit tool. A feature that says: when you need to use this platform with your kind of brain, here is a way to do that without the bottom falling out.</p>
+    </div>
+  </section>
+
+  <!-- 04 Deliverables -->
+  <section class="cs-section" data-title="Deliverables" id="deliverables">
+    <aside class="cs-section-aside">
+      <span class="cs-section-num">04</span>
+      <span class="cs-section-kicker">Deliverables</span>
+    </aside>
+    <div class="cs-section-body" style="max-width: none;">
+      <div class="cs-deliverables">
+        <h3>Three artifacts, shipped together</h3>
+        <dl>
+          <div class="cs-deliverable-row">
+            <dt>Working prototype</dt>
+            <dd>Real drag physics, magnification, reactions wired to a private spaced-repetition queue.</dd>
+            <a href="../prototype/index.html" class="cs-go">Open  →</a>
+          </div>
+          <div class="cs-deliverable-row">
+            <dt>Figma file</dt>
+            <dd>Cover, design system, six polished mobile frames, and a flow board.</dd>
+            <a href="https://www.figma.com/design/ZFEmkHeen3nXUy6ogyGQW0" target="_blank" rel="noopener" class="cs-go">Open Figma  →</a>
+          </div>
+          <div class="cs-deliverable-row">
+            <dt>Figma-ready spec</dt>
+            <dd>W3C Design Tokens JSON plus component and screen specs for handoff.</dd>
+            <a href="../figma-spec/components.md" class="cs-go">View specs  →</a>
+          </div>
+          <div class="cs-deliverable-row">
+            <dt>Design specification</dt>
+            <dd>Full research-grounded design spec with citations, principles, and trade-offs.</dd>
+            <a href="../docs/superpowers/specs/2026-05-16-adhd-mode-linkedin-design.md" class="cs-go">View spec  →</a>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 Research -->
+  <section class="cs-section" data-title="Research">
+    <aside class="cs-section-aside">
+      <span class="cs-section-num">05</span>
+      <span class="cs-section-kicker">Research</span>
+    </aside>
+    <div class="cs-section-body">
+      <h2>The <em>cognitive science</em> the design responds to</h2>
+      <p>Every mechanic in this design traces to a finding in the cognitive science literature, a documented HCI principle, or an explicit designer's hypothesis marked as such.</p>
+
+      <h3>ADHD cognition</h3>
+      <p>Combined and hyperactive-impulsive ADHD presentations share four documented patterns relevant to feed design: delay aversion and time blindness (Barkley; Sonuga-Barke), executive function and working memory load (Barkley's model), novelty-seeking and impulse interaction, and hyperfocus collapse where time perception disappears once attention is captured.</p>
+
+      <h3>Cognitive Disengagement Syndrome</h3>
+      <p>CDS, formerly known as Sluggish Cognitive Tempo, was renamed via expert consensus in 2022.<sup><a href="#ref-becker2022">1</a></sup> Its defining cognitive signature is "accurate but slow" across attention and executive function tasks.<sup><a href="#ref-mayes">2</a></sup> CDS users reach correct answers but at significantly reduced processing speed. The implication for feed design is not faster forgetting; it is slower encoding. Content presented at typical density or pace is missed or skimmed past without absorption.</p>
+
+      <h3>Spaced repetition</h3>
+      <p>Established as a memory consolidation strategy since Ebbinghaus's forgetting curve (1885), validated extensively in modern learning science. Application to ADHD populations is supported on the basis of working-memory load reduction and alignment with shorter attention spans.</p>
+
+      <h3>Interaction principles</h3>
+      <p>The design also draws on three well-established HCI principles: Fitts's Law (magnified targets reduce time-to-acquire and error rate), preview-before-commit (a visible label during a swipe gives the user a chance to back out, addressing ADHD's response-inhibition deficit), and effort-matched-to-consequence (the low-stakes default is cheap; the high-stakes deliberate action requires more intent).</p>
+
+      <p><em>What this design is not:</em> a medical intervention. The framing throughout is "design that respects how these cognitive profiles work," not "treatment."</p>
+    </div>
+  </section>
+
+  <!-- 06 Principles -->
+  <section class="cs-section" data-title="Principles">
+    <aside class="cs-section-aside">
+      <span class="cs-section-num">06</span>
+      <span class="cs-section-kicker">Principles</span>
+    </aside>
+    <div class="cs-section-body">
+      <h2>Seven <em>falsifiable</em> principles</h2>
+      <p>The constraints held throughout. Each one is a test the design must pass, not a vague aspiration.</p>
+      <ol>
+        <li><strong>Embedded, not bolted on.</strong> Every visual, every interaction, every piece of copy reads as something LinkedIn could ship. No competing identity. No wellness-app pastel.</li>
+        <li><strong>Beauty in simplicity.</strong> If a screen needs more than its data and structure to be understood, the design has failed. No marketing copy on operational screens.</li>
+        <li><strong>Research-grounded.</strong> Every mechanic traces to a cited finding, a documented HCI principle, or an explicit designer's hypothesis marked as such.</li>
+        <li><strong>Respects the business model.</strong> The design preserves LinkedIn's social signal: reactions fire normally, notifications go out, content reaches authors. It improves engagement quality without attacking engagement quantity.</li>
+        <li><strong>Respects scroll muscle memory.</strong> Gesture grammar moves in the directions users already move.</li>
+        <li><strong>Accessible by default.</strong> Every gesture has a tap-based fallback. Motor coordination differences are accommodated. <code>prefers-reduced-motion</code> is honored everywhere with meaningful, not degraded, fallbacks.</li>
+        <li><strong>Closure, not abandonment.</strong> Sessions end with a calm finish, not a "you've been here too long" scold.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 07 Walkthrough -->
+  <section class="cs-section" data-title="Walkthrough" id="walkthrough">
+    <aside class="cs-section-aside">
+      <span class="cs-section-num">07</span>
+      <span class="cs-section-kicker">Walkthrough</span>
+    </aside>
+    <div class="cs-section-body">
+      <h2>The product, <em>screen by screen</em></h2>
+
+      <h3>Entry point</h3>
+      <p>The ADHD Mode entry is a card inserted second in the LinkedIn home feed. Discoverable but quiet. The brand-gradient mark and the single-line description signal what the mode does without overselling it.</p>
+      <div class="cs-figure">
+        <iframe src="../screens/entry-point.html" title="Entry point" loading="lazy"></iframe>
+        <div class="cs-figure-caption">A discoverable card on LinkedIn home. The mode is opted into, not opted out of.</div>
+      </div>
+
+      <h3>Session setup</h3>
+      <p>Two choices: mode (Focus or Re-engage) and length. Re-engage's tile copy ("Foggy or slow. More room per post.") is deliberately non-clinical. The user does not have to self-diagnose to use the right mode.</p>
+      <div class="cs-figure">
+        <iframe src="../screens/session-setup.html" title="Session setup" loading="lazy"></iframe>
+        <div class="cs-figure-caption">Two choices, then begin. Smart defaults so the impatient user can launch in one tap.</div>
+      </div>
+
+      <h3>The active session</h3>
+      <p>One post at a time, full-bleed, no chrome competing for attention. Vertical swipe up to skip privately. Vertical swipe down to react, with sideways drift selecting a richer reaction. The reaction tray is always visible at the bottom. The skip arc at the top is a quiet teaching affordance.</p>
+      <div class="cs-figure">
+        <iframe src="../prototype/index.html" title="Working prototype" loading="lazy"></iframe>
+        <div class="cs-figure-caption">The working prototype. Drag the card to react or skip. Long-press for the static reaction picker.</div>
+      </div>
+
+      <h3>Mid-session check-in</h3>
+      <p>At the cap, the user is given a deliberate choice: wrap, extend, or pause. The primary action is "Wrap up", the easy default takes you to closure. Extending the session is the deliberate choice.</p>
+      <div class="cs-figure">
+        <iframe src="../screens/mid-session-checkin.html" title="Mid-session check-in" loading="lazy"></iframe>
+        <div class="cs-figure-caption">Notice the action hierarchy: closure is primary; extension is secondary.</div>
+      </div>
+
+      <h3>End of session</h3>
+      <p>The closure ritual. A calm card, the word "Done.", three numbers, three items returning later, and a primary action that takes the user out of LinkedIn rather than back into more feed.</p>
+      <div class="cs-figure">
+        <iframe src="../screens/end-of-session.html" title="End of session" loading="lazy"></iframe>
+        <div class="cs-figure-caption">No celebration screen. No "great job!" The structure communicates completion; the design gives permission to leave.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 Mechanic: Reactions -->
+  <section class="cs-section" data-title="Mechanic, reactions" id="mechanics">
+    <aside class="cs-section-aside">
+      <span class="cs-section-num">08</span>
+      <span class="cs-section-kicker">Mechanic, reactions</span>
+    </aside>
+    <div class="cs-section-body">
+      <h2>LinkedIn reactions <em>as spaced repetition</em></h2>
+      <p>The most distinctive move in the design. LinkedIn already has six reactions: Like, Celebrate, Support, Love, Insightful, Funny. Inside ADHD Mode they keep their social function (the notification still fires, the author still hears about it) and quietly take on a second function: scheduling the post into a private resurface queue.</p>
+
+      <table class="cs-table">
+        <thead>
+          <tr>
+            <th>Reaction</th>
+            <th>Social signal</th>
+            <th>Resurface behavior</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>💡 Insightful</td><td>Standard</td><td>~3 days, then spaced (SM-2 style)</td></tr>
+          <tr><td>🤝 Support</td><td>Standard</td><td>~1 week</td></tr>
+          <tr><td>❤️ Love</td><td>Standard</td><td>~2 weeks</td></tr>
+          <tr><td>🎉 Celebrate</td><td>Standard</td><td>Surfaces on next profile visit</td></tr>
+          <tr><td>👍 Like, 😄 Funny</td><td>Standard</td><td>No resurface</td></tr>
+          <tr><td><em>No reaction</em></td><td>None</td><td>No resurface, no penalty</td></tr>
+        </tbody>
+      </table>
+
+      <p>The mapping is deliberate. Insightful, Support, and Love are the three reactions whose emotional signal most strongly implies "I want to remember this" or "this person matters to me." Like and Funny are ephemeral acknowledgments; they don't deserve future attention bandwidth. Celebrate is moment-specific; it surfaces only when relevant (next profile visit).</p>
+
+      <p>Resurfacing is ambient. The user does not see "this returns Tuesday." A small ↻ counter in the session topbar quietly grows during a session. The full queue is browsable in settings but no resurface item ever announces its arrival.</p>
+
+      <p class="cs-pull">Your past attention <em>curates</em> your present attention. The mechanism is invisible. The benefit is not.</p>
+    </div>
+  </section>
+
+  <!-- 09 Mechanic: Reflow -->
+  <section class="cs-section" data-title="Mechanic, reflow">
+    <aside class="cs-section-aside">
+      <span class="cs-section-num">09</span>
+      <span class="cs-section-kicker">Mechanic, reflow</span>
+    </aside>
+    <div class="cs-section-body">
+      <h2>Long-post <em>reflow</em></h2>
+      <p>LinkedIn posts above ~60 words are reflowed in ADHD Mode into a chunked, paged structure. The first card is always a TL;DR; subsequent cards are body chunks split on narrative beats. This addresses the wall-of-text overwhelm and the sunk-cost trap simultaneously.</p>
+
+      <p>The TL;DR-first ordering is the key move. "See more" hides text but forces a sunk-cost decision: once you start reading, ADHD users feel obligated to finish even when the post is not paying off. TL;DR-first lets you decide before starting. If the summary is not for you, skip the post entirely. If it is, the paged structure means you always know how much further the post goes and you can choose to continue or wrap.</p>
+
+      <p>The pipeline is five steps: detect and classify, generate TL;DR (third-person referent so the summary reads as orientation rather than the author's voice), chunk by beat (paragraph boundaries and narrative breaks, not arbitrary word counts), preserve visual hierarchy (lists stay together, quotes stay intact), and in Re-engage mode only, prepend a "what you'll find" comprehension scaffold.</p>
+    </div>
+  </section>
+
+  <!-- 10 Business framing -->
+  <section class="cs-section" data-title="Business framing">
+    <aside class="cs-section-aside">
+      <span class="cs-section-num">10</span>
+      <span class="cs-section-kicker">Business framing</span>
+    </aside>
+    <div class="cs-section-body">
+      <h2>Why this is the <em>credible</em> version of the wellbeing promise</h2>
+      <p>The design carefully preserves the business model. Reactions still fire to authors. Notifications still escalate. Engagement still happens. What changes is the <em>quality</em> of engagement for users who would otherwise scroll-and-bounce or doom-loop without absorbing anything.</p>
+      <p>The hypothesis worth defending in a product review: opt-in users will exhibit higher 7-day return rate than a matched control, longer dwell quality (engagement with content, not just time on app), and a reaction-mix shift toward Insightful/Support/Love (the three resurface-eligible reactions). If those hypotheses hold, ADHD Mode is a net-positive engagement product, not just a wellbeing artifact. If they don't, the design needs rework rather than incremental polish, and the honest acknowledgment of that is part of the proposal.</p>
+    </div>
+  </section>
+
+  <!-- 11 Measurement -->
+  <section class="cs-section" data-title="What I'd measure">
+    <aside class="cs-section-aside">
+      <span class="cs-section-num">11</span>
+      <span class="cs-section-kicker">Measurement</span>
+    </aside>
+    <div class="cs-section-body">
+      <h2>What I would <em>measure</em></h2>
+      <p>The hypotheses to instrument from day one. If any of these fail, the design needs rework, not polish.</p>
+
+      <div class="cs-counters">
+        <div class="cs-counter">
+          <div class="cs-counter-num" data-target="40" data-suffix="%">0<span class="cs-counter-unit">%</span></div>
+          <div class="cs-counter-label">Target opt-in</div>
+          <div class="cs-counter-desc">Among LinkedIn users who self-identify as ADHD or CDS.</div>
         </div>
-        <div class="cs-deliverable-row">
-          <dt>Figma file</dt>
-          <dd>Cover, design system, six polished mobile frames, and a flow board. <a href="https://www.figma.com/design/ZFEmkHeen3nXUy6ogyGQW0" target="_blank" rel="noopener">Open in Figma  →</a></dd>
+        <div class="cs-counter">
+          <div class="cs-counter-num" data-target="2.2" data-suffix="x">0<span class="cs-counter-unit">x</span></div>
+          <div class="cs-counter-label">Return rate lift</div>
+          <div class="cs-counter-desc">7-day return for opt-in users vs matched control. The core retention hypothesis.</div>
         </div>
-        <div class="cs-deliverable-row">
-          <dt>Figma-ready spec</dt>
-          <dd>W3C Design Tokens JSON plus component and screen specs for handoff. <a href="../figma-spec/components.md">View spec package  →</a></dd>
+        <div class="cs-counter">
+          <div class="cs-counter-num" data-target="3.5" data-suffix="x">0<span class="cs-counter-unit">x</span></div>
+          <div class="cs-counter-label">Reaction-mix shift</div>
+          <div class="cs-counter-desc">Insightful + Support + Love share inside the mode vs the default feed.</div>
         </div>
-        <div class="cs-deliverable-row">
-          <dt>Design specification</dt>
-          <dd>Full research-grounded spec with citations, principles, and trade-offs. <a href="../docs/superpowers/specs/2026-05-16-adhd-mode-linkedin-design.md">View spec  →</a></dd>
-        </div>
-      </dl>
+      </div>
+
+      <p>Plus session completion rate (container quality), session length distribution (did the bounded structure hold?), resurface acceptance rate (is the spacing logic working?), mode selection split (are both sub-modes earning their existence?), and post-session app exits (closure-ritual effectiveness).</p>
     </div>
   </section>
 
-  <!-- Section 2: The hook -->
-  <section class="cs-section">
-    <h2>The hook: selective attention on LinkedIn</h2>
-    <p>Before you read another sentence, look at this feed for five seconds. Then close your eyes.</p>
-
-    <div class="cs-figure">
-      <iframe src="../screens/before-feed-annotated.html" title="Annotated LinkedIn feed"></iframe>
-      <div class="cs-figure-caption">A realistic LinkedIn home feed, annotated with nine attention-cost vectors on a single screen.</div>
-    </div>
-
-    <p>How many posts mentioned hiring? Did you see the layoff? What color was the second profile photo? How many notification badges were there?</p>
-
-    <p class="cs-pull">You have neurotypical attention and you still missed most of it. This is what people with ADHD and CDS navigate every time they open the app.</p>
-  </section>
-
-  <!-- Section 3: The problem -->
-  <section class="cs-section">
-    <h2>The problem</h2>
-    <p>Major platforms have made public commitments to user wellbeing. Instagram's "Take a Break," screen-time tools across iOS and Android, LinkedIn's own member wellbeing pages. These commitments exist alongside product surfaces optimized for indefinite engagement: infinite scroll, autoplay, escalating notification counts, algorithmically novel content, reaction counts that anchor judgment before evaluation.</p>
-    <p>For attention-typical users the gap between promise and product is uncomfortable. For ADHD and CDS users it is exclusionary. These users are required to use LinkedIn for professional reasons (job search, network maintenance, industry awareness) and are then confronted with a surface that is structurally hostile to how their attention works.</p>
-    <p>ADHD Mode is the credible version of the wellbeing promise. Not an attack on the business model. Not a competing app. Not a punishing time-limit tool. A feature that says: when you need to use this platform with your kind of brain, here is a way to do that without the bottom falling out.</p>
-  </section>
-
-  <!-- Section 4: Research foundation -->
-  <section class="cs-section">
-    <h2>Research foundation</h2>
-
-    <h3>ADHD cognition</h3>
-    <p>Combined and hyperactive-impulsive ADHD presentations share four documented patterns relevant to feed design: delay aversion and time blindness (Barkley; Sonuga-Barke), executive function and working memory load (Barkley's model), novelty-seeking and impulse interaction, and hyperfocus collapse where time perception disappears once attention is captured.</p>
-
-    <h3>Cognitive Disengagement Syndrome</h3>
-    <p>CDS, formerly known as Sluggish Cognitive Tempo, was renamed via expert consensus in 2022.<sup><a href="#ref-becker2022">1</a></sup> Its defining cognitive signature is "accurate but slow" across attention and executive function tasks.<sup><a href="#ref-mayes">2</a></sup> CDS users reach correct answers but at significantly reduced processing speed. The implication for feed design is not faster forgetting; it is slower encoding. Content presented at typical density or pace is missed or skimmed past without absorption.</p>
-
-    <h3>Spaced repetition</h3>
-    <p>Established as a memory consolidation strategy since Ebbinghaus's forgetting curve (1885), validated extensively in modern learning science. Application to ADHD populations is supported on the basis of working-memory load reduction and alignment with shorter attention spans.</p>
-
-    <h3>Interaction principles</h3>
-    <p>The design also draws on three well-established HCI principles: Fitts's Law (magnified targets reduce time-to-acquire and error rate), preview-before-commit (a visible label during a swipe gives the user a chance to back out, addressing ADHD's response-inhibition deficit), and effort-matched-to-consequence (the low-stakes default is cheap; the high-stakes deliberate action requires more intent).</p>
-
-    <p><em>What this design is not:</em> a medical intervention. The framing throughout is "design that respects how these cognitive profiles work," not "treatment."</p>
-  </section>
-
-  <!-- Section 5: Design principles -->
-  <section class="cs-section">
-    <h2>Design principles</h2>
-    <p>The constraints held throughout. Each is a falsifiable test the design must pass.</p>
-    <ol>
-      <li><strong>Embedded, not bolted on.</strong> Every visual, every interaction, every piece of copy reads as something LinkedIn could ship. No competing identity. No wellness-app pastel.</li>
-      <li><strong>Beauty in simplicity.</strong> If a screen needs more than its data and structure to be understood, the design has failed. No marketing copy on operational screens.</li>
-      <li><strong>Research-grounded.</strong> Every mechanic traces to a cited finding, a documented HCI principle, or an explicit designer's hypothesis marked as such.</li>
-      <li><strong>Respects the business model.</strong> The design preserves LinkedIn's social signal: reactions fire normally, notifications go out, content reaches authors. It improves engagement quality without attacking engagement quantity.</li>
-      <li><strong>Respects scroll muscle memory.</strong> Gesture grammar moves in the directions users already move.</li>
-      <li><strong>Accessible by default.</strong> Every gesture has a tap-based fallback. Motor coordination differences are accommodated. <code>prefers-reduced-motion</code> is honored everywhere with meaningful, not degraded, fallbacks.</li>
-      <li><strong>Closure, not abandonment.</strong> Sessions end with a calm finish, not a "you've been here too long" scold.</li>
-    </ol>
-  </section>
-
-  <!-- Section 6: Product walkthrough -->
-  <section class="cs-section" id="walkthrough">
-    <div class="cs-eyebrow-mini">06 · Walkthrough</div>
-    <h2>Product walkthrough</h2>
-
-    <h3>Entry point</h3>
-    <p>The ADHD Mode entry is a card inserted second in the LinkedIn home feed. Discoverable but quiet. The brand-gradient mark and the single-line description signal what the mode does without overselling it.</p>
-    <div class="cs-figure">
-      <iframe src="../screens/entry-point.html" title="Entry point"></iframe>
-      <div class="cs-figure-caption">A discoverable card on LinkedIn home. The mode is opted into, not opted out of.</div>
-    </div>
-
-    <h3>Session setup</h3>
-    <p>Two choices: mode (Focus or Re-engage) and length. Re-engage's tile copy ("Foggy or slow. More room per post.") is deliberately non-clinical. The user does not have to self-diagnose to use the right mode.</p>
-    <div class="cs-figure">
-      <iframe src="../screens/session-setup.html" title="Session setup"></iframe>
-      <div class="cs-figure-caption">Two choices, then begin. Smart defaults so the impatient user can launch in one tap.</div>
-    </div>
-
-    <h3>The active session</h3>
-    <p>One post at a time, full-bleed, no chrome competing for attention. Vertical swipe up to skip privately. Vertical swipe down to react, with sideways drift selecting a richer reaction. The reaction tray is always visible at the bottom. The skip arc at the top is a quiet teaching affordance.</p>
-    <div class="cs-figure">
-      <iframe src="../prototype/index.html" title="Working prototype"></iframe>
-      <div class="cs-figure-caption">The working prototype. Drag the card to react or skip. Long-press for the static reaction picker.</div>
-    </div>
-
-    <h3>Mid-session check-in</h3>
-    <p>At the cap, the user is given a deliberate choice: wrap, extend, or pause. The primary action is "Wrap up", the easy default takes you to closure. Extending the session is the deliberate choice.</p>
-    <div class="cs-figure">
-      <iframe src="../screens/mid-session-checkin.html" title="Mid-session check-in"></iframe>
-      <div class="cs-figure-caption">Notice the action hierarchy: closure is primary; extension is secondary.</div>
-    </div>
-
-    <h3>End of session</h3>
-    <p>The closure ritual. A calm card, the word "Done.", three numbers, three items returning later, and a primary action that takes the user out of LinkedIn rather than back into more feed.</p>
-    <div class="cs-figure">
-      <iframe src="../screens/end-of-session.html" title="End of session"></iframe>
-      <div class="cs-figure-caption">No celebration screen. No "great job!" The structure communicates completion; the design gives permission to leave.</div>
+  <!-- 12 Pattern -->
+  <section class="cs-section" data-title="Pattern">
+    <aside class="cs-section-aside">
+      <span class="cs-section-num">12</span>
+      <span class="cs-section-kicker">Pattern</span>
+    </aside>
+    <div class="cs-section-body">
+      <h2>Pattern, <em>not just a feature</em></h2>
+      <p>ADHD Mode is composed of three reusable design primitives that any feed-style surface could adopt:</p>
+      <ol>
+        <li><strong>The bounded session container with a closure ritual.</strong> Applies anywhere infinite content meets time-blind users.</li>
+        <li><strong>Existing-reaction-primitives as a private attention-scheduling layer.</strong> Applies to any platform with reactions, likes, or saves.</li>
+        <li><strong>The vertical gesture grammar with magnification.</strong> Applies to any card-based interface where users currently react via tap.</li>
+      </ol>
+      <p>These are the patterns. ADHD Mode for LinkedIn is one instantiation.</p>
     </div>
   </section>
 
-  <!-- Section 7: Mechanic deep-dive, Reactions as spaced repetition -->
-  <section class="cs-section" id="mechanics">
-    <div class="cs-eyebrow-mini">07 · Mechanic deep-dive</div>
-    <h2>Mechanic deep-dive: LinkedIn reactions as spaced repetition</h2>
-    <p>The most distinctive move in the design. LinkedIn already has six reactions: Like, Celebrate, Support, Love, Insightful, Funny. Inside ADHD Mode they keep their social function (the notification still fires, the author still hears about it) and quietly take on a second function: scheduling the post into a private resurface queue.</p>
-
-    <table class="cs-table">
-      <thead>
-        <tr>
-          <th>Reaction</th>
-          <th>Social signal</th>
-          <th>Resurface behavior</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td>💡 Insightful</td><td>Standard</td><td>~3 days, then spaced (SM-2 style)</td></tr>
-        <tr><td>🤝 Support</td><td>Standard</td><td>~1 week</td></tr>
-        <tr><td>❤️ Love</td><td>Standard</td><td>~2 weeks</td></tr>
-        <tr><td>🎉 Celebrate</td><td>Standard</td><td>Surfaces on next profile visit</td></tr>
-        <tr><td>👍 Like, 😄 Funny</td><td>Standard</td><td>No resurface</td></tr>
-        <tr><td><em>No reaction</em></td><td>None</td><td>No resurface, no penalty</td></tr>
-      </tbody>
-    </table>
-
-    <p>The mapping is deliberate. Insightful, Support, and Love are the three reactions whose emotional signal most strongly implies "I want to remember this" or "this person matters to me." Like and Funny are ephemeral acknowledgments; they don't deserve future attention bandwidth. Celebrate is moment-specific; it surfaces only when relevant (next profile visit).</p>
-
-    <p>Resurfacing is ambient. The user does not see "this returns Tuesday." A small ↻ counter in the session topbar quietly grows during a session. The full queue is browsable in settings but no resurface item ever announces its arrival.</p>
-
-    <p class="cs-pull">Your past attention curates your present attention. The mechanism is invisible. The benefit is not.</p>
+  <!-- 13 Generalization -->
+  <section class="cs-section" data-title="Generalization">
+    <aside class="cs-section-aside">
+      <span class="cs-section-num">13</span>
+      <span class="cs-section-kicker">Generalization</span>
+    </aside>
+    <div class="cs-section-body">
+      <h2>How this <em>generalizes</em></h2>
+      <p>Streaming surfaces have most of the same attention failure modes as social feeds: autoplay-next, infinite suggested content, episode binging, the "I have no idea what I just watched" effect. The ADHD Mode pattern translates directly.</p>
+      <ul>
+        <li><strong>Disney+ session container:</strong> bounded viewing session with a chosen length. After session end, autoplay-next is suppressed and a closure screen shows what was watched and what is queued for a future session.</li>
+        <li><strong>Reactions-as-spaced-repetition for content:</strong> a "this stuck with me" reaction that brings the episode (or related content) back in 1-2 weeks. Particularly useful for documentary and kids' educational programming.</li>
+        <li><strong>Vertical gesture grammar for content browsing:</strong> swipe up to skip a suggested title, swipe down to add to a personal queue with magnification picking the queue type (Watch later, Watch with kids, Save for binge weekend).</li>
+      </ul>
+    </div>
   </section>
 
-  <!-- Section 8: Mechanic deep-dive, Long-post reflow -->
-  <section class="cs-section">
-    <h2>Mechanic deep-dive: long-post reflow</h2>
-    <p>LinkedIn posts above ~60 words are reflowed in ADHD Mode into a chunked, paged structure. The first card is always a TL;DR; subsequent cards are body chunks split on narrative beats. This addresses the wall-of-text overwhelm and the sunk-cost trap simultaneously.</p>
-
-    <p>The TL;DR-first ordering is the key move. "See more" hides text but forces a sunk-cost decision: once you start reading, ADHD users feel obligated to finish even when the post is not paying off. TL;DR-first lets you decide before starting. If the summary is not for you, skip the post entirely. If it is, the paged structure means you always know how much further the post goes and you can choose to continue or wrap.</p>
-
-    <p>The pipeline is five steps: detect and classify, generate TL;DR (third-person referent so the summary reads as orientation rather than the author's voice), chunk by beat (paragraph boundaries and narrative breaks, not arbitrary word counts), preserve visual hierarchy (lists stay together, quotes stay intact), and in Re-engage mode only, prepend a "what you'll find" comprehension scaffold.</p>
+  <!-- 14 Open questions -->
+  <section class="cs-section" data-title="Open questions">
+    <aside class="cs-section-aside">
+      <span class="cs-section-num">14</span>
+      <span class="cs-section-kicker">Open questions</span>
+    </aside>
+    <div class="cs-section-body">
+      <h2>What I'd <em>test next</em></h2>
+      <ul>
+        <li><strong>CDS spacing intervals.</strong> No empirical research yet exists for optimal long-term spacing in CDS populations. The current design adapts the encoding phase only; the long-term curve is identical across sub-modes. This is a stated designer's hypothesis to validate post-launch.</li>
+        <li><strong>Reaction-mix authenticity.</strong> If most users gravitate to Insightful for everything, the resurface queue over-triggers. Mitigations: the queue cap (4 exposures) and the secondary metric of resurface acceptance rate.</li>
+        <li><strong>Sub-mode selection friction.</strong> Asking users to self-classify puts cognitive load up front. Worth testing a smart default that uses prior-session signals.</li>
+        <li><strong>Generalization validity.</strong> The Disney/streaming generalization is partly speculative. Validation requires building the same primitives inside a different surface and observing whether the mechanics still hold.</li>
+      </ul>
+    </div>
   </section>
 
-  <!-- Section 9: Why this is the credible version of the wellbeing promise -->
-  <section class="cs-section">
-    <h2>Why this is the credible version of the wellbeing promise</h2>
-    <p>The design carefully preserves the business model. Reactions still fire to authors. Notifications still escalate. Engagement still happens. What changes is the <em>quality</em> of engagement for users who would otherwise scroll-and-bounce or doom-loop without absorbing anything.</p>
-    <p>The hypothesis worth defending in a product review: opt-in users will exhibit higher 7-day return rate than a matched control, longer dwell quality (engagement with content, not just time on app), and a reaction-mix shift toward Insightful/Support/Love (the three resurface-eligible reactions). If those hypotheses hold, ADHD Mode is a net-positive engagement product, not just a wellbeing artifact. If they don't, the design needs rework rather than incremental polish, and the honest acknowledgment of that is part of the proposal.</p>
+  <!-- 15 References -->
+  <section class="cs-section" data-title="References" id="refs">
+    <aside class="cs-section-aside">
+      <span class="cs-section-num">15</span>
+      <span class="cs-section-kicker">References</span>
+    </aside>
+    <div class="cs-section-body">
+      <h2>References</h2>
+      <ol class="cs-refs">
+        <li id="ref-becker2022">Becker, S. P., et al. (2022). Report of a Work Group on Sluggish Cognitive Tempo: Key Research Directions and a Consensus Change in Terminology to Cognitive Disengagement Syndrome. <em>Journal of the American Academy of Child &amp; Adolescent Psychiatry.</em> <a href="https://www.jaacap.org/article/S0890-8567(22)01246-1/fulltext">jaacap.org</a></li>
+        <li id="ref-mayes">Mayes, S. D., et al. Neurocognition in Children with Cognitive Disengagement Syndrome: Accurate but Slow. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10474248/">PMC10474248</a></li>
+        <li>Adi-Japha, E., et al. (2017). Procedural Memory Consolidation in ADHD Is Promoted by Scheduling of Practice to Evening Hours. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5540945/">PMC5540945</a></li>
+        <li>Barkley, R. A. <em>ADHD and the Nature of Self-Control.</em> The Guilford Press.</li>
+        <li>Ebbinghaus, H. (1885). <em>Über das Gedächtnis.</em></li>
+        <li>Fitts, P. M. (1954). The information capacity of the human motor system in controlling the amplitude of movement.</li>
+      </ol>
+    </div>
   </section>
 
-  <!-- Section 10: What I'd measure -->
-  <section class="cs-section">
-    <h2>What I would measure</h2>
-    <p>Metrics to instrument from day one, each mapped to a specific hypothesis:</p>
-    <ul>
-      <li>Opt-in rate (% of eligible users who try ADHD Mode at least once), demand signal</li>
-      <li>Session completion rate (% of started sessions reaching end-of-session), container quality</li>
-      <li>Session length distribution (cap-clustered vs runtime ceiling), did the bounded structure hold?</li>
-      <li>Reaction-mix distribution inside vs outside ADHD Mode, are users using reactions more deliberately?</li>
-      <li>Resurface acceptance (% of resurfaced items reacted to on second touch), is the spacing logic working?</li>
-      <li>Mode selection split (Focus vs Re-engage frequency), are both sub-modes earning their existence?</li>
-      <li>7-day and 30-day return rate, ADHD Mode users vs matched control, the core retention hypothesis</li>
-      <li>Post-session app exits (% of sessions where the user actually closes vs returns to feed), closure-ritual effectiveness</li>
-    </ul>
-  </section>
-
-  <!-- Section 11: Pattern, not just a feature -->
-  <section class="cs-section">
-    <h2>Pattern, not just a feature</h2>
-    <p>ADHD Mode is composed of three reusable design primitives that any feed-style surface could adopt:</p>
-    <ol>
-      <li><strong>The bounded session container with a closure ritual.</strong> Applies anywhere infinite content meets time-blind users.</li>
-      <li><strong>Existing-reaction-primitives as a private attention-scheduling layer.</strong> Applies to any platform with reactions, likes, or saves.</li>
-      <li><strong>The vertical gesture grammar with magnification.</strong> Applies to any card-based interface where users currently react via tap.</li>
-    </ol>
-    <p>These are the patterns. ADHD Mode for LinkedIn is one instantiation.</p>
-  </section>
-
-  <!-- Section 12: How this generalizes -->
-  <section class="cs-section">
-    <h2>How this generalizes</h2>
-    <p>Streaming surfaces have most of the same attention failure modes as social feeds: autoplay-next, infinite suggested content, episode binging, the "I have no idea what I just watched" effect. The ADHD Mode pattern translates directly.</p>
-    <ul>
-      <li><strong>Disney+ session container:</strong> bounded viewing session with a chosen length. After session end, autoplay-next is suppressed and a closure screen shows what was watched and what is queued for a future session.</li>
-      <li><strong>Reactions-as-spaced-repetition for content:</strong> a "this stuck with me" reaction that brings the episode (or related content) back in 1-2 weeks. Particularly useful for documentary and kids' educational programming.</li>
-      <li><strong>Vertical gesture grammar for content browsing:</strong> swipe up to skip a suggested title, swipe down to add to a personal queue with magnification picking the queue type (Watch later, Watch with kids, Save for binge weekend).</li>
-    </ul>
-  </section>
-
-  <!-- Section 13: Open questions -->
-  <section class="cs-section">
-    <h2>Open questions and what I'd test next</h2>
-    <ul>
-      <li><strong>CDS spacing intervals.</strong> No empirical research yet exists for optimal long-term spacing in CDS populations. The current design adapts the encoding phase only; the long-term curve is identical across sub-modes. This is a stated designer's hypothesis to validate post-launch.</li>
-      <li><strong>Reaction-mix authenticity.</strong> If most users gravitate to Insightful for everything, the resurface queue over-triggers. Mitigations: the queue cap (4 exposures) and the secondary metric of resurface acceptance rate.</li>
-      <li><strong>Sub-mode selection friction.</strong> Asking users to self-classify puts cognitive load up front. Worth testing a smart default that uses prior-session signals.</li>
-      <li><strong>Generalization validity.</strong> The Disney/streaming generalization is partly speculative. Validation requires building the same primitives inside a different surface and observing whether the mechanics still hold.</li>
-    </ul>
-  </section>
-
-  <!-- References -->
-  <section class="cs-section">
-    <h2>References</h2>
-    <ol class="cs-refs">
-      <li id="ref-becker2022">Becker, S. P., et al. (2022). Report of a Work Group on Sluggish Cognitive Tempo: Key Research Directions and a Consensus Change in Terminology to Cognitive Disengagement Syndrome. <em>Journal of the American Academy of Child &amp; Adolescent Psychiatry.</em> <a href="https://www.jaacap.org/article/S0890-8567(22)01246-1/fulltext">jaacap.org</a></li>
-      <li id="ref-mayes">Mayes, S. D., et al. Neurocognition in Children with Cognitive Disengagement Syndrome: Accurate but Slow. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10474248/">PMC10474248</a></li>
-      <li>Adi-Japha, E., et al. (2017). Procedural Memory Consolidation in ADHD Is Promoted by Scheduling of Practice to Evening Hours. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5540945/">PMC5540945</a></li>
-      <li>Barkley, R. A. <em>ADHD and the Nature of Self-Control.</em> The Guilford Press.</li>
-      <li>Ebbinghaus, H. (1885). <em>Über das Gedächtnis.</em></li>
-      <li>Fitts, P. M. (1954). The information capacity of the human motor system in controlling the amplitude of movement.</li>
-    </ol>
+  <!-- CLOSING SPREAD -->
+  <section class="cs-closing">
+    <div class="cs-closing-eyebrow">End of case study</div>
+    <h2 class="cs-closing-title">Designed for people whose <em>attention works differently</em>.</h2>
+    <p class="cs-closing-sub">Built with research, restraint, and a respect for muscle memory. Ready to talk about how this thinking applies to your product.</p>
+    <a class="cs-closing-contact" href="mailto:chrisfioreschool@gmail.com">Get in touch  ↗</a>
   </section>
 
 </article>
 
 <footer class="cs-foot">
   <p>ADHD Mode for LinkedIn  ·  Chris Fiore  ·  2026</p>
-  <p>Built with HTML, CSS, vanilla JavaScript, and Source Sans 3. No build step. <a href="../README.md" style="color: var(--brand);">View repository</a>.</p>
+  <p>Built with HTML, CSS, vanilla JavaScript, Source Sans 3, Instrument Serif, JetBrains Mono. No build step. <a href="../README.md">View repository</a>.</p>
 </footer>
 
 <script>
-  // Scroll-reveal sections. Uses IntersectionObserver with one-shot reveal.
-  // prefers-reduced-motion is handled in CSS (sections render visible immediately).
-  if ('IntersectionObserver' in window) {
+  // ============================================================
+  // Scroll-reveal sections (one-shot fade-and-rise)
+  // ============================================================
+  const supportsIO = 'IntersectionObserver' in window;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (supportsIO && !reduced) {
     const io = new IntersectionObserver((entries) => {
       for (const e of entries) {
         if (e.isIntersecting) {
@@ -311,12 +434,89 @@
           io.unobserve(e.target);
         }
       }
-    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.05 });
-
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
     document.querySelectorAll('.cs-section').forEach(s => io.observe(s));
   } else {
-    // Fallback: show everything immediately
     document.querySelectorAll('.cs-section').forEach(s => s.classList.add('cs-visible'));
+  }
+
+  // ============================================================
+  // Sticky nav: appears once past hero; current section text updates
+  // ============================================================
+  const stickyNav = document.getElementById('sticky-nav');
+  const stickySection = document.getElementById('sticky-section');
+  const hero = document.querySelector('.cs-hero');
+
+  function updateSticky() {
+    if (!stickyNav || !hero) return;
+    const heroBottom = hero.getBoundingClientRect().bottom;
+    if (heroBottom < 0) {
+      stickyNav.classList.add('visible');
+      stickyNav.setAttribute('aria-hidden', 'false');
+    } else {
+      stickyNav.classList.remove('visible');
+      stickyNav.setAttribute('aria-hidden', 'true');
+    }
+
+    // Find the section nearest to top of viewport
+    const sections = document.querySelectorAll('.cs-section[data-title]');
+    let current = null;
+    for (const s of sections) {
+      const r = s.getBoundingClientRect();
+      if (r.top < window.innerHeight * 0.4) current = s;
+    }
+    if (current && stickySection) {
+      const t = current.dataset.title;
+      if (stickySection.textContent !== t) stickySection.textContent = t;
+    }
+  }
+
+  let scrollTicking = false;
+  window.addEventListener('scroll', () => {
+    if (!scrollTicking) {
+      requestAnimationFrame(() => { updateSticky(); scrollTicking = false; });
+      scrollTicking = true;
+    }
+  }, { passive: true });
+  updateSticky();
+
+  // ============================================================
+  // Number counters in the measurement section
+  // ============================================================
+  const easeOut = t => 1 - Math.pow(1 - t, 3);
+
+  function animateCounter(el) {
+    const target = parseFloat(el.dataset.target);
+    const suffix = el.dataset.suffix || '';
+    const isFloat = !Number.isInteger(target);
+    if (reduced) {
+      el.innerHTML = (isFloat ? target.toFixed(1) : target) + '<span class="cs-counter-unit">' + suffix + '</span>';
+      return;
+    }
+    const duration = 1400;
+    const start = performance.now();
+    function tick(now) {
+      const t = Math.min((now - start) / duration, 1);
+      const v = easeOut(t) * target;
+      const shown = isFloat ? v.toFixed(1) : Math.round(v);
+      el.innerHTML = shown + '<span class="cs-counter-unit">' + suffix + '</span>';
+      if (t < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  if (supportsIO) {
+    const counterIO = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) {
+          animateCounter(e.target);
+          counterIO.unobserve(e.target);
+        }
+      }
+    }, { threshold: 0.4 });
+    document.querySelectorAll('.cs-counter-num').forEach(el => counterIO.observe(el));
+  } else {
+    document.querySelectorAll('.cs-counter-num').forEach(animateCounter);
   }
 </script>
 
