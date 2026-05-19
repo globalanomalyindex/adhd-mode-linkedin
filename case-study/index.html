@@ -116,26 +116,55 @@
     </aside>
     <div class="cs-section-body" style="max-width: none;">
       <div class="cs-deliverables">
-        <h3>Three artifacts, shipped together</h3>
+        <h3>The system, end to end</h3>
+
+        <div class="cs-stats-strip">
+          <div class="cs-stat-cell">
+            <div class="cs-stat-num">61</div>
+            <div class="cs-stat-label">design tokens</div>
+          </div>
+          <div class="cs-stat-cell">
+            <div class="cs-stat-num">9</div>
+            <div class="cs-stat-label">components</div>
+          </div>
+          <div class="cs-stat-cell">
+            <div class="cs-stat-num">16</div>
+            <div class="cs-stat-label">variants</div>
+          </div>
+          <div class="cs-stat-cell">
+            <div class="cs-stat-num">6</div>
+            <div class="cs-stat-label">screens</div>
+          </div>
+          <div class="cs-stat-cell">
+            <div class="cs-stat-num">7</div>
+            <div class="cs-stat-label">prototype links</div>
+          </div>
+        </div>
+
         <dl>
           <div class="cs-deliverable-row">
             <dt>Working prototype</dt>
-            <dd>Real drag physics, magnification, reactions wired to a private spaced-repetition queue.</dd>
-            <a href="../prototype/index.html" class="cs-go">Open  →</a>
+            <dd>HTML/JS interactive demo of the focus session. Real velocity-spring drag physics, tap-or-drag dock, long-press preview, comment compose, cycling community comments. Single file, no build step.</dd>
+            <a href="../prototype/demo.html" class="cs-go">Try it  →</a>
           </div>
           <div class="cs-deliverable-row">
-            <dt>Figma file</dt>
-            <dd>Cover, design system, six polished mobile frames, and a flow board.</dd>
+            <dt>Figma file <small style="font-weight: 400; color: var(--coral); font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; margin-left: 8px;">Dev-handoff ready</small></dt>
+            <dd>Six pages: Cover, Foundations (token swatches), Components (full library with variants), Screens (six mobile frames), Prototype Flow, Case Study Boards. Every fill bound to a variable. Every component has a description for Dev Mode.</dd>
             <a href="https://www.figma.com/design/ZFEmkHeen3nXUy6ogyGQW0" target="_blank" rel="noopener" class="cs-go">Open Figma  →</a>
           </div>
           <div class="cs-deliverable-row">
-            <dt>Figma-ready spec</dt>
-            <dd>W3C Design Tokens JSON plus component and screen specs for handoff.</dd>
-            <a href="../figma-spec/components.md" class="cs-go">View specs  →</a>
+            <dt>Interactive flow</dt>
+            <dd>Click-through prototype inside Figma: Entry → Setup → Active → Long-post → Mid-check → End → loop. Smart Animate transitions. A "Try Live Prototype" pill in Play mode opens the HTML demo for the deep interaction.</dd>
+            <a href="https://www.figma.com/proto/ZFEmkHeen3nXUy6ogyGQW0/ADHD-Mode-for-LinkedIn--Portfolio?node-id=4-7&starting-point-node-id=4:7" target="_blank" rel="noopener" class="cs-go">Play prototype  →</a>
+          </div>
+          <div class="cs-deliverable-row">
+            <dt>Component specs</dt>
+            <dd>Atomic and organism documentation: Action Dock state machine, FAB anatomy, Reaction Slot variants, motion specs, accessibility notes.</dd>
+            <a href="../figma-spec/action-dock.md" class="cs-go">View specs  →</a>
           </div>
           <div class="cs-deliverable-row">
             <dt>Design specification</dt>
-            <dd>Full research-grounded design spec with citations, principles, and trade-offs.</dd>
+            <dd>Full research-grounded design spec with citations, principles, trade-offs, hypotheses, and measurement plan.</dd>
             <a href="../docs/superpowers/specs/2026-05-16-adhd-mode-linkedin-design.md" class="cs-go">View spec  →</a>
           </div>
         </dl>
@@ -214,10 +243,11 @@
       </div>
 
       <h3>The active session  <em>(try it)</em></h3>
-      <p>One post at a time, full-bleed, no chrome competing for attention. Vertical swipe up to skip privately. Vertical swipe down to react, with sideways drift selecting a richer reaction. The reaction tray is always visible at the bottom. The skip arc at the top is a quiet teaching affordance.</p>
+      <p>One post at a time, full-bleed, no chrome competing for attention. The bottom dock has two liquid-glass FABs at the corners: <strong>Comment</strong> on the left (tap to compose) and <strong>React</strong> on the right (tap to expand a reaction tray that grows leftward to reveal six reactions). The skip target at the top is a quiet teaching affordance.</p>
+      <p>Two paths to the same outcome. Tap-friendly: tap the React FAB, then tap a reaction. Gesture-friendly: drag the card down toward the dock and the React FAB auto-expands; release on a slot to commit, with magnification + a floating preview tracking your thumb. Velocity carries into a spring on release, so a flick continues past your finger with momentum. Long-press a slot for a held preview.</p>
       <div class="cs-figure cs-figure-demo">
-        <iframe src="../prototype/demo.html" title="Interactive demo, drag to react or skip" loading="lazy"></iframe>
-        <div class="cs-figure-caption">Drag the card. Real velocity tracking carries into the spring on release, the card wobbles under acceleration, and the reaction tray magnifies under the thumb. Loops through four posts; tap restart to start over. The full multi-screen prototype is linked in the deliverables.</div>
+        <iframe src="../prototype/demo.html" title="Interactive demo, tap or drag to react" loading="lazy"></iframe>
+        <div class="cs-figure-caption">Try it. Tap the right-side React FAB to expand the tray, then tap a reaction. Or drag the card down past the activation threshold to auto-expand, with the floating preview tracking your thumb. The bottom dock proves the same component can serve both common (skip past) and rare (react / comment) actions without cluttering the screen.</div>
       </div>
 
       <h3>Mid-session check-in</h3>
