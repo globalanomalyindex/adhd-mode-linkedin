@@ -1,0 +1,52 @@
+name: CI
+
+# Run on every push and pull request against main. Each check is a
+# separate step so a failure points straight at the cause.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          # Node 22 LTS matches @types/node in devDependencies.
+          node-version: 22
+          cache: npm
+
+      - name: Install (clean, from lockfile)
+        run: npm ci
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: No banned dashes
+        run: npm run check:dashes
+
+      # Token freshness gate. The committed token files are generated from
+      # design-system/tokens.source.json. Rebuild them, then fail if the
+      # working tree changed: a nonempty diff means someone edited a
+      # generated file by hand or forgot to rebuild after touching the
+      # source. The build is deterministic (no timestamps), so a fresh
+      # checkout that ran the build produces a clean diff.
+      - name: Tokens are fresh
+        run: |
+          npm run tokens:build
+          git diff --exit-code design-system/ \
+            || (echo "::error::Token files are stale. Run 'npm run tokens:build' and commit design-system/tokens.css and tokens.json." && exit 1)

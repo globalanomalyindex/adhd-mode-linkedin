@@ -1,0 +1,21 @@
+# Dependencies and environments
+node_modules/
+.venv-analytics/
+
+# Test and build output
+coverage/
+.vitest-cache/
+dist/
+build/
+
+# Lockfile (machine-generated, very large)
+package-lock.json
+
+# Minified bundles
+*.min.css
+*.min.js
+
+# Generated token artifacts (owned by the Style Dictionary build,
+# not by Prettier; formatting comes from config.js renderers).
+design-system/tokens.css
+design-system/tokens.json
