@@ -175,9 +175,11 @@
   pointer-events: none;
 }
 
-/* Expanded: static full-pill clip; the staggered slots animate the reveal. */
+/* Expanded: drop the clip entirely. The pill shape comes from border-radius, and
+   removing the clip lets a magnified reaction overflow above the dock instead of
+   being cut off. The staggered slots animate the reveal. */
 .action-dock__react[data-state='expanded'] .action-dock__react-shell {
-  clip-path: inset(0 0 0 0 round 999px);
+  clip-path: none;
 }
 
 /* The actual interactive React button stays a fixed 52x52 circle pinned
@@ -344,7 +346,7 @@
   /* Shell: drop the clip travel entirely (no circle-to-bar jump). The shell
      stays fully unclipped and the tray glass fades in on opacity instead. */
   .action-dock__react-shell {
-    clip-path: inset(0 0 0 0 round 999px) !important;
+    clip-path: none !important;
     opacity: 0;
     transition: opacity var(--ad-d-base) var(--ad-ease-out) !important;
     transition-delay: 0ms !important;

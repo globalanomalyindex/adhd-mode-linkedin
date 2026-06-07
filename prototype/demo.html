@@ -569,7 +569,10 @@
       box-shadow 0.2s var(--ease-out);
   }
   .react-fab[data-state="expanded"] {
-    clip-path: inset(0 0 0 0 round 999px); /* static: full bar; the slots animate the reveal */
+    /* No clip when open: the pill shape comes from border-radius, and dropping
+       the clip lets a magnified reaction overflow above the dock instead of
+       being cut off at the top edge. */
+    clip-path: none;
   }
 
   /* The trigger sits at the RIGHT edge always (52px square area) */
@@ -714,6 +717,12 @@
     display: flex; flex-direction: column;
   }
   .sheet.open { transform: translateY(0); }
+  /* A closed sheet is translated out of view, but its box can still sit over the
+     bottom of the screen. Make closed sheets click-transparent so a tap on the
+     OPEN sheet's controls (close, backdrop) is never stolen by the other,
+     closed sheet that overlaps it. */
+  .sheet:not(.open),
+  .compose-sheet:not(.open) { pointer-events: none; }
   .sheet-handle {
     width: 36px; height: 4px;
     background: rgba(0, 0, 0, 0.18);
