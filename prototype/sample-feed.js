@@ -1,112 +1,69 @@
 // prototype/sample-feed.js
-// Sample post data for the working prototype. Covers all rendering branches:
-// short, medium, long, with-image, listicle, with-quote.
+// The six canonical posts (canon section 3). Authors keep the same name,
+// title, and body across every artifact: the prototype, the screens, and the
+// case study all draw from this set. Bodies are specific and human, with no
+// influencer bait.
+//
+// Coverage of the reflow branches: Priya and Maya run long enough to reflow
+// (TL;DR first, then paged body); James and Daniel are medium; Acme and Lena
+// are short single-page posts.
 /** @typedef {import('../lib/types').Post} Post */
 
 /** @type {Post[]} */
 export const SAMPLE_FEED = [
   {
     id: 'p1',
-    author: 'Maya Chen',
-    role: 'VP Engineering at Stripe',
+    author: 'Priya Nair',
+    role: 'Engineering Manager (formerly Cobalt Robotics)',
     text:
-      'I almost quit my job last year.\n\n' +
-      'It was 11pm on a Thursday. I was sitting in my car in the office parking lot, staring at my phone. I had just opened our internal Slack to see another message from our CTO: "Can you jump on a call tomorrow at 7am?"\n\n' +
-      "I closed the app. I opened my email. I started typing a resignation letter.\n\n" +
-      "I didn't send it. Here's why, and here's what I learned about leading through ambiguity that I wish someone had told me three years ago.\n\n" +
-      "When you take a senior role at a fast-growing company, nobody tells you that 80% of your job is going to be making decisions with incomplete information.\n\n" +
-      "Your job isn't to remove ambiguity. It IS the job. Three things that means:\n\n" +
-      '1. Make decisions, even bad ones, faster than feels comfortable.\n' +
-      "2. Tell people what you don't know, as honestly as you can.\n" +
-      '3. Give them a framework for moving forward without you.',
+      'Friday was my last day at Cobalt. My whole team was cut in the restructure. I am not going to pretend it does not sting.\n\n' +
+      'What I keep coming back to: the best work I did there was the reliability work nobody noticed until it stopped breaking.\n\n' +
+      'If you are hiring an EM who cares more about a humane on-call rotation than about the org chart, I would love to talk.',
     avatarTheme: 'blue',
   },
   {
     id: 'p2',
     author: 'James Park',
-    role: 'Former PM at Meta · #OpenToWork',
-    text: 'Today I was part of the layoffs at Meta. After 6 years, I am officially looking. If you have any leads in product roles at scale, please reach out. Thank you to everyone who has reached out already.',
+    role: 'Product Manager at Atlas Health',
+    text:
+      'We are hiring two product designers on the Atlas Health platform team. The work is unglamorous and it matters: we are rebuilding the intake flow every patient touches before they ever see a doctor.\n\n' +
+      'If you have shipped healthcare or other high-stakes workflows, my messages are open.',
     avatarTheme: 'red',
   },
   {
     id: 'p3',
-    author: 'Priya Nair',
-    role: 'Writer',
-    text: "My grandmother's last recipe, before her hands forgot. I am putting it here so the internet keeps it for our family.\n\nTake the rice. Wash it. Add cardamom, not too much. The trick is the slowness.",
+    author: 'Maya Chen',
+    role: 'Staff Engineer at Northwind Logistics',
+    text:
+      'We finally retired the cron job that ran our billing pipeline. It had thirty seven downstream consumers and a single point of failure that took us down twice last quarter.\n\n' +
+      'Moving to an event log was not the hard part. The hard part was convincing six teams that "it has always worked" is not the same as "it works."\n\n' +
+      'Migration notes in the comments.',
     avatarTheme: 'yellow',
   },
   {
     id: 'p4',
-    author: 'Alex Romero',
-    role: 'Engineering Manager',
-    text: 'Just shipped a thing. Feels good.',
-    avatarTheme: 'green',
-  },
-  {
-    id: 'p5',
-    author: 'Sara Kim',
-    role: 'Designer at Figma',
+    author: 'Acme Cloud',
+    role: 'Cloud infrastructure',
     text:
-      "Five things I've learned about design hiring in 2026, after running 60+ portfolio reviews this year:\n\n" +
-      '1. Show the rejected options. The artifact alone is not the work; the choice between artifacts is.\n' +
-      '2. Name your trade-offs out loud. A confident "I chose X over Y because" reads stronger than perfect-looking screens.\n' +
-      "3. Stop apologizing for incomplete work. If it's incomplete, say what's still open.\n" +
-      "4. Don't lead with the visual. Lead with the problem.\n" +
-      '5. Cite your research. Even when nobody asks.',
-    avatarTheme: 'purple',
-  },
-  {
-    id: 'p6',
-    author: 'Tom Reeves',
-    role: 'CTO at a startup you have not heard of',
-    text: 'Quarterly reminder: if your strategy fits on one slide, it is not a strategy yet. It is a slogan.',
+      'Acme Cloud now supports point in time recovery on every plan, including the free tier. Because losing data should not be a premium feature.',
     avatarTheme: 'grey',
   },
   {
-    id: 'p7',
-    author: 'Dr. Lin Wei',
-    role: 'Clinical researcher',
-    text: 'New paper out today on cognitive disengagement in adult populations. Headline finding: the diagnostic threshold appears stable across cultures we sampled, but the daily-functioning impact varies sharply with workplace structure. Open access link in comments.',
+    id: 'p5',
+    author: 'Daniel Okafor',
+    role: 'UX Researcher at Meridian Bank',
+    text:
+      'Watched twelve people use our new dashboard this week. Eleven of them ignored the feature we spent a quarter building and went straight for the export button.\n\n' +
+      'The export button took an afternoon. There is a lesson in that I am still sitting with.',
     avatarTheme: 'teal',
   },
   {
-    id: 'p8',
-    author: 'Ben Olsen',
-    role: 'Product at Spotify',
-    text: 'Hot take: every "infinite scroll" surface should ship with a default cap that users can lift, not a default unbounded that users can cap.',
-    avatarTheme: 'green',
-  },
-  {
-    id: 'p9',
-    author: 'Maya Chen',
-    role: 'VP Engineering at Stripe',
-    text: 'Hiring two senior platform engineers. Reply or DM. I read everything.',
-    avatarTheme: 'blue',
-  },
-  {
-    id: 'p10',
-    author: 'Roya Ahmadi',
-    role: 'Author & speaker',
+    id: 'p6',
+    author: 'Lena Fischer',
+    role: 'Logistics Analyst at Northwind',
     text:
-      "Three quotes from this morning's reading, in order of how much they wrecked me:\n\n" +
-      '"You cannot reason yourself into the version of yourself you have not yet become."\n\n' +
-      '"The opposite of busy is not idle. It is intentional."\n\n' +
-      '"What you tolerate is what you teach."',
-    avatarTheme: 'red',
-  },
-  {
-    id: 'p11',
-    author: 'David Chu',
-    role: 'Director at Adobe',
-    text: "After 14 years here, today's my last day. Grateful, scared, ready.",
-    avatarTheme: 'purple',
-  },
-  {
-    id: 'p12',
-    author: 'Hana Suzuki',
-    role: 'Researcher at OpenAI',
-    text: 'A surprising finding from our latest eval: models are sometimes wrong in ways that look right, and right in ways that look wrong. We are publishing a calibration dataset for those failure modes.',
-    avatarTheme: 'yellow',
+      'Five years at Northwind today. Grateful for the people who answered my questions back when I was the most junior person in the room.',
+    avatarTheme: 'green',
   },
 ];
 

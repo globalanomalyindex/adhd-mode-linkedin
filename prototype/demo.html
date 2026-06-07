@@ -9,15 +9,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <style>
+  /* Design tokens are the single source of truth: brand, surfaces, text scale,
+     hairline, durations, and the --ease-out / --ease-spring / --ease-in-out
+     curves all come from here. Do not redeclare them below. */
+  @import url('../design-system/tokens.css');
+
   :root {
-    --bg:           #f4f2ee;
-    --card:         #ffffff;
-    --text:         rgba(0, 0, 0, 0.92);
-    --text-2:       rgba(0, 0, 0, 0.6);
-    --text-3:       rgba(0, 0, 0, 0.45);
-    --hairline:     rgba(0, 0, 0, 0.06);
-    --brand:        #0a66c2;
-    --brand-tint:   rgba(10, 102, 194, 0.06);
+    /* Demo-only tokens. These describe the marketing-frame chrome around the
+       device (the editorial paper backdrop and the hardware shell) and a few
+       text-opacity aliases the demo's components reference. They are not part
+       of the in-app token set, so they stay local. */
+    --text-2:       var(--text-secondary);
+    --text-3:       var(--text-tertiary);
 
     --paper:        #f4f2ee;
     --coral:        #c4523a;
@@ -25,9 +28,6 @@
     --ink:          #171717;
     --device-bg:    #0d0d0e;
     --device-rim:   #1f1f22;
-
-    --ease-out:     cubic-bezier(0.16, 1, 0.3, 1);
-    --ease-spring:  cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -284,7 +284,16 @@
     border: none;
     font-family: inherit;
   }
+  /* 44px pointer target around the 32px chip. */
+  .profile-back::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 44px; height: 44px;
+    transform: translate(-50%, -50%);
+  }
   .profile-back:hover { background: var(--brand-tint); color: var(--brand); }
+  .profile-back:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
   .profile-hero {
     display: flex; align-items: center; gap: 14px;
     margin-top: 18px; margin-bottom: 14px;
@@ -374,10 +383,14 @@
     will-change: opacity, transform;
   }
   .react-preview.visible { opacity: 1; }
+  /* Fixed-size emoji node. Proximity growth is a transform: scale set in JS,
+     never a font-size change, so the glyph rasterizes once and the scale runs
+     on the compositor (canon section 8). */
   .react-preview-emoji {
     font-size: 64px;
     line-height: 1;
     filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.22));
+    transform: scale(1);
     transition: transform 0.2s var(--ease-spring);
     will-change: transform;
   }
@@ -425,6 +438,7 @@
     transform: translateY(8px);
     pointer-events: none;
   }
+  .comment-chip:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
   .comment-chip.swap-out { opacity: 0; transform: translateY(-4px); }
   .comment-chip.swap-in  { opacity: 0; transform: translateY(8px); }
   .comment-chip:not(.hidden):not(.swap-out):not(.swap-in):hover {
@@ -517,6 +531,7 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.7);
   }
   .fab:active { transform: scale(0.96); }
+  .fab:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
 
   .fab-icon {
     width: 24px; height: 24px;
@@ -529,33 +544,40 @@
     width: 52px;
   }
 
-  /* RIGHT: React FAB, grows to pill when expanded */
+  /* RIGHT: React FAB.
+     The shell is ALWAYS its full 264px width, anchored to the right corner.
+     Expansion is a clip-path reveal, not a width animation, so the browser
+     never relayouts: the clip inset runs on the compositor. Collapsed, the
+     clip hides everything but the 52px trigger circle at the right edge. */
   .react-fab {
     right: 18px;
-    width: 52px;
+    width: 264px;
     padding: 0;
-    overflow: hidden;
-    transition:
-      width 0.4s var(--ease-spring),
-      transform 0.18s var(--ease-out),
-      background 0.18s var(--ease-out),
-      box-shadow 0.2s var(--ease-out);
     display: flex;
-    justify-content: flex-start; /* expanded children stack from left */
+    justify-content: flex-start; /* slots stack from the left */
     align-items: center;
     padding-left: 6px;
     padding-right: 0;
+    /* Reveal from the right edge: collapsed clips off the leftmost 212px,
+       leaving the 52px trigger visible. */
+    clip-path: inset(0 0 0 212px round 999px);
+    transition:
+      clip-path 0.4s var(--ease-spring),
+      transform 0.18s var(--ease-out),
+      background 0.18s var(--ease-out),
+      box-shadow 0.2s var(--ease-out);
+    will-change: clip-path;
   }
   .react-fab[data-state="expanded"] {
-    width: 264px;
+    clip-path: inset(0 0 0 0 round 999px);
     transition:
-      width 0.4s var(--ease-spring),
+      clip-path 0.4s var(--ease-spring),
       background 0.18s var(--ease-out);
   }
-  /* Collapse exits faster than enter */
+  /* Collapse exits faster than it enters */
   .react-fab.collapsing {
     transition:
-      width 0.28s var(--ease-out),
+      clip-path 0.28s var(--ease-out),
       background 0.18s var(--ease-out);
   }
 
@@ -575,6 +597,7 @@
   }
   .react-fab-trigger:hover { background: rgba(0, 0, 0, 0.04); }
   .react-fab-trigger:active { transform: scale(0.94); }
+  .react-fab-trigger:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 
   /* Smile / Close icon crossfade */
   .react-fab-trigger .fab-icon {
@@ -617,8 +640,11 @@
     pointer-events: auto;
   }
 
-  /* Individual reaction slot */
+  /* Individual reaction slot. Visual size stays 36px (the dock is dense by
+     design); a centered 44px pseudo-element gives the pointer a full-size hit
+     area without pushing the glyphs apart. */
   .fab-slot {
+    position: relative;
     font-size: 22px;
     line-height: 1;
     width: 36px; height: 36px;
@@ -635,7 +661,18 @@
       background 0.18s var(--ease-out);
     will-change: transform;
     padding: 0;
-    color: rgba(0, 0, 0, 0.92);
+    color: var(--text);
+  }
+  .fab-slot::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 44px; height: 44px;
+    transform: translate(-50%, -50%);
+  }
+  .fab-slot:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
   }
   .react-fab[data-state="expanded"] .fab-slot {
     transform: scale(1);
@@ -703,6 +740,7 @@
     color: var(--text-3);
   }
   .sheet-close {
+    position: relative;
     background: rgba(0, 0, 0, 0.05);
     border: none;
     width: 28px; height: 28px;
@@ -713,7 +751,17 @@
     display: flex; align-items: center; justify-content: center;
     transition: background 0.18s ease;
   }
+  /* 44px pointer target around the 28px close button (covers both the comment
+     sheet and the compose sheet, which share .sheet-close). */
+  .sheet-close::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 44px; height: 44px;
+    transform: translate(-50%, -50%);
+  }
   .sheet-close:hover { background: rgba(0, 0, 0, 0.1); }
+  .sheet-close:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
   .sheet-content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
   .sheet-original { display: flex; gap: 12px; padding: 10px 4px; }
   .sheet-original-avatar { width: 36px; height: 36px; border-radius: 999px; flex-shrink: 0; }
@@ -913,10 +961,42 @@
   }
   .reset-btn:hover { background: var(--coral); color: #fff; border-color: var(--coral); }
 
+  /* Keyboard focus rings for the rest of the operable controls. The pointer
+     proximity choreography is untouched; these only show on :focus-visible. */
+  .profile-btn-primary:focus-visible,
+  .profile-btn-secondary:focus-visible,
+  .compose-post:focus-visible,
+  .compose-cancel:focus-visible,
+  .sheet-reply-input:focus-visible,
+  .reset-btn:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+  .compose-textarea:focus-visible { outline: none; }
+
   @media (prefers-reduced-motion: reduce) {
+    /* The demo is self-contained, so it carries base.css's global
+       transition-killing rule itself. Near-zero (not zero) keeps transitionend
+       and animationend listeners firing. */
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-delay: 0ms !important;
+      transition-duration: 0.01ms !important;
+    }
+    /* Decorative ambient loops have no destination, so kill them outright. */
     .card.idle-wobble { animation: none; }
     .topbar-dot { animation: none; }
     .aura.pulse { animation: none; }
+    /* The dock staggered reveal collapses to a single instant: clear the
+       per-slot transition-delays so all six reactions appear together. */
+    .react-fab[data-state="expanded"] .fab-slot { transition-delay: 0ms !important; }
+    /* Sheets settle without a slide. The transform snaps to its open or closed
+       position instantly; a short opacity fade carries the change instead. */
+    .sheet, .compose-sheet {
+      opacity: 0;
+      transition: transform 0.01ms, opacity var(--d-base) var(--ease-out) !important;
+    }
+    .sheet.open, .compose-sheet.open { opacity: 1; }
   }
 
   @media (max-width: 480px) {
@@ -928,6 +1008,10 @@
 <body>
 
 <button class="reset-btn" id="reset">↻ Restart</button>
+
+<!-- Screen-reader announcements for skip / react / resurface and sheet state. -->
+<div id="sr-live" aria-live="polite" aria-atomic="true"
+  style="position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;"></div>
 
 <div class="stage">
   <div class="device">
@@ -1000,11 +1084,12 @@
 
       <div class="comment-dots" id="comment-dots"></div>
 
-      <div class="comment-chip" id="comment-chip">
+      <div class="comment-chip" id="comment-chip" role="button" tabindex="0"
+        aria-label="Open the comment thread">
         <div class="comment-avatar" id="comment-avatar"></div>
         <div class="comment-body">
-          <div class="comment-author" id="comment-author">Jamie L.</div>
-          <div class="comment-text" id="comment-text">This hits.</div>
+          <div class="comment-author" id="comment-author">Asha Verma</div>
+          <div class="comment-text" id="comment-text">Loading comment.</div>
         </div>
         <div class="comment-replies">
           <span id="comment-reply-count">2 replies</span>
@@ -1064,9 +1149,10 @@
             </div>
           </div>
           <div class="sheet-replies" id="sheet-replies"></div>
-          <div class="sheet-reply-input" id="sheet-reply-input">
+          <div class="sheet-reply-input" id="sheet-reply-input" role="button" tabindex="0"
+            aria-label="Write a reply">
             <div class="you-avatar"></div>
-            <span>Reply to <span id="sheet-reply-author">Jamie</span>...</span>
+            <span>Reply to <span id="sheet-reply-author">Asha</span>...</span>
           </div>
         </div>
       </div>
@@ -1109,126 +1195,38 @@
   </div>
 </div>
 
-<script>
-  'use strict';
+<script type="module">
+  // ES modules are always strict, so no 'use strict' directive is needed.
 
-  // ============================================================
-  // POSTS: each has 3 cycling comments + author profile
-  // ============================================================
-  const POSTS = [
-    {
-      author: "Maya Chen",
-      role: "VP Engineering at Stripe",
-      avatar: ["#dbeafe", "#bfdbfe"],
-      content: "I almost quit my job last year.\n\nWhat saved me was learning that my job isn't to remove ambiguity. It IS the job. Make decisions faster than feels comfortable. Tell people what you don't know. Give them a framework to move forward without you.",
-      profile: {
-        headline: "Engineer turned leader. Building things that matter, slowly.",
-        followers: "12.4K",
-        mutual: 3,
-        location: "San Francisco",
-        about: "VP Engineering at Stripe. Previously: Square, Airbnb. I write about leadership, ambiguity, and what nobody tells you about senior roles.",
-      },
-      comments: [
-        { avatar: ["#fde68a", "#fcd34d"], author: "Jamie L.", text: "This hits. I had the exact same parking-lot moment last fall.", time: "1h", likes: "12 reactions",
-          replies: [
-            { avatar: ["#dbeafe", "#bfdbfe"], author: "Maya Chen", text: "Thank you, Jamie. You're not alone.", time: "45m" },
-            { avatar: ["#ddd6fe", "#c4b5fd"], author: "Tom Reeves", text: "I needed to read this today.", time: "30m" },
-          ] },
-        { avatar: ["#bbf7d0", "#86efac"], author: "Priya Nair", text: "Saving this to re-read every Sunday night.", time: "50m", likes: "8 reactions",
-          replies: [
-            { avatar: ["#dbeafe", "#bfdbfe"], author: "Maya Chen", text: "That made me smile. Thank you.", time: "40m" },
-          ] },
-        { avatar: ["#ddd6fe", "#c4b5fd"], author: "David Chu", text: "The framework piece is the hardest. Curious how you do it on a Tuesday.", time: "20m", likes: "5 reactions",
-          replies: [
-            { avatar: ["#dbeafe", "#bfdbfe"], author: "Maya Chen", text: "Honestly, badly half the time. Then we iterate the framework.", time: "12m" },
-            { avatar: ["#fecaca", "#fca5a5"], author: "Lin Wei", text: "+1 to badly. Same here.", time: "8m" },
-          ] },
-      ],
-    },
-    {
-      author: "James Park",
-      role: "Former PM at Meta · #OpenToWork",
-      avatar: ["#fecaca", "#fca5a5"],
-      content: "Today I was part of the layoffs at Meta. After 6 years, I'm officially looking. If you have any leads in product roles at scale, I'd love to hear from you. Thank you to everyone who has already reached out.",
-      profile: {
-        headline: "Product builder for products that ship. Open to talk.",
-        followers: "8.7K",
-        mutual: 17,
-        location: "Brooklyn, NY",
-        about: "PM with 6 years at Meta across Feed, Messaging, and Reality Labs. Looking for senior product roles at scale, especially anything trust & safety adjacent.",
-      },
-      comments: [
-        { avatar: ["#bbf7d0", "#86efac"], author: "Sarah K.", text: "Sending strength. We have an opening that might fit. DMing you now.", time: "2h", likes: "47 reactions",
-          replies: [
-            { avatar: ["#fecaca", "#fca5a5"], author: "James Park", text: "Thank you, Sarah. Will reply tonight.", time: "1h" },
-          ] },
-        { avatar: ["#fde68a", "#fcd34d"], author: "Lin Wei", text: "Same situation here. Solidarity.", time: "1h", likes: "23 reactions",
-          replies: [
-            { avatar: ["#fecaca", "#fca5a5"], author: "James Park", text: "Solidarity right back. Let's stay in touch.", time: "55m" },
-          ] },
-        { avatar: ["#ddd6fe", "#c4b5fd"], author: "Maya Chen", text: "We're hiring senior PMs at Stripe if you want a referral.", time: "30m", likes: "61 reactions",
-          replies: [
-            { avatar: ["#fecaca", "#fca5a5"], author: "James Park", text: "Yes please. Thank you, Maya.", time: "25m" },
-            { avatar: ["#bbf7d0", "#86efac"], author: "Tom Reeves", text: "Stripe PM team is great, James. Worth a look.", time: "18m" },
-          ] },
-      ],
-    },
-    {
-      author: "Priya Nair",
-      role: "Writer at The Atlantic",
-      avatar: ["#fde68a", "#fcd34d"],
-      content: "My grandmother's last recipe, before her hands forgot. I'm putting it on the internet so our family always has it.\n\nTake the rice. Wash it three times. Add cardamom, not too much. The trick is the slowness.",
-      profile: {
-        headline: "Essays on family, food, and the things we keep.",
-        followers: "24.1K",
-        mutual: 1,
-        location: "Brooklyn, NY",
-        about: "Staff writer at The Atlantic, covering family and culture. Author of two books. Currently writing about diaspora kitchens.",
-      },
-      comments: [
-        { avatar: ["#ddd6fe", "#c4b5fd"], author: "Alex P.", text: "Crying at my desk. My grandmother had a similar one with saffron.", time: "3h", likes: "204 reactions",
-          replies: [
-            { avatar: ["#fde68a", "#fcd34d"], author: "Priya Nair", text: "Saffron is the soul of it. ❤", time: "2h" },
-          ] },
-        { avatar: ["#dbeafe", "#bfdbfe"], author: "Maya Chen", text: "Going to make this for my mom on Sunday. Thank you for sharing it.", time: "1h", likes: "88 reactions",
-          replies: [
-            { avatar: ["#fde68a", "#fcd34d"], author: "Priya Nair", text: "Please tell me how it turns out.", time: "50m" },
-          ] },
-        { avatar: ["#bbf7d0", "#86efac"], author: "Roya Ahmadi", text: "The trick is the slowness. Saving this whole line.", time: "20m", likes: "47 reactions",
-          replies: [
-            { avatar: ["#fde68a", "#fcd34d"], author: "Priya Nair", text: "It really is.", time: "15m" },
-          ] },
-      ],
-    },
-    {
-      author: "Sara Kim",
-      role: "Senior Designer at Figma",
-      avatar: ["#ddd6fe", "#c4b5fd"],
-      content: "Three things I've learned about hiring senior designers, after running 60+ portfolio reviews this year:\n\n1. Show the rejected options.\n2. Name your trade-offs out loud.\n3. Stop apologizing for incomplete work.",
-      profile: {
-        headline: "Designer. Mentor. Curator of harsh portfolio feedback.",
-        followers: "31.2K",
-        mutual: 9,
-        location: "Oakland, CA",
-        about: "Senior designer at Figma. Previously Stripe, Square. I review portfolios for free for designers of color in the SF Bay Area.",
-      },
-      comments: [
-        { avatar: ["#bbf7d0", "#86efac"], author: "David Chu", text: "Most useful thing I've read about design hiring this year.", time: "5h", likes: "89 reactions",
-          replies: [
-            { avatar: ["#ddd6fe", "#c4b5fd"], author: "Sara Kim", text: "Means a lot from you, David.", time: "4h" },
-          ] },
-        { avatar: ["#fde68a", "#fcd34d"], author: "Hana Suzuki", text: "+1, sharing internally.", time: "3h", likes: "32 reactions",
-          replies: [
-            { avatar: ["#ddd6fe", "#c4b5fd"], author: "Sara Kim", text: "Thanks, Hana.", time: "2h" },
-          ] },
-        { avatar: ["#fecaca", "#fca5a5"], author: "Ben Olsen", text: "Number 3 is the hardest one. Going to work on this.", time: "1h", likes: "21 reactions",
-          replies: [
-            { avatar: ["#ddd6fe", "#c4b5fd"], author: "Sara Kim", text: "It's hard for me too. We're all working on it.", time: "55m" },
-          ] },
-      ],
-    },
-  ];
+  // The lib owns gesture classification and the reaction order; the demo
+  // consumes them rather than re-declaring them, so the prototype and the
+  // shipped component stay in lockstep (canon section 10).
+  import { classifyGesture, magnificationFor, REACTIONS_ORDER } from '../lib/gestures.js';
+  import { SAMPLE_FEED, getPostById } from './sample-feed.js';
 
+  // ----- Motion tokens -----
+  // The spring constants and gesture thresholds from canon section 8, named so
+  // the tuning reads as deliberate. The Spring class below integrates with a
+  // semi-implicit Euler step; each entry is [stiffness, damping].
+  const SPRING = {
+    pos:     [260, 24], // card translate x and y
+    rotation:[220, 18], // card tilt
+    scale:   [280, 22], // press shrink and commit pop
+    opacity: [200, 24], // fade on commit
+  };
+  // Drag geometry, in CSS pixels unless noted.
+  const ACTIVATION_DIST = 60;   // drag depth where the react zone arms
+  const COMMIT_DIST     = 130;  // drag depth (or flick) that commits skip or react
+  const REACT_RADIUS    = 50;   // thumb-to-emoji proximity for slot magnification
+  const TAP_MOVE_MAX    = 8;    // max travel still read as a tap, not a drag
+  const TAP_DUR_MAX     = 280;  // max press duration (ms) still read as a tap
+  const COMMIT_VEL      = 0.85; // flick velocity (px/ms) that commits without distance
+  const THROW_CLAMP     = 1400; // min outgoing spring velocity injected on commit
+
+  // The three reactions that seed a resurface (canon section 4).
+  const RESURFACE = new Set(['insightful', 'support', 'love']);
+
+  // Presentation-only lookups, keyed by the canonical reaction union.
   const REACTION_NAMES = {
     like:'LIKE', celebrate:'CELEBRATE', support:'SUPPORT',
     love:'LOVE', insightful:'INSIGHTFUL', funny:'FUNNY',
@@ -1236,21 +1234,181 @@
   const REACTION_EMOJI = {
     like:'👍', celebrate:'🎉', support:'🤝', love:'❤️', insightful:'💡', funny:'😄',
   };
-  const REACTION_COLOR = {
-    like:'#2563eb', celebrate:'#6366f1', support:'#ea580c',
-    love:'#dc2626', insightful:'#b45309', funny:'#ca8a04',
-  };
   const REACTION_AURA = {
     like:'rgba(37, 99, 235, 0.45)', celebrate:'rgba(99, 102, 241, 0.45)',
     support:'rgba(234, 88, 12, 0.45)', love:'rgba(220, 38, 38, 0.5)',
     insightful:'rgba(180, 83, 9, 0.5)', funny:'rgba(202, 138, 4, 0.45)',
   };
   const SKIP_AURA = 'rgba(107, 114, 128, 0.4)';
-  const RESURFACE = new Set(['insightful', 'support', 'love']);
 
-  // ============================================================
-  // ELEMENTS
-  // ============================================================
+  // Avatar gradients, keyed by the avatarTheme on each canonical post.
+  const AVATAR_THEME = {
+    blue:  ['#dbeafe', '#bfdbfe'],
+    red:   ['#fecaca', '#fca5a5'],
+    yellow:['#fde68a', '#fcd34d'],
+    green: ['#bbf7d0', '#86efac'],
+    teal:  ['#99f6e4', '#5eead4'],
+    purple:['#ddd6fe', '#c4b5fd'],
+    grey:  ['#e5e7eb', '#cbd5e1'],
+  };
+  function avatarFor(theme) { return AVATAR_THEME[theme] || AVATAR_THEME.grey; }
+
+  // The demo's display model. Author, role, and content come straight from the
+  // canonical feed (single source of truth); profiles and comment threads are
+  // demo-only presentation, written specific and human per canon section 3.
+  const PRESENTATION = {
+    p1: {
+      profile: {
+        headline: 'Engineering Manager. Reliability over org charts.',
+        followers: '6.2K', mutual: 4, location: 'Austin, TX',
+        about: 'EM for eight years, most recently at Cobalt Robotics. I care about humane on-call, boring infrastructure that does not page anyone, and hiring for judgment.',
+      },
+      comments: [
+        { theme: 'green', author: 'Daniel Okafor', text: 'The reliability work nobody notices is the work that holds. Sorry about Cobalt.', time: '2h', likes: '34 reactions',
+          replies: [
+            { theme: 'blue', author: 'Priya Nair', text: 'Thank you, Daniel. That means a lot.', time: '1h' },
+          ] },
+        { theme: 'purple', author: 'Asha Verma', text: 'We are hiring an EM on a platform team. Sending you a note.', time: '1h', likes: '21 reactions',
+          replies: [
+            { theme: 'blue', author: 'Priya Nair', text: 'Please do. I would love to talk.', time: '50m' },
+          ] },
+        { theme: 'teal', author: 'Marcus Hale', text: 'Humane on-call is a hill worth dying on. Glad you said it out loud.', time: '40m', likes: '12 reactions',
+          replies: [
+            { theme: 'blue', author: 'Priya Nair', text: 'It really is. Worth defending every quarter.', time: '30m' },
+          ] },
+      ],
+    },
+    p2: {
+      profile: {
+        headline: 'Product Manager at Atlas Health. Unglamorous workflows.',
+        followers: '4.8K', mutual: 9, location: 'Chicago, IL',
+        about: 'PM on the Atlas Health platform team. I work on the intake flow every patient touches. Previously shipped claims and billing tools. Hiring designers right now.',
+      },
+      comments: [
+        { theme: 'purple', author: 'Asha Verma', text: 'Intake flows are where the real design work hides. Sharing with two people.', time: '3h', likes: '28 reactions',
+          replies: [
+            { theme: 'red', author: 'James Park', text: 'Thank you, Asha. Send them my way.', time: '2h' },
+          ] },
+        { theme: 'blue', author: 'Priya Nair', text: 'Is the role remote-friendly? I know a designer who ships healthcare.', time: '2h', likes: '16 reactions',
+          replies: [
+            { theme: 'red', author: 'James Park', text: 'Yes, remote within the US. Please connect us.', time: '1h' },
+          ] },
+        { theme: 'green', author: 'Daniel Okafor', text: 'High-stakes workflows need researchers too. Hope that is in the plan.', time: '1h', likes: '9 reactions',
+          replies: [
+            { theme: 'red', author: 'James Park', text: 'It is next on the list. Stay in touch.', time: '45m' },
+          ] },
+      ],
+    },
+    p3: {
+      profile: {
+        headline: 'Staff Engineer at Northwind Logistics. Event logs, not cron.',
+        followers: '11.3K', mutual: 6, location: 'Seattle, WA',
+        about: 'Staff engineer at Northwind. I migrate fragile pipelines to durable ones and write up what broke. Most of my work is convincing people that old is not the same as correct.',
+      },
+      // Canonical comments for Maya's migration post (canon section 3).
+      comments: [
+        { theme: 'teal', author: 'Marcus Hale', text: "The line about 'it has always worked' is going on our team wiki.", time: '2h', likes: '41 reactions',
+          replies: [
+            { theme: 'yellow', author: 'Maya Chen', text: 'Steal it freely. It earned the wiki spot the hard way.', time: '1h' },
+          ] },
+        { theme: 'green', author: 'Daniel Okafor', text: 'How did you handle the backfill for the existing consumers?', time: '1h', likes: '18 reactions',
+          replies: [
+            { theme: 'yellow', author: 'Maya Chen', text: 'Dual-wrote for two weeks, then cut over per consumer. Notes in the thread.', time: '50m' },
+          ] },
+        { theme: 'blue', author: 'Priya Nair', text: 'We are mid migration on something similar. This is the reassurance I needed.', time: '35m', likes: '23 reactions',
+          replies: [
+            { theme: 'yellow', author: 'Maya Chen', text: 'You will get there. Happy to compare notes offline.', time: '20m' },
+          ] },
+      ],
+    },
+    p4: {
+      profile: {
+        headline: 'Acme Cloud. Infrastructure that does not surprise you.',
+        followers: '52.7K', mutual: 0, location: 'Remote',
+        about: 'Acme Cloud builds storage and recovery tooling for teams of every size. We ship the boring guarantees: durability, recovery, and a free tier that is actually useful.',
+      },
+      comments: [
+        { theme: 'green', author: 'Daniel Okafor', text: 'Point in time recovery on the free tier is a real one. Nicely done.', time: '4h', likes: '57 reactions',
+          replies: [
+            { theme: 'grey', author: 'Acme Cloud', text: 'Thank you. It shipped to every plan at once on purpose.', time: '3h' },
+          ] },
+        { theme: 'teal', author: 'Marcus Hale', text: 'How far back does the recovery window go on the free tier?', time: '3h', likes: '19 reactions',
+          replies: [
+            { theme: 'grey', author: 'Acme Cloud', text: 'Seven days on free, thirty five on paid. Details in the docs.', time: '2h' },
+          ] },
+        { theme: 'purple', author: 'Asha Verma', text: 'Migrating a side project this weekend just for this.', time: '2h', likes: '11 reactions',
+          replies: [
+            { theme: 'grey', author: 'Acme Cloud', text: 'Tell us how it goes. We read every reply.', time: '1h' },
+          ] },
+      ],
+    },
+    p5: {
+      profile: {
+        headline: 'UX Researcher at Meridian Bank. Watching what people actually do.',
+        followers: '8.1K', mutual: 7, location: 'Toronto, ON',
+        about: 'Researcher at Meridian Bank. I run usability sessions on financial tooling and write honest readouts, including the ones that say we built the wrong thing.',
+      },
+      comments: [
+        { theme: 'yellow', author: 'Maya Chen', text: 'The export button winning is the most honest finding in this whole feed.', time: '5h', likes: '63 reactions',
+          replies: [
+            { theme: 'teal', author: 'Daniel Okafor', text: 'It humbled the whole team. We are sitting with it.', time: '4h' },
+          ] },
+        { theme: 'purple', author: 'Asha Verma', text: 'What did people say when you asked why they reached for export?', time: '3h', likes: '24 reactions',
+          replies: [
+            { theme: 'teal', author: 'Daniel Okafor', text: 'They trusted the spreadsheet more than our charts. Fair.', time: '2h' },
+          ] },
+        { theme: 'blue', author: 'Priya Nair', text: 'A quarter of work versus an afternoon. Saving this for our next planning.', time: '2h', likes: '15 reactions',
+          replies: [
+            { theme: 'teal', author: 'Daniel Okafor', text: 'Same. It changed how I scope research now.', time: '1h' },
+          ] },
+      ],
+    },
+    p6: {
+      profile: {
+        headline: 'Logistics Analyst at Northwind. Five years in.',
+        followers: '2.4K', mutual: 5, location: 'Seattle, WA',
+        about: 'Analyst on the Northwind logistics team. I turn messy routing data into decisions people can act on. Grateful for the colleagues who taught me how.',
+      },
+      comments: [
+        { theme: 'yellow', author: 'Maya Chen', text: 'Five years and counting. You answer the new folks the way people answered you.', time: '6h', likes: '38 reactions',
+          replies: [
+            { theme: 'green', author: 'Lena Fischer', text: 'That is the whole point of it. Thank you, Maya.', time: '5h' },
+          ] },
+        { theme: 'teal', author: 'Marcus Hale', text: 'Congrats, Lena. You were never the most junior in the room for long.', time: '4h', likes: '17 reactions',
+          replies: [
+            { theme: 'green', author: 'Lena Fischer', text: 'Kind of you to say. Onward.', time: '3h' },
+          ] },
+        { theme: 'purple', author: 'Asha Verma', text: 'The people who answer questions early make all the difference. Cheers to them.', time: '2h', likes: '8 reactions',
+          replies: [
+            { theme: 'green', author: 'Lena Fischer', text: 'Every single one of them.', time: '1h' },
+          ] },
+      ],
+    },
+  };
+
+  // Compose the runtime feed: canonical author/role/content plus demo
+  // presentation, in canonical feed order.
+  const POSTS = SAMPLE_FEED.map(post => {
+    const pres = PRESENTATION[post.id];
+    return {
+      id: post.id,
+      author: post.author,
+      role: post.role,
+      avatar: avatarFor(post.avatarTheme),
+      content: post.text,
+      profile: pres.profile,
+      comments: pres.comments.map(c => ({
+        avatar: avatarFor(c.theme),
+        author: c.author,
+        text: c.text,
+        time: c.time,
+        likes: c.likes,
+        replies: c.replies.map(r => ({ avatar: avatarFor(r.theme), author: r.author, text: r.text, time: r.time })),
+      })),
+    };
+  });
+
+  // ----- Element handles -----
   const $ = s => document.querySelector(s);
   const $$ = s => Array.from(document.querySelectorAll(s));
 
@@ -1260,11 +1418,8 @@
   const reactFab = $('#react-fab');
   const reactFabTrigger = $('#react-fab-trigger');
   const commentFab = $('#comment-fab');
-  // The slot buttons inside the React FAB. Use a getter because the
-  // selector is the same and there are exactly six; we re-query at use.
-  const trayIcons = $$('.fab-slot');
-  // Back-compat alias so existing functions that referenced `tray` still work.
-  const tray = reactFab;
+  const trayIcons = $$('.fab-slot'); // the six reaction slots inside the React FAB
+  const srLive = $('#sr-live');
   const skipTarget = $('#skip-target');
   const skipLabel = $('#skip-label');
   const hint = $('#hint');
@@ -1319,9 +1474,7 @@
   const reactPreviewEmoji = $('#react-preview-emoji');
   const reactPreviewLabel = $('#react-preview-label');
 
-  // ============================================================
-  // STATE
-  // ============================================================
+  // ----- Mutable state -----
   let postIdx = 0;
   let commentIdx = 0;
   let queueCount = 0;
@@ -1339,14 +1492,14 @@
   const COMMENT_SWAP_MS = 280;
   let commentTimer = null;
 
-  const ACTIVATION_DIST = 60;
-  const COMMIT_DIST     = 130;
-  const COMMIT_VEL      = 0.85;
-  const TAP_MOVE_MAX    = 8;
-  const TAP_DUR_MAX     = 280;
+  // True when the OS asks for reduced motion. The spring loop reads this each
+  // frame to hard-settle instead of animating (canon section 8).
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
+  // Local UI helper, not part of the lib. A spring per animated property,
+  // integrated with a semi-implicit Euler step; constants come from SPRING.
   class Spring {
-    constructor(value, stiffness = 220, damping = 22) {
+    constructor(value, stiffness, damping) {
       this.value = value; this.target = value; this.velocity = 0;
       this.stiffness = stiffness; this.damping = damping;
     }
@@ -1355,6 +1508,8 @@
     setVelocity(v) { this.velocity = v; }
     setTarget(t) { this.target = t; }
     step(dt) {
+      // Reduced motion: skip the integration and snap to the destination.
+      if (reduceMotion.matches) { this.value = this.target; this.velocity = 0; return; }
       const force = -this.stiffness * (this.value - this.target);
       const damp = -this.damping * this.velocity;
       this.velocity += (force + damp) * dt;
@@ -1362,15 +1517,26 @@
     }
   }
 
-  const sX = new Spring(0, 260, 24);
-  const sY = new Spring(0, 260, 24);
-  const sRot = new Spring(0, 220, 18);
-  const sScale = new Spring(1, 280, 22);
-  const sOpacity = new Spring(1, 200, 24);
+  const sX = new Spring(0, ...SPRING.pos);
+  const sY = new Spring(0, ...SPRING.pos);
+  const sRot = new Spring(0, ...SPRING.rotation);
+  const sScale = new Spring(1, ...SPRING.scale);
+  const sOpacity = new Spring(1, ...SPRING.opacity);
 
-  // ============================================================
-  // RENDER
-  // ============================================================
+  // Announce a short message to assistive tech via the polite live region.
+  function announce(msg) {
+    if (!srLive) return;
+    srLive.textContent = '';
+    requestAnimationFrame(() => { srLive.textContent = msg; });
+  }
+
+  // Fire a haptic pulse when supported. No-op on desktop and unsupported
+  // browsers; never throws.
+  function vibrate(pattern) {
+    if (navigator.vibrate) { try { navigator.vibrate(pattern); } catch {} }
+  }
+
+  // ----- Render -----
   function renderPost(idx) {
     const p = POSTS[idx];
     elPostAuthor.textContent = p.author;
@@ -1419,9 +1585,7 @@
   renderComment(POSTS[0].comments[0]);
   updateMeta();
 
-  // ============================================================
-  // SPRING LOOP
-  // ============================================================
+  // ----- Spring loop -----
   let lastT = performance.now();
   function frame(now) {
     const dt = Math.min((now - lastT) / 1000, 0.05);
@@ -1442,9 +1606,7 @@
   }
   requestAnimationFrame(frame);
 
-  // ============================================================
-  // COMMENT CYCLE
-  // ============================================================
+  // ----- Cycling comment chip -----
   function startCommentCycle() {
     stopCommentCycle();
     commentTimer = setTimeout(advanceComment, COMMENT_CYCLE_MS);
@@ -1480,9 +1642,7 @@
     else if (!sheetOpen && !composeOpen) startCommentCycle();
   }
 
-  // ============================================================
-  // REACT FAB expand/collapse
-  // ============================================================
+  // ----- React FAB expand and collapse -----
   // Two sources can open the React FAB: a deliberate tap (sticky) and a
   // card drag entering the react zone (auto-collapses when leaving).
   let reactExpansionSource = null; // 'tap' | 'drag' | null
@@ -1510,9 +1670,7 @@
   }
   function isReactExpanded() { return reactFab.dataset.state === 'expanded'; }
 
-  // ============================================================
-  // VIEW STATE
-  // ============================================================
+  // ----- Post / profile view state -----
   function setView(view) {
     if (view === viewState) return;
     viewState = view;
@@ -1527,9 +1685,7 @@
     setTimeout(() => card.classList.remove(cls), 400);
   }
 
-  // ============================================================
-  // VELOCITY + GESTURE FEEDBACK (unchanged from previous)
-  // ============================================================
+  // ----- Velocity sampling and live gesture feedback -----
   function pushSample(x, y, t) {
     samples.push({ x, y, t });
     while (samples.length > 6) samples.shift();
@@ -1550,7 +1706,7 @@
     }
     return best;
   }
-  function updatePreview(t, nearestIcon, reaction) {
+  function updatePreview(t, nearestIcon, reaction, mag) {
     const screenRect = screen.getBoundingClientRect();
     const iconRect = nearestIcon.getBoundingClientRect();
 
@@ -1560,22 +1716,25 @@
     const previewY = iconRect.top - 18 - 50 * t - screenRect.top;
     reactPreview.style.left = previewX + 'px';
     reactPreview.style.top  = previewY + 'px';
-    reactPreviewEmoji.style.fontSize = (54 + 28 * t) + 'px';
+
+    // Proximity growth is transform: scale on the fixed 64px node, never a
+    // font-size change (canon section 8). The lib's magnificationFor supplies
+    // the lateral proximity factor (1.0..1.8); vertical descent `t` adds the
+    // final stretch toward commit.
+    const previewScale = 0.84 + 0.16 * t + 0.28 * (mag - 1);
+    setPreviewScale(previewScale);
 
     if (reactPreviewEmoji.textContent !== REACTION_EMOJI[reaction]) {
       reactPreviewEmoji.textContent = REACTION_EMOJI[reaction];
-      reactPreviewEmoji.style.transform = 'scale(0.82)';
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        reactPreviewEmoji.style.transform = 'scale(1)';
-      }));
+      // A brief pop on glyph swap, then settle back to the proximity scale.
+      setPreviewScale(previewScale * 0.82);
+      requestAnimationFrame(() => requestAnimationFrame(() => setPreviewScale(previewScale)));
     }
     reactPreviewLabel.textContent = REACTION_NAMES[reaction];
     reactPreviewLabel.classList.toggle('resurface', RESURFACE.has(reaction));
   }
-  // Tighter lateral falloff so the closest icon really is the only one growing,
-  // and gate the magnification by vertical proximity so far-from-tray drags
-  // don't trigger full-size growth.
-  const REACT_RADIUS = 50;
+  // Drive the floating emoji's size with a compositor-friendly scale.
+  function setPreviewScale(s) { reactPreviewEmoji.style.transform = `scale(${s.toFixed(3)})`; }
 
   function updateSkipTarget(progress) {
     // progress 0..1 along the way to commit
@@ -1595,15 +1754,20 @@
     skipLabel.classList.remove('visible');
   }
 
+  // Tracks whether the react zone is currently armed, so the arming haptic
+  // fires exactly once per entry rather than every frame.
+  let reactArmed = false;
+
   function updateDestinationFeedback(dx, dy, clientX) {
     const upward = dy < -10 && Math.abs(dy) > Math.abs(dx) * 0.6;
     const downward = dy > 0;
     const inReactZone = downward && dy >= ACTIVATION_DIST;
 
     if (upward) {
+      reactArmed = false;
       const progress = Math.min(Math.abs(dy) / COMMIT_DIST, 1);
       updateSkipTarget(progress);
-      tray.classList.remove('dragging-react');
+      reactFab.classList.remove('dragging-react');
       for (const el of trayIcons) {
         el.style.transform = `scale(${1 - 0.05 * progress})`;
         el.classList.remove('nearest');
@@ -1612,6 +1776,7 @@
       return;
     }
     if (inReactZone) {
+      if (!reactArmed) { reactArmed = true; vibrate(8); } // arm tick
       clearSkipTarget();
       // Auto-expand the React FAB so the slots become real targets for the
       // floating preview and the commit. Source = 'drag' so we know to
@@ -1639,11 +1804,14 @@
           el.classList.remove('nearest');
         }
       }
+      // Lateral proximity factor from the lib, for the floating preview scale.
+      const mag = magnificationFor(reaction, { dx, dy }, viewOf());
       reactPreview.classList.add('visible');
-      updatePreview(t, nearest, reaction);
+      updatePreview(t, nearest, reaction, mag);
       return;
     }
     // idle held (or dragging outside both zones)
+    reactArmed = false;
     clearSkipTarget();
     // If the React FAB was opened by the drag and we left the zone, collapse it
     if (reactExpansionSource === 'drag') collapseReact();
@@ -1655,6 +1823,7 @@
     reactPreview.classList.remove('visible');
   }
   function clearFeedback() {
+    reactArmed = false;
     clearSkipTarget();
     if (reactExpansionSource === 'drag') collapseReact();
     reactFab.classList.remove('dragging-react');
@@ -1673,9 +1842,16 @@
     setTimeout(() => aura.classList.remove('pulse'), 1050);
   }
 
-  // ============================================================
-  // POINTER INTERACTION
-  // ============================================================
+  // ----- Pointer interaction -----
+  // The lib's classifyGesture resolves the commit decision (idle / skip /
+  // react) from the drag delta; the demo keeps its own screen-position math for
+  // WHICH reaction slot the thumb is over, since the slots are laid out on
+  // screen rather than along the lib's abstract arc.
+  function viewOf() {
+    const r = screen.getBoundingClientRect();
+    return { width: r.width, height: r.height };
+  }
+
   function onPointerDown(e) {
     if (committing || sheetOpen || composeOpen) return;
     dragging = true;
@@ -1734,8 +1910,11 @@
       return;
     }
 
-    const upCommit   = (dy < -COMMIT_DIST) || (vel.vy < -COMMIT_VEL);
-    const downCommit = ((dy > COMMIT_DIST) || (vel.vy > COMMIT_VEL)) && dy >= ACTIVATION_DIST;
+    // Distance commit comes from the lib classifier; velocity flick is the
+    // demo's own affordance for a quick throw that has not traveled far yet.
+    const gesture = classifyGesture({ dx, dy }, viewOf());
+    const upCommit   = (gesture.zone === 'skip' && gesture.commit) || vel.vy < -COMMIT_VEL;
+    const downCommit = ((gesture.zone === 'react' && gesture.commit) || vel.vy > COMMIT_VEL) && dy >= ACTIVATION_DIST;
 
     if (upCommit) {
       commitSkip(vel);
@@ -1772,7 +1951,11 @@
     committing = true;
     clearFeedback();
     flashAura(SKIP_AURA);
-    sY.setVelocity(Math.min(vel.vy * 1000, -1400));
+    vibrate(12); // a short tick on commit
+    announce(`Moved on from ${POSTS[postIdx].author}'s post.`);
+    // Inject the outgoing throw velocity, clamped so even a slow release leaves
+    // with enough momentum to clear the frame (canon section 8).
+    sY.setVelocity(Math.min(vel.vy * 1000, -THROW_CLAMP));
     sY.setTarget(-900);
     sRot.setTarget(sRot.value + (Math.random() > 0.5 ? -4 : 4));
     sOpacity.setTarget(0);
@@ -1783,13 +1966,19 @@
     committing = true;
     clearFeedback();
     flashAura(REACTION_AURA[reaction]);
-    if (RESURFACE.has(reaction)) {
+    vibrate(18); // a slightly firmer pulse than skip
+    const resurfaces = RESURFACE.has(reaction);
+    if (resurfaces) {
       queueCount += 1;
       updateMeta();
     }
+    announce(
+      `Reacted ${REACTION_NAMES[reaction].toLowerCase()} to ${POSTS[postIdx].author}'s post.` +
+      (resurfaces ? ' Saved to resurface.' : '')
+    );
     sScale.setTarget(1.04);
     setTimeout(() => sScale.setTarget(0.94), 110);
-    sY.setVelocity(Math.max(vel.vy * 1000, 1400));
+    sY.setVelocity(Math.max(vel.vy * 1000, THROW_CLAMP));
     sY.setTarget(900);
     sOpacity.setTarget(0);
     setTimeout(nextPost, 320);
@@ -1803,6 +1992,10 @@
     renderPost(postIdx);
     renderComment(POSTS[postIdx].comments[0]);
     updateMeta();
+    // Announce the new card by its canonical author (sourced from the feed via
+    // the lib's getPostById, the same lookup the shipped component uses).
+    const canonical = getPostById(POSTS[postIdx].id);
+    if (canonical) announce(`Now showing ${canonical.author}'s post.`);
     sX.set(0); sY.set(40); sRot.set(0); sScale.set(0.96); sOpacity.set(0);
     requestAnimationFrame(() => {
       sY.setTarget(0); sScale.setTarget(1); sOpacity.setTarget(1);
@@ -1842,7 +2035,7 @@
     reactPreview.style.left = (iconRect.left + iconRect.width/2 - screenRect.left) + 'px';
     reactPreview.style.top  = (iconRect.top - 68 - screenRect.top) + 'px';
     reactPreviewEmoji.textContent = REACTION_EMOJI[reaction];
-    reactPreviewEmoji.style.fontSize = '74px';
+    setPreviewScale(74 / 64); // fixed slot-hold size, as a scale on the 64px node
     reactPreviewLabel.textContent = REACTION_NAMES[reaction];
     reactPreviewLabel.classList.toggle('resurface', RESURFACE.has(reaction));
     reactPreview.classList.add('visible');
@@ -1884,14 +2077,13 @@
       const wasPreview = slotPreviewShown;
       clearSlotPreview();
       slotPressedIcon = null;
-      // Commit on quick tap (no movement) OR on long-press release on icon
+      // Commit on a quick tap, or on a long-press release while still on the
+      // icon. Sliding off before release cancels (handled by clearSlotPreview).
       if (moved < 8) {
         commitReaction(el.dataset.r, { vx: 0, vy: 1.6 });
         collapseReact();
-      } else if (wasPreview) {
-        // Sliding off cancels (parity with prior long-press behavior)
-        // (nothing else to do)
       }
+      void wasPreview;
       e.stopPropagation();
     });
     el.addEventListener('pointercancel', () => {
@@ -1918,9 +2110,7 @@
     collapseReact();
   });
 
-  // ============================================================
-  // COMMENT SHEET
-  // ============================================================
+  // ----- Comment thread sheet -----
   chip.addEventListener('click', () => {
     if (chip.classList.contains('hidden')) return;
     openSheet();
@@ -1958,38 +2148,44 @@
 
     sheet.classList.add('open');
     sheetBackdrop.classList.add('open');
+    announce(`Comment thread from ${c.author}. ${c.replies.length} replies.`);
+    trapFocus(sheet);
+    sheetClose.focus();
   }
   function closeSheet() {
     if (!sheetOpen) return;
     sheetOpen = false;
     sheet.classList.remove('open');
     sheetBackdrop.classList.remove('open');
+    releaseFocusTrap();
+    chip.focus();
     if (!dragging && !composeOpen && viewState === 'post') startCommentCycle();
   }
   sheetClose.addEventListener('click', closeSheet);
   sheetBackdrop.addEventListener('click', closeSheet);
 
-  // Reply-to-comment input opens compose with reply context
+  // Reply-to-comment input opens compose with reply context.
   sheetReplyInput.addEventListener('click', () => {
     const c = POSTS[postIdx].comments[commentIdx];
     openCompose({ kind: 'reply', author: c.author.split(' ')[0] });
   });
 
-  // ============================================================
-  // COMPOSE SHEET
-  // Compose is opened by the Comment FAB (wired above) and by the
-  // "Reply to ..." input inside the comment thread sheet.
-  // ============================================================
+  // ----- Compose sheet -----
+  // Opened by the Comment FAB and by the "Reply to ..." input in the thread.
+  let composeReturnFocus = null;
 
   function openCompose(ctx) {
     if (composeOpen) return;
     composeOpen = true;
+    composeReturnFocus = document.activeElement;
     collapseReact();
     stopCommentCycle();
     if (ctx.kind === 'reply') {
       composeContextText.innerHTML = `Replying to <strong>${ctx.author}</strong>`;
+      announce(`Composing a reply to ${ctx.author}.`);
     } else {
       composeContextText.innerHTML = `Commenting on <strong>${ctx.author}</strong>'s post`;
+      announce(`Composing a comment on ${ctx.author}'s post.`);
     }
     composeTextarea.value = '';
     composeCount.textContent = '0 / 280';
@@ -1998,7 +2194,7 @@
 
     composeSheet.classList.add('open');
     sheetBackdrop.classList.add('open');
-
+    trapFocus(composeSheet);
     setTimeout(() => composeTextarea.focus(), 320);
   }
   function closeCompose() {
@@ -2006,6 +2202,11 @@
     composeOpen = false;
     composeSheet.classList.remove('open');
     if (!sheetOpen) sheetBackdrop.classList.remove('open');
+    // If the comment sheet is still open behind compose, keep its trap;
+    // otherwise release and restore focus to whatever opened compose.
+    if (sheetOpen) trapFocus(sheet);
+    else releaseFocusTrap();
+    if (composeReturnFocus && composeReturnFocus.focus) composeReturnFocus.focus();
     if (!dragging && !sheetOpen && viewState === 'post') startCommentCycle();
   }
   composeClose.addEventListener('click', closeCompose);
@@ -2020,6 +2221,7 @@
     if (composePost.disabled) return;
     closeCompose();
     flashToast('Your comment was posted.');
+    announce('Your comment was posted.');
   });
 
   function flashToast(msg) {
@@ -2028,9 +2230,7 @@
     setTimeout(() => toast.classList.remove('visible'), 2400);
   }
 
-  // ============================================================
-  // RESET
-  // ============================================================
+  // ----- Reset -----
   resetBtn.addEventListener('click', () => {
     closeSheet();
     closeCompose();
@@ -2039,9 +2239,97 @@
     commentIdx = 0;
     queueCount = 0;
     nextPost();
+    announce('Session restarted.');
   });
 
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+  // ----- Focus trap (shared by both sheets) -----
+  // Keeps Tab cycling within the open sheet and remembers where to return focus
+  // when it closes. Only one trap is active at a time.
+  const FOCUSABLE = 'button, [href], input, textarea, [tabindex]:not([tabindex="-1"])';
+  let trapContainer = null;
+
+  function trapFocus(container) {
+    trapContainer = container;
+    document.addEventListener('keydown', trapKeyHandler, true);
+  }
+  function releaseFocusTrap() {
+    trapContainer = null;
+    document.removeEventListener('keydown', trapKeyHandler, true);
+  }
+  function trapKeyHandler(ev) {
+    if (ev.key !== 'Tab' || !trapContainer) return;
+    const nodes = Array.from(trapContainer.querySelectorAll(FOCUSABLE))
+      .filter(n => !n.disabled && n.offsetParent !== null);
+    if (nodes.length === 0) return;
+    const first = nodes[0];
+    const last = nodes[nodes.length - 1];
+    if (ev.shiftKey && document.activeElement === first) {
+      ev.preventDefault(); last.focus();
+    } else if (!ev.shiftKey && document.activeElement === last) {
+      ev.preventDefault(); first.focus();
+    }
+  }
+
+  // ----- Enter / Space activation for the div-based controls -----
+  function activateOnKey(el, fn) {
+    el.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); fn(); }
+    });
+  }
+  activateOnKey(chip, () => { if (!chip.classList.contains('hidden')) openSheet(); });
+  activateOnKey(sheetReplyInput, () => {
+    const c = POSTS[postIdx].comments[commentIdx];
+    openCompose({ kind: 'reply', author: c.author.split(' ')[0] });
+  });
+
+  // ----- Global keyboard layer -----
+  // Additive to the pointer choreography: ArrowUp skips, ArrowDown opens or
+  // picks a reaction, number keys 1..6 pick by REACTIONS_ORDER, Escape closes
+  // the open sheet, and Enter / Space activate whatever holds focus. Typing in
+  // the compose box is never intercepted.
+  document.addEventListener('keydown', (ev) => {
+    if (ev.target === composeTextarea) return; // let the user type freely
+
+    // Escape closes the topmost open surface.
+    if (ev.key === 'Escape') {
+      if (composeOpen) { ev.preventDefault(); closeCompose(); return; }
+      if (sheetOpen) { ev.preventDefault(); closeSheet(); return; }
+      if (isReactExpanded()) { ev.preventDefault(); collapseReact(); return; }
+      return;
+    }
+
+    // No card gestures while a sheet is open or a commit is mid-flight.
+    if (sheetOpen || composeOpen || committing) return;
+
+    if (ev.key === 'ArrowUp') {
+      ev.preventDefault();
+      commitSkip({ vx: 0, vy: 0 });
+      return;
+    }
+    if (ev.key === 'ArrowDown') {
+      ev.preventDefault();
+      if (!isReactExpanded()) { expandReact('tap'); announce('Reactions open. Press 1 through 6 to pick one.'); }
+      else collapseReact();
+      return;
+    }
+    // Number keys pick a reaction by canonical order (canon section 4).
+    const n = parseInt(ev.key, 10);
+    if (n >= 1 && n <= REACTIONS_ORDER.length) {
+      ev.preventDefault();
+      commitReaction(REACTIONS_ORDER[n - 1], { vx: 0, vy: 1.6 });
+      collapseReact();
+    }
+  });
+
+  // Re-snap springs the instant reduced-motion is toggled mid-session.
+  reduceMotion.addEventListener('change', () => {
+    if (reduceMotion.matches) {
+      sX.set(sX.target); sY.set(sY.target); sRot.set(sRot.target);
+      sScale.set(sScale.target); sOpacity.set(sOpacity.target);
+    }
+  });
 </script>
 </body>
 </html>

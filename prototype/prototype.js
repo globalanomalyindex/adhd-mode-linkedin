@@ -9,7 +9,7 @@ import { chunkPost } from '../lib/reflow.js';
 // ---------- Application state ----------
 let session = createSession();
 let queue = createQueue();
-let setupChoice = { mode: 'focus', durationMin: 12 };
+const setupChoice = { mode: 'focus', durationMin: 12 };
 let timer = null;
 let currentPostIdx = 0;
 let currentPageIdx = 0;
@@ -18,6 +18,39 @@ let currentChunks = [];
 // ---------- DOM helpers ----------
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+// Styles for the in-DOM checkpoint. Injected here so the fix lives entirely in
+// the file that owns the behavior (index.html is not edited by this lane).
+(function injectCheckpointStyles() {
+  const css = `
+  .checkpoint { position: absolute; inset: 0; z-index: 20; display: flex; align-items: flex-end; }
+  .checkpoint-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.32);
+    opacity: 0; transition: opacity var(--d-base) var(--ease-out); }
+  .checkpoint.open .checkpoint-backdrop { opacity: 1; }
+  .checkpoint-sheet { position: relative; width: 100%; background: var(--card);
+    border-radius: var(--r-lg) var(--r-lg) 0 0; padding: 20px 18px 22px;
+    transform: translateY(100%); transition: transform var(--d-slow) var(--ease-out); }
+  .checkpoint.open .checkpoint-sheet { transform: translateY(0); }
+  .checkpoint-title { font-size: var(--fs-meta); font-weight: 600; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--text-secondary); margin-bottom: 8px; }
+  .checkpoint-body { font-size: 15px; line-height: 1.5; color: var(--text); margin-bottom: 18px; }
+  .checkpoint-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .checkpoint-wrap, .checkpoint-continue { padding: 12px; border-radius: var(--r-pill);
+    font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer;
+    transition: background var(--d-fast) var(--ease-in-out), border-color var(--d-fast) var(--ease-in-out); }
+  .checkpoint-wrap { border: 1.5px solid var(--hairline); background: transparent; color: var(--text-secondary); }
+  .checkpoint-wrap:hover { border-color: var(--brand); color: var(--brand); }
+  .checkpoint-continue { border: none; background: var(--brand); color: #fff; }
+  .checkpoint-continue:hover { background: var(--brand-hover); }
+  .checkpoint-continue:focus-visible, .checkpoint-wrap:focus-visible {
+    outline: 2px solid var(--brand); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) {
+    .checkpoint-backdrop, .checkpoint-sheet { transition: none; }
+  }`;
+  const style = document.createElement('style');
+  style.textContent = css;
+  document.head.appendChild(style);
+})();
 
 function showPanel(stateName) {
   $$('.panel, .session').forEach(p => p.classList.remove('active'));
@@ -160,15 +193,66 @@ function endSession() {
   showPanel('end');
 }
 
+// Non-blocking in-DOM checkpoint. The earlier window.confirm() froze the page
+// and the spring loop; this overlay lets the user read the count and choose
+// without halting the main thread. Built once, then shown on demand.
+let checkpointEl = null;
+
+function buildCheckpoint() {
+  const el = document.createElement('div');
+  el.className = 'checkpoint';
+  el.id = 'checkpoint';
+  el.setAttribute('role', 'dialog');
+  el.setAttribute('aria-modal', 'true');
+  el.setAttribute('aria-labelledby', 'checkpoint-title');
+  el.hidden = true;
+  el.innerHTML = `
+    <div class="checkpoint-backdrop"></div>
+    <div class="checkpoint-sheet">
+      <div class="checkpoint-title" id="checkpoint-title">Halfway point</div>
+      <p class="checkpoint-body" id="checkpoint-body"></p>
+      <div class="checkpoint-actions">
+        <button class="checkpoint-wrap" id="checkpoint-wrap">Wrap up</button>
+        <button class="checkpoint-continue" id="checkpoint-continue">Keep going</button>
+      </div>
+    </div>
+  `;
+  document.querySelector('.stage')?.appendChild(el) ?? document.body.appendChild(el);
+  $('#checkpoint-continue', el).addEventListener('click', () => resolveCheckpoint('CONTINUE'));
+  $('#checkpoint-wrap', el).addEventListener('click', () => resolveCheckpoint('WRAP'));
+  return el;
+}
+
 function showCheckpoint() {
-  const cont = confirm(`You've seen ${session.cardsSeen} posts. Keep going?`);
-  session = send(session, { type: cont ? 'CONTINUE' : 'WRAP' });
+  if (!checkpointEl) checkpointEl = buildCheckpoint();
+  const minutesLeft = Math.max(1, Math.round(session.durationSec / 120));
+  $('#checkpoint-body', checkpointEl).textContent =
+    `${session.cardsSeen} posts in. About ${minutesLeft} minutes left. Keep going, or wrap up here?`;
+  checkpointEl.hidden = false;
+  announce(`Checkpoint. ${session.cardsSeen} posts in. Keep going, or wrap up.`);
+  requestAnimationFrame(() => checkpointEl.classList.add('open'));
+  $('#checkpoint-continue', checkpointEl).focus();
+  document.addEventListener('keydown', checkpointKeyHandler);
+}
+
+function resolveCheckpoint(action) {
+  if (checkpointEl) {
+    checkpointEl.classList.remove('open');
+    checkpointEl.hidden = true;
+  }
+  document.removeEventListener('keydown', checkpointKeyHandler);
+  session = send(session, { type: action });
   if (session.state === 'active') {
+    announce('Continuing the session.');
     currentPostIdx += 1;
     presentCard();
   } else {
     endSession();
   }
+}
+
+function checkpointKeyHandler(ev) {
+  if (ev.key === 'Escape') resolveCheckpoint('WRAP');
 }
 
 // ---------- Drag handlers ----------
@@ -191,11 +275,9 @@ function attachDragHandlers() {
     const p = pointerOf(ev);
     startX = p.x; startY = p.y;
     card.setPointerCapture?.(ev.pointerId ?? 0);
-    longPressTimer = setTimeout(() => {
-      if (Math.hypot(0, 0) < 16) {
-        openPicker();
-      }
-    }, 500);
+    // Long press opens the reaction picker. `move` clears this timer as soon as
+    // the pointer travels, so the picker only fires on a held, still press.
+    longPressTimer = setTimeout(openPicker, 500);
     ev.preventDefault();
   }
 
@@ -283,7 +365,7 @@ function attachDragHandlers() {
   card.addEventListener('pointermove', move);
   card.addEventListener('pointerup', up);
   card.addEventListener('pointercancel', up);
-  card.addEventListener('click', (ev) => {
+  card.addEventListener('click', () => {
     if (dragging) return;
     if (currentPageIdx < currentChunks.length - 1) {
       currentPageIdx += 1;
