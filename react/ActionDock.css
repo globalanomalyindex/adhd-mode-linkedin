@@ -5,11 +5,12 @@
    leftward. See figma-spec/action-dock.md.
 
    Motion craft notes (Emil Kowalski school):
-   - Only transform, opacity, and clip-path are animated. NEVER width/height.
-     The leftward reveal is a clip-path inset on the FAB shell (parity with
-     prototype/demo.html): the shell is always its full tray width and the
-     clip hides everything but the trigger circle when collapsed. clip-path
-     runs on the compositor and does not distort the contents.
+   - Only transform and opacity are animated. NEVER width/height, and never an
+     animated clip-path or filter over the backdrop-filtered shell: animating
+     geometry over a backdrop blur re-rasterizes the blur every frame and stalls
+     the compositor on real GPUs. The shell is always its full tray width with a
+     STATIC clip masking it to the trigger when collapsed; the reveal motion is
+     carried entirely by the slots staggering in on opacity and transform.
    - ease-out for enter, faster exit than enter.
    - Reaction slots stagger in right to left (40ms), out left to
      right (30ms), and exit faster than they enter.
@@ -165,17 +166,18 @@
   -webkit-backdrop-filter: blur(40px) saturate(180%);
   backdrop-filter: blur(40px) saturate(180%);
   box-shadow: var(--ad-glass-shadow);
-  /* collapsed: clip off the leftmost (tray - fab), leaving the trigger */
+  /* STATIC clip: masks everything but the trigger when collapsed. The clip is
+     never animated. Animating a clip (or width) over a backdrop-filter forces
+     the browser to re-rasterize the blur against a changing region every frame,
+     which stalls the compositor on real GPUs (software rendering hides it). The
+     slots carry the reveal on opacity and transform, which are compositor-only. */
   clip-path: inset(0 0 0 calc(var(--ad-tray) - var(--ad-fab)) round 999px);
-  transition: clip-path var(--ad-d-base) var(--ad-ease-out);
-  will-change: clip-path;
   pointer-events: none;
 }
 
-/* Enter: gentle spring, slower. Exit: faster, plain ease-out. */
+/* Expanded: static full-pill clip; the staggered slots animate the reveal. */
 .action-dock__react[data-state='expanded'] .action-dock__react-shell {
   clip-path: inset(0 0 0 0 round 999px);
-  transition: clip-path var(--ad-d-slow) var(--ad-ease-spring);
 }
 
 /* The actual interactive React button stays a fixed 52x52 circle pinned

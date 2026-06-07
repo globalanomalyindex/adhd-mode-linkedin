@@ -504,9 +504,9 @@
     bottom: 26px;
     height: 52px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.62);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
     border: 1px solid rgba(255, 255, 255, 0.45);
     box-shadow:
       0 1px 0 rgba(0,0,0,0.04),
@@ -546,9 +546,13 @@
 
   /* RIGHT: React FAB.
      The shell is ALWAYS its full 264px width, anchored to the right corner.
-     Expansion is a clip-path reveal, not a width animation, so the browser
-     never relayouts: the clip inset runs on the compositor. Collapsed, the
-     clip hides everything but the 52px trigger circle at the right edge. */
+     A STATIC clip-path masks everything but the 52px trigger when collapsed.
+     The clip is deliberately NOT animated. Animating a clip (or width) over a
+     backdrop-filter forces the browser to re-rasterize the blur against a
+     changing region every frame, which stalls the compositor on real GPUs (it
+     looks fine in software rendering, which is the trap). The reveal motion
+     comes entirely from the slots staggering in on opacity and transform, which
+     are compositor-only, so the glass stays and the drag stays smooth. */
   .react-fab {
     right: 18px;
     width: 264px;
@@ -558,27 +562,14 @@
     align-items: center;
     padding-left: 6px;
     padding-right: 0;
-    /* Reveal from the right edge: collapsed clips off the leftmost 212px,
-       leaving the 52px trigger visible. */
-    clip-path: inset(0 0 0 212px round 999px);
+    clip-path: inset(0 0 0 212px round 999px); /* static mask: only the trigger shows */
     transition:
-      clip-path 0.4s var(--ease-spring),
       transform 0.18s var(--ease-out),
       background 0.18s var(--ease-out),
       box-shadow 0.2s var(--ease-out);
-    will-change: clip-path;
   }
   .react-fab[data-state="expanded"] {
-    clip-path: inset(0 0 0 0 round 999px);
-    transition:
-      clip-path 0.4s var(--ease-spring),
-      background 0.18s var(--ease-out);
-  }
-  /* Collapse exits faster than it enters */
-  .react-fab.collapsing {
-    transition:
-      clip-path 0.28s var(--ease-out),
-      background 0.18s var(--ease-out);
+    clip-path: inset(0 0 0 0 round 999px); /* static: full bar; the slots animate the reveal */
   }
 
   /* The trigger sits at the RIGHT edge always (52px square area) */
