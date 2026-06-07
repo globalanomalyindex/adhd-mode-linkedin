@@ -2331,7 +2331,14 @@
     if (!dragging && !composeOpen && viewState === 'post') startCommentCycle();
   }
   sheetClose.addEventListener('click', closeSheet);
-  sheetBackdrop.addEventListener('click', closeSheet);
+  // Tapping outside dismisses the TOPMOST surface, matching the Escape key: if the
+  // composer is open over the comment thread, close the composer first and leave the
+  // thread; otherwise close the thread. Closing the thread underneath while the
+  // composer stays open is what stranded the composer with no way out.
+  sheetBackdrop.addEventListener('click', () => {
+    if (composeOpen) closeCompose();
+    else closeSheet();
+  });
 
   // Reply-to-comment input opens compose with reply context.
   sheetReplyInput.addEventListener('click', () => {
