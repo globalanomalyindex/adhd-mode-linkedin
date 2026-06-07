@@ -1,0 +1,334 @@
+/* =========================================================
+   ACTION DOCK (React)
+   The bottom UI of the focus session card view: a Comment FAB
+   (left) and a React FAB (right) that expands a reaction tray
+   leftward. See figma-spec/action-dock.md.
+
+   Motion craft notes (Emil Kowalski school):
+   - Only transform and opacity are animated. NEVER width/height.
+     The leftward reveal is a scaleX on the FAB shell with an
+     inverse-scaled content layer so the tray contents do not warp.
+   - ease-out for enter, faster exit than enter.
+   - Reaction slots stagger in right to left (40ms), out left to
+     right (30ms), and exit faster than they enter.
+   - prefers-reduced-motion: opacity-only, no transform travel.
+   - Press feedback is scale(0.97) on :active.
+
+   Tokens mirror design-system/tokens.css. They are redeclared in a
+   scoped :where() block so the component is drop-in without the global
+   stylesheet, but real token values win when tokens.css is present.
+   ========================================================= */
+
+:where(.action-dock) {
+  /* Color (LinkedIn-native palette, canon section 8 / tokens.css) */
+  --ad-brand: var(--brand, #0a66c2);
+  --ad-brand-tint: var(--brand-tint, rgba(10, 102, 194, 0.04));
+  --ad-ink: var(--text, rgba(0, 0, 0, 0.9));
+
+  /* Liquid glass (figma-spec/action-dock.md, FAB Round base) */
+  --ad-glass-fill: rgba(255, 255, 255, 0.62);
+  --ad-glass-fill-hover: rgba(255, 255, 255, 0.78);
+  --ad-glass-border: 1px solid rgba(255, 255, 255, 0.45);
+  --ad-glass-shadow:
+    0 14px 36px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+
+  /* Motion (canon section 8 / tokens.css) */
+  --ad-d-fast: var(--d-fast, 150ms);
+  --ad-d-base: var(--d-base, 240ms);
+  --ad-d-slow: var(--d-slow, 400ms);
+  --ad-ease-out: var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  --ad-ease-spring: var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1));
+
+  /* Geometry */
+  --ad-fab: 52px;
+  --ad-tray: 264px;
+  --ad-slot: 44px;
+  --ad-slots: 6;
+}
+
+/* ---------------------------------------------------------
+   Organism: the dock rail
+   --------------------------------------------------------- */
+
+.action-dock {
+  position: absolute;
+  bottom: 26px;
+  left: 18px;
+  right: 18px;
+  height: var(--ad-fab);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none; /* only the FABs catch input, not the rail gap */
+  font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, sans-serif);
+}
+
+.action-dock > * {
+  pointer-events: auto;
+}
+
+/* ---------------------------------------------------------
+   Molecule: FAB Round base (shared by Comment + React)
+   --------------------------------------------------------- */
+
+.action-dock__fab {
+  /* min 44x44 a11y target is satisfied: 52 > 44 */
+  min-width: var(--ad-fab);
+  min-height: var(--ad-fab);
+  width: var(--ad-fab);
+  height: var(--ad-fab);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: var(--ad-glass-border);
+  border-radius: var(--r-pill, 999px);
+  background: var(--ad-glass-fill);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  backdrop-filter: blur(40px) saturate(180%);
+  box-shadow: var(--ad-glass-shadow);
+  color: var(--ad-ink);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  /* transform/opacity only; explicit list keeps width off the compositor */
+  transition:
+    transform var(--ad-d-fast) var(--ad-ease-out),
+    background-color var(--ad-d-base) var(--ad-ease-out);
+}
+
+@media (hover: hover) {
+  .action-dock__fab:hover {
+    background: var(--ad-glass-fill-hover);
+    transform: translateY(-1px);
+  }
+}
+
+/* Press feedback: scale(0.97), never scale(0) */
+.action-dock__fab:active {
+  transform: scale(0.97);
+}
+
+.action-dock__fab:focus-visible {
+  outline: 2px solid var(--ad-brand);
+  outline-offset: 2px;
+}
+
+.action-dock__icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+/* ---------------------------------------------------------
+   React FAB: the expanding shell
+   The shell scales horizontally; an inverse-scaled inner layer
+   carries the contents so they do not stretch. This keeps the
+   reveal on the compositor (no width animation).
+   --------------------------------------------------------- */
+
+.action-dock__react {
+  position: relative;
+  /* React FAB anchors to the right edge and grows leftward */
+  transform-origin: right center;
+  overflow: visible;
+}
+
+/* The glass shell that visually widens. It is sized to the full tray
+   width and scaled DOWN to a circle when collapsed, then up to 1 when
+   expanded. scaleX is a transform, so no layout-property animation. */
+.action-dock__react-shell {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: var(--ad-fab);
+  width: var(--ad-tray);
+  border: var(--ad-glass-border);
+  border-radius: var(--r-pill, 999px);
+  background: var(--ad-glass-fill);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  backdrop-filter: blur(40px) saturate(180%);
+  box-shadow: var(--ad-glass-shadow);
+  transform-origin: right center;
+  /* collapsed: scaled down so visible width == one FAB */
+  transform: scaleX(calc(var(--ad-fab) / var(--ad-tray)));
+  transition: transform var(--ad-d-base) var(--ad-ease-out);
+  pointer-events: none;
+}
+
+/* Enter: gentle spring, slower. Exit: faster, plain ease-out. */
+.action-dock__react[data-state='expanded'] .action-dock__react-shell {
+  transform: scaleX(1);
+  transition: transform var(--ad-d-slow) var(--ad-ease-spring);
+}
+
+/* The actual interactive React button stays a fixed 52x52 circle pinned
+   to the right edge, layered above the shell. */
+.action-dock__react-btn {
+  position: relative;
+  z-index: 2;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+@media (hover: hover) {
+  .action-dock__react-btn:hover {
+    background: transparent;
+    transform: none;
+  }
+}
+
+/* Smile to Close morph: crossfade + 90deg rotation (canon ease-out) */
+.action-dock__react-icon {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  transition:
+    opacity var(--ad-d-base) var(--ad-ease-out),
+    transform var(--ad-d-base) var(--ad-ease-out);
+}
+
+.action-dock__react-icon--smile {
+  opacity: 1;
+  transform: rotate(0deg);
+}
+.action-dock__react-icon--close {
+  opacity: 0;
+  transform: rotate(-90deg);
+}
+
+.action-dock__react[data-state='expanded'] .action-dock__react-icon--smile {
+  opacity: 0;
+  transform: rotate(90deg);
+}
+.action-dock__react[data-state='expanded'] .action-dock__react-icon--close {
+  opacity: 1;
+  transform: rotate(0deg);
+}
+
+/* ---------------------------------------------------------
+   Reaction tray + slots
+   The tray sits inside the shell, right-aligned, to the LEFT of
+   the React button. Slots reveal with stagger.
+   --------------------------------------------------------- */
+
+.action-dock__tray {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  /* leave the 52px React button clear on the right */
+  right: var(--ad-fab);
+  left: 8px;
+  height: var(--ad-fab);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  /* collapsed tray is inert and invisible */
+  pointer-events: none;
+}
+
+.action-dock__react[data-state='expanded'] .action-dock__tray {
+  pointer-events: auto;
+}
+
+.action-dock__slot {
+  min-width: var(--ad-slot);
+  min-height: var(--ad-slot);
+  width: var(--ad-slot);
+  height: var(--ad-slot);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: var(--r-pill, 999px);
+  background: transparent;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  /* resting state: faded out + nudged right, ready to stagger in */
+  opacity: 0;
+  transform: translateX(10px) scale(0.6);
+  /* exit (collapse) is faster than enter; ease-out, no spring overshoot */
+  transition:
+    opacity var(--ad-d-fast) var(--ad-ease-out),
+    transform var(--ad-d-fast) var(--ad-ease-out);
+  /* stagger out left to right, 30ms steps */
+  transition-delay: calc(var(--ad-slot-i, 0) * 30ms);
+}
+
+.action-dock__react[data-state='expanded'] .action-dock__slot {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+  /* enter: spring, slower; stagger right to left at 40ms steps. The
+     rightmost slot (highest index in REACTIONS_ORDER) leads. */
+  transition:
+    opacity var(--ad-d-base) var(--ad-ease-spring),
+    transform var(--ad-d-base) var(--ad-ease-spring);
+  transition-delay: calc(
+    (var(--ad-slots) - 1 - var(--ad-slot-i, 0)) * 40ms
+  );
+}
+
+@media (hover: hover) {
+  .action-dock__slot:hover {
+    background: var(--ad-brand-tint);
+    transform: scale(1.18);
+  }
+}
+
+.action-dock__slot:active {
+  transform: scale(0.94);
+  background: var(--ad-brand-tint);
+}
+
+.action-dock__slot:focus-visible {
+  outline: 2px solid var(--ad-brand);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------
+   Reduced motion: opacity only, no transform travel, near-instant.
+   --------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .action-dock__fab,
+  .action-dock__react-shell,
+  .action-dock__react-icon,
+  .action-dock__slot {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  .action-dock__react-shell {
+    /* still reveal, but via instant scale rather than a travelled motion */
+    transition-property: transform;
+  }
+
+  .action-dock__react-icon--smile,
+  .action-dock__react-icon--close {
+    transform: none !important;
+  }
+
+  .action-dock__slot {
+    transform: none !important;
+  }
+
+  .action-dock__react[data-state='expanded'] .action-dock__slot {
+    transform: none !important;
+  }
+
+  .action-dock__fab:active,
+  .action-dock__slot:active {
+    transform: none !important;
+  }
+}

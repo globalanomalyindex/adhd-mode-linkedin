@@ -1,7 +1,9 @@
 // prototype/sample-feed.js
 // Sample post data for the working prototype. Covers all rendering branches:
 // short, medium, long, with-image, listicle, with-quote.
+/** @typedef {import('../lib/types').Post} Post */
 
+/** @type {Post[]} */
 export const SAMPLE_FEED = [
   {
     id: 'p1',
@@ -108,6 +110,11 @@ export const SAMPLE_FEED = [
   },
 ];
 
+/**
+ * Look up a sample post by id.
+ * @param {string} id
+ * @returns {Post | undefined}
+ */
 export function getPostById(id) {
   return SAMPLE_FEED.find(p => p.id === id);
 }
