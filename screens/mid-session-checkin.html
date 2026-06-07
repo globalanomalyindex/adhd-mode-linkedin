@@ -18,16 +18,41 @@
   }
   @keyframes card-in { to { opacity: 1; transform: none; } }
 
+  /* Halfway marker: posts seen on the track, time read alongside. */
   .progress-ring { margin: 0 auto var(--s-5); width: 64px; height: 64px;
     position: relative; }
   .progress-ring svg { transform: rotate(-90deg); }
   .progress-ring .label { position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
-    font-size: 13px; font-weight: 600; color: var(--text); }
+    font-size: 13px; font-weight: 600; color: var(--text);
+    font-variant-numeric: tabular-nums; }
 
   h1 { font-size: 24px; font-weight: 600; line-height: var(--lh-tight); }
-  p { font-size: var(--fs-small); color: var(--text-secondary);
-    margin-top: var(--s-3); margin-bottom: var(--s-7); }
+  .lede { font-size: var(--fs-small); color: var(--text-secondary);
+    margin-top: var(--s-3); margin-bottom: var(--s-6); }
+
+  /* Optional grounding moment (canon section 6). Skippable, never forced. */
+  .grounding {
+    background: var(--brand-tint); border-radius: var(--r-md);
+    padding: var(--s-4); text-align: left;
+    display: flex; gap: var(--s-3); align-items: flex-start;
+    margin-bottom: var(--s-6);
+  }
+  .grounding-icon {
+    width: 20px; height: 20px; flex-shrink: 0; color: var(--brand); margin-top: 1px;
+  }
+  .grounding-copy { flex: 1; }
+  .grounding-tag {
+    font-size: var(--fs-meta); font-weight: 600; color: var(--brand);
+    letter-spacing: var(--tracking-wide); text-transform: uppercase;
+  }
+  .grounding-text { font-size: var(--fs-small); color: var(--text);
+    line-height: var(--lh-base); margin-top: var(--s-1); }
+  .grounding-skip {
+    font-size: var(--fs-meta); color: var(--text-secondary); font-weight: 600;
+    margin-top: var(--s-2); padding: 2px 0;
+  }
+  .grounding-skip:hover { color: var(--brand); }
 
   .actions { display: flex; flex-direction: column; gap: var(--s-2); }
   .btn-stack {
@@ -49,17 +74,28 @@
       <svg width="64" height="64">
         <circle cx="32" cy="32" r="28" fill="none" stroke="var(--hairline)" stroke-width="3"/>
         <circle cx="32" cy="32" r="28" fill="none" stroke="var(--brand)" stroke-width="3"
-          stroke-dasharray="175.93" stroke-dashoffset="58.6" stroke-linecap="round"/>
+          stroke-dasharray="175.93" stroke-dashoffset="87.96" stroke-linecap="round"/>
       </svg>
-      <div class="label">12/12</div>
+      <div class="label">6/15</div>
     </div>
 
-    <h1>You've seen 12 posts.</h1>
-    <p>You're at the cap you set. Keep going, wrap, or pause for now.</p>
+    <h1>6 posts in. About 6 minutes left.</h1>
+    <p class="lede">Halfway through. Keep going, wrap up, or pause for now.</p>
+
+    <div class="grounding">
+      <svg class="grounding-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle>
+      </svg>
+      <div class="grounding-copy">
+        <div class="grounding-tag">Optional reset</div>
+        <div class="grounding-text">Look up from the screen. Name five things you can see that are green.</div>
+        <button class="grounding-skip">Skip</button>
+      </div>
+    </div>
 
     <div class="actions">
-      <button class="btn-stack primary">Wrap up</button>
-      <button class="btn-stack secondary">Keep going for 5 more minutes</button>
+      <button class="btn-stack primary">Keep going</button>
+      <button class="btn-stack secondary">Wrap up now</button>
       <button class="btn-stack tertiary">Pause and come back later</button>
     </div>
   </div>

@@ -21,7 +21,7 @@
     display: flex; align-items: center; justify-content: center; font-size: 15px;
   }
   .ln-search {
-    flex: 1; background: #eef3f8; border-radius: var(--r-sm); padding: 8px 12px;
+    flex: 1; background: var(--field-grey); border-radius: var(--r-sm); padding: 8px 12px;
     color: var(--text-secondary); font-size: var(--fs-small);
   }
 
@@ -36,21 +36,16 @@
     width: 44px; height: 44px; border-radius: var(--r-pill);
     background: linear-gradient(135deg, var(--brand), var(--brand-hover));
     display: flex; align-items: center; justify-content: center;
-    color: #fff; font-weight: 600; font-size: 14px; letter-spacing: 0.04em;
+    color: #fff;
   }
+  .adhd-mark svg { width: 22px; height: 22px; }
   .adhd-copy h3 {
     font-size: 15px; font-weight: 600; line-height: var(--lh-tight);
   }
   .adhd-copy p {
     font-size: var(--fs-small); color: var(--text-secondary); margin-top: 2px;
   }
-  .adhd-cta {
-    background: var(--brand); color: #fff; padding: 8px 18px;
-    border-radius: var(--r-pill); font-size: 14px; font-weight: 600;
-    transition: background var(--d-fast) var(--ease-in-out),
-                transform var(--d-fast) var(--ease-out);
-  }
-  .adhd-cta:hover { background: var(--brand-hover); transform: translateY(-1px); }
+  /* CTA uses the shared .btn-primary from base.css; nothing custom here. */
 
   .post {
     background: var(--card); border-radius: var(--r-md); box-shadow: var(--shadow);
@@ -77,28 +72,32 @@
     </div>
 
     <div class="adhd-entry">
-      <div class="adhd-mark">af</div>
+      <div class="adhd-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="4"></circle>
+        </svg>
+      </div>
       <div class="adhd-copy">
         <h3>Start a focus session</h3>
-        <p>A calmer way to use the feed. Bounded time, your reactions guide what comes back.</p>
+        <p>Set a time and a post cap. Your reactions decide what comes back later.</p>
       </div>
-      <button class="adhd-cta">Begin</button>
+      <button class="btn-primary">Begin</button>
     </div>
 
     <div class="post">
       <div class="post-header">
         <div class="post-avatar"></div>
-        <div class="post-meta"><strong>Maya Chen</strong><div>VP Engineering · 2h</div></div>
+        <div class="post-meta"><strong>James Park</strong><div>Product Manager at Atlas Health · 2h</div></div>
       </div>
-      <div class="post-body">I almost quit my job last year. It was 11pm on a Thursday...</div>
+      <div class="post-body">We are hiring two product designers on the Atlas Health platform team. The work is unglamorous and it matters...</div>
     </div>
 
     <div class="post">
       <div class="post-header">
         <div class="post-avatar" style="background: linear-gradient(135deg, #fde68a, #fcd34d);"></div>
-        <div class="post-meta"><strong>James Park</strong><div>Former PM at Meta · 4h</div></div>
+        <div class="post-meta"><strong>Priya Nair</strong><div>Engineering Manager · 4h</div></div>
       </div>
-      <div class="post-body">Today I was part of the layoffs at Meta. After 6 years...</div>
+      <div class="post-body">Friday was my last day at Cobalt. My whole team was cut in the restructure...</div>
     </div>
   </div>
 </body>

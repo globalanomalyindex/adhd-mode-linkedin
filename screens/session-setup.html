@@ -39,14 +39,24 @@
   .mode-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
   .mode-desc { font-size: var(--fs-meta); color: var(--text-secondary); line-height: var(--lh-base); }
 
-  .durations { display: flex; gap: var(--s-2); margin-bottom: var(--s-7); }
+  .durations { display: flex; gap: var(--s-2); margin-bottom: var(--s-3); }
   .duration {
-    flex: 1; border: 1.5px solid var(--hairline); border-radius: var(--r-pill);
-    padding: 10px; text-align: center; font-size: 14px; font-weight: 600;
+    flex: 1; border: 1.5px solid var(--hairline); border-radius: var(--r-md);
+    padding: 10px 8px; text-align: center;
     cursor: pointer; transition: all var(--d-fast) var(--ease-in-out);
   }
-  .duration:hover { border-color: var(--brand); color: var(--brand); }
-  .duration.selected { border-color: var(--brand); background: var(--brand); color: #fff; }
+  .duration .d-min { font-size: 14px; font-weight: 600; line-height: 1.1; }
+  .duration .d-cap { font-size: var(--fs-meta); color: var(--text-secondary); margin-top: 2px; }
+  .duration:hover { border-color: var(--brand); }
+  .duration:hover .d-min { color: var(--brand); }
+  .duration.selected { border-color: var(--brand); background: var(--brand); }
+  .duration.selected .d-min { color: #fff; }
+  .duration.selected .d-cap { color: rgba(255, 255, 255, 0.85); }
+
+  .cap-note {
+    font-size: var(--fs-meta); color: var(--text-secondary);
+    line-height: var(--lh-base); margin-bottom: var(--s-7);
+  }
 
   .actions { display: flex; justify-content: flex-end; gap: var(--s-3); }
 </style>
@@ -70,10 +80,20 @@
 
     <div class="group-label">Length</div>
     <div class="durations">
-      <button class="duration" data-min="5">5 min</button>
-      <button class="duration selected" data-min="12">12 min</button>
-      <button class="duration" data-min="20">20 min</button>
+      <button class="duration" data-min="5" data-cap="8">
+        <div class="d-min">5 min</div>
+        <div class="d-cap">up to 8 posts</div>
+      </button>
+      <button class="duration selected" data-min="12" data-cap="15">
+        <div class="d-min">12 min</div>
+        <div class="d-cap">up to 15 posts</div>
+      </button>
+      <button class="duration" data-min="20" data-cap="25">
+        <div class="d-min">20 min</div>
+        <div class="d-cap">up to 25 posts</div>
+      </button>
     </div>
+    <p class="cap-note">The session ends at whichever comes first, the time or the post cap.</p>
 
     <div class="actions">
       <button class="btn-text">Cancel</button>

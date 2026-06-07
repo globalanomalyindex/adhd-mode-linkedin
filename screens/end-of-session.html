@@ -72,15 +72,16 @@
     text-align: center;
   }
   .hero h1 {
-    font-size: 32px;
+    font-size: 28px;
     font-weight: 600;
     letter-spacing: -0.015em;
-    line-height: 1.15;
+    line-height: 1.2;
     color: var(--text);
     opacity: 0;
     transform: translateY(var(--lift-sm));
     animation: rise var(--d-slow) var(--ease-out) 360ms forwards;
   }
+  .hero h1 .sep { color: var(--text-tertiary); font-weight: 400; }
 
   /* ---------- Stats ---------- */
   .stats {
@@ -145,12 +146,11 @@
   .queue-item:hover { background: var(--brand-tint); cursor: pointer; }
   .queue-item:nth-of-type(1) { animation: rise var(--d-slow) var(--ease-out) 720ms forwards; }
   .queue-item:nth-of-type(2) { animation: rise var(--d-slow) var(--ease-out) calc(720ms + var(--stagger-tight)) forwards; }
-  .queue-item:nth-of-type(3) { animation: rise var(--d-slow) var(--ease-out) calc(720ms + var(--stagger-tight) * 2) forwards; }
 
   .queue-emoji {
     width: 36px; height: 36px;
     border-radius: 50%;
-    background: #eef3f8;
+    background: var(--field-grey);
     display: flex; align-items: center; justify-content: center;
     font-size: 16px;
     transition: transform var(--d-base) var(--ease-spring);
@@ -253,11 +253,11 @@
       <span style="color: var(--text-tertiary);">·</span>
       <span style="color: var(--text-secondary);">Ended</span>
     </div>
-    <div class="time">12:00</div>
+    <div class="time">12 min</div>
   </div>
 
   <div class="hero">
-    <h1>Done.</h1>
+    <h1>11 posts. 12 minutes. <span class="sep">·</span> 2 saved to revisit.</h1>
   </div>
 
   <div class="stats">
@@ -266,12 +266,12 @@
       <div class="stat-label">Posts seen</div>
     </div>
     <div class="stat">
-      <div class="stat-num" data-target="4">0</div>
+      <div class="stat-num" data-target="2">0</div>
       <div class="stat-label">Reactions</div>
     </div>
     <div class="stat">
-      <div class="stat-num" data-target="3">0</div>
-      <div class="stat-label">Will resurface</div>
+      <div class="stat-num" data-target="2">0</div>
+      <div class="stat-label">Saved to revisit</div>
     </div>
   </div>
 
@@ -282,33 +282,24 @@
       <div class="queue-emoji">&#128161;</div>
       <div class="queue-body">
         <div class="queue-author">Maya Chen</div>
-        <div class="queue-snippet">Leading through ambiguity</div>
+        <div class="queue-snippet">Retiring the cron job behind our billing pipeline</div>
       </div>
-      <div class="queue-when">In a few days</div>
+      <div class="queue-when">In about 3 days</div>
     </div>
 
     <div class="queue-item">
       <div class="queue-emoji">&#129309;</div>
       <div class="queue-body">
-        <div class="queue-author">James Park</div>
-        <div class="queue-snippet">Laid off from Meta after 6 years</div>
-      </div>
-      <div class="queue-when">Next week</div>
-    </div>
-
-    <div class="queue-item">
-      <div class="queue-emoji">&#10084;&#65039;</div>
-      <div class="queue-body">
         <div class="queue-author">Priya Nair</div>
-        <div class="queue-snippet">Her grandmother's last recipe</div>
+        <div class="queue-snippet">Friday was my last day at Cobalt</div>
       </div>
-      <div class="queue-when">Later this month</div>
+      <div class="queue-when">In about a week</div>
     </div>
   </div>
 
   <div class="actions">
-    <button class="btn-text">Start another session</button>
-    <button class="btn-primary">Close LinkedIn</button>
+    <button class="btn-text">Back to my feed</button>
+    <button class="btn-primary">See what I saved</button>
   </div>
 </div>
 

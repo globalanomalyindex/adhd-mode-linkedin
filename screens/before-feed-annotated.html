@@ -16,41 +16,42 @@
   .layout { display: flex; gap: 32px; justify-content: center; align-items: flex-start;
     flex-wrap: wrap; margin: 24px 0; }
 
+  /* ---------- Phone (a real LinkedIn home feed) ---------- */
   .phone-wrap { position: relative; width: 340px; flex-shrink: 0; }
-  .phone-shell { background: #111; border-radius: 36px; padding: 14px 8px;
+  .phone-shell { background: var(--text); border-radius: 36px; padding: 14px 8px;
     box-shadow: 0 12px 36px rgba(0,0,0,0.22); }
   .phone-screen { background: var(--bg); border-radius: 28px; height: 680px;
     position: relative; overflow: hidden; }
 
   .status-bar { background: var(--card); padding: 6px 16px; display: flex;
     justify-content: space-between; font-size: 10px; color: var(--text);
-    border-bottom: 1px solid #f0f0f0; }
+    border-bottom: 1px solid var(--hairline); }
 
   .nav-bar { background: var(--card); padding: 8px 12px; display: flex; gap: 8px;
-    align-items: center; border-bottom: 1px solid #e0dfdc; position: relative; }
+    align-items: center; border-bottom: 1px solid var(--hairline-2); position: relative; }
   .nav-logo { width: 28px; height: 28px; background: var(--brand); border-radius: 6px;
     display: flex; align-items: center; justify-content: center; color: #fff;
     font-weight: 700; font-size: 13px; }
-  .nav-search { background: #eef3f8; border-radius: 6px; flex: 1; height: 28px;
+  .nav-search { background: var(--field-grey); border-radius: 6px; flex: 1; height: 28px;
     padding: 6px 10px; box-sizing: border-box; font-size: 10px; color: var(--text-secondary); }
-  .nav-icon { width: 28px; height: 28px; border-radius: 6px; background: #eef3f8;
+  .nav-icon { width: 28px; height: 28px; border-radius: 6px; background: var(--field-grey);
     display: flex; align-items: center; justify-content: center; font-size: 14px; position: relative; }
-  .nav-badge { position: absolute; top: -2px; right: -2px; background: #cb112d;
+  .nav-badge { position: absolute; top: -2px; right: -2px; background: var(--notify-red);
     color: #fff; font-size: 8px; font-weight: 700; padding: 1px 4px;
     border-radius: 8px; min-width: 10px; text-align: center; }
 
-  .tabs { background: var(--card); display: flex; border-bottom: 1px solid #e0dfdc;
+  .tabs { background: var(--card); display: flex; border-bottom: 1px solid var(--hairline-2);
     font-size: 10px; color: var(--text-secondary); }
   .tab { flex: 1; text-align: center; padding: 8px 0; position: relative; }
   .tab.active { color: var(--brand); font-weight: 600; border-bottom: 2px solid var(--brand); }
-  .tab-badge { position: absolute; top: 4px; background: #cb112d; color: #fff;
+  .tab-badge { position: absolute; top: 4px; background: var(--notify-red); color: #fff;
     font-size: 7px; padding: 1px 3px; border-radius: 6px; }
 
   .compose { background: var(--card); margin: 8px; border-radius: 8px;
     padding: 10px 12px; display: flex; gap: 8px; align-items: center; }
   .compose-avatar { width: 32px; height: 32px; border-radius: 50%;
     background: linear-gradient(135deg, #fde68a, #fcd34d); }
-  .compose-input { flex: 1; border: 1px solid #d1d5db; border-radius: 24px;
+  .compose-input { flex: 1; border: 1px solid var(--hairline-2); border-radius: 24px;
     padding: 6px 12px; font-size: 11px; color: var(--text-secondary); }
   .compose-actions { background: var(--card); margin: 0 8px; padding: 6px 12px 10px;
     display: flex; gap: 6px; justify-content: space-around; font-size: 9px;
@@ -69,24 +70,17 @@
   .post-close { font-size: 14px; color: var(--text-secondary); margin-left: 4px; }
   .post-body { font-size: 10px; line-height: 1.55; color: var(--text); }
   .post-body .more { color: var(--brand); font-weight: 600; }
-  .post-video { background: #000; height: 80px; margin-top: 8px; border-radius: 6px;
-    position: relative; display: flex; align-items: center; justify-content: center; }
-  .post-video .play { color: #fff; font-size: 20px; }
-  .post-video .duration { position: absolute; top: 6px; right: 6px;
-    background: rgba(0,0,0,0.6); color: #fff; font-size: 8px; padding: 2px 5px; border-radius: 3px; }
-  .post-video .views { position: absolute; bottom: 6px; left: 6px;
-    background: rgba(0,0,0,0.6); color: #fff; font-size: 8px; padding: 2px 5px; border-radius: 3px; }
   .post-counts { display: flex; align-items: center; justify-content: space-between;
-    margin-top: 8px; padding-top: 6px; border-top: 1px solid #f0f0f0;
+    margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--hairline);
     font-size: 9px; color: var(--text-secondary); }
   .post-actions { display: flex; justify-content: space-around; margin-top: 6px;
-    padding-top: 6px; border-top: 1px solid #f0f0f0; font-size: 10px; color: var(--text-secondary); }
+    padding-top: 6px; border-top: 1px solid var(--hairline); font-size: 10px; color: var(--text-secondary); }
 
-  .promoted { border: 1px solid #fef3c7; }
-  .promoted-tag { font-size: 9px; color: #92400e; background: #fef3c7;
+  .promoted { border: 1px solid var(--hairline-2); }
+  .promoted-tag { font-size: 9px; color: var(--text-secondary); background: var(--surface-2);
     display: inline-block; padding: 2px 6px; border-radius: 3px;
     margin-bottom: 6px; font-weight: 600; }
-  .promoted-logo { width: 40px; height: 40px; background: #e5e7eb; border-radius: 4px; }
+  .promoted-logo { width: 40px; height: 40px; background: var(--surface-2); border-radius: 4px; }
   .promoted-name { font-size: 10px; font-weight: 600; }
   .promoted-followers { font-size: 9px; color: var(--text-secondary); }
   .promoted-body { font-size: 10px; line-height: 1.5; margin-top: 6px; }
@@ -95,7 +89,7 @@
 
   .pymk-title { font-size: 11px; font-weight: 600; margin-bottom: 8px; }
   .pymk-row { display: flex; gap: 6px; overflow-x: auto; }
-  .pymk-card { background: #f9fafb; border-radius: 6px; padding: 6px;
+  .pymk-card { background: var(--surface-2); border-radius: 6px; padding: 6px;
     min-width: 80px; text-align: center; }
   .pymk-avatar { width: 36px; height: 36px; border-radius: 50%; margin: 0 auto 4px; }
   .pymk-name { font-size: 9px; font-weight: 600; }
@@ -103,34 +97,37 @@
     border: 1px solid var(--brand); padding: 2px; border-radius: 12px;
     font-size: 8px; margin-top: 4px; }
 
-  .pin { position: absolute; background: #cb112d; color: #fff; width: 22px; height: 22px;
+  /* Annotation pin: a numbered marker that ties the feed to the legend. */
+  .pin { position: absolute; background: var(--brand); color: #fff; width: 22px; height: 22px;
     border-radius: 50%; display: flex; align-items: center; justify-content: center;
     font-size: 11px; font-weight: 700; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
 
+  /* ---------- Annotation panel (overlay, native chrome) ---------- */
   .side { flex: 1; min-width: 340px; max-width: 480px; }
 
-  .hook { background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 14px;
-    padding: 18px 20px; margin-bottom: 20px; border-left: 4px solid #f59e0b; }
-  .hook-tag { font-size: 10px; font-weight: 700; color: #92400e;
-    letter-spacing: 1px; margin-bottom: 6px; }
-  .hook-h { font-size: 15px; font-weight: 600; color: var(--text);
-    line-height: 1.4; margin-bottom: 8px; }
-  .hook-body { font-size: 13px; line-height: 1.6; color: #374151; }
-  .hook-foot { font-size: 12px; line-height: 1.5; color: #92400e;
-    margin-top: 12px; font-style: italic; }
+  /* Overline label: small, normal case, not all-caps shouting. */
+  .overline { font-size: var(--fs-meta); font-weight: 600; color: var(--text-secondary);
+    letter-spacing: var(--tracking-wide); margin-bottom: var(--s-2); }
 
-  .legend { background: var(--card); border-radius: 14px; padding: 18px 20px;
-    box-shadow: 0 2px 14px rgba(0,0,0,0.05); }
-  .legend-tag { font-size: 10px; font-weight: 700; color: var(--text-secondary);
-    letter-spacing: 1px; margin-bottom: 12px; }
-  .legend-list { display: flex; flex-direction: column; gap: 10px; }
-  .legend-row { display: flex; gap: 10px; align-items: flex-start; }
-  .legend-num { background: #cb112d; color: #fff; width: 20px; height: 20px;
+  .hook { background: var(--card); border-radius: var(--r-md);
+    box-shadow: var(--shadow); padding: var(--s-5) var(--s-5);
+    margin-bottom: var(--s-5); border-left: 3px solid var(--brand); }
+  .hook-h { font-size: 15px; font-weight: 600; color: var(--text);
+    line-height: var(--lh-base); margin-bottom: var(--s-2); }
+  .hook-body { font-size: var(--fs-small); line-height: var(--lh-loose); color: var(--text); }
+  .hook-foot { font-size: var(--fs-meta); line-height: var(--lh-base); color: var(--text-secondary);
+    margin-top: var(--s-3); padding-top: var(--s-3); border-top: 1px solid var(--hairline); }
+
+  .legend { background: var(--card); border-radius: var(--r-md); padding: var(--s-5);
+    box-shadow: var(--shadow); }
+  .legend-list { display: flex; flex-direction: column; gap: var(--s-3); }
+  .legend-row { display: flex; gap: var(--s-3); align-items: flex-start; }
+  .legend-num { background: var(--brand); color: #fff; width: 20px; height: 20px;
     border-radius: 50%; display: flex; align-items: center; justify-content: center;
     font-size: 10px; font-weight: 700; flex-shrink: 0; }
-  .legend-text { font-size: 12px; line-height: 1.5; }
-  .legend-foot { margin-top: 14px; padding-top: 12px; border-top: 1px solid #f0f0f0;
-    font-size: 11px; color: var(--text-tertiary); font-style: italic; line-height: 1.5; }
+  .legend-text { font-size: var(--fs-meta); line-height: var(--lh-loose); }
+  .legend-foot { margin-top: var(--s-4); padding-top: var(--s-3); border-top: 1px solid var(--hairline);
+    font-size: var(--fs-meta); color: var(--text-tertiary); line-height: var(--lh-base); }
 </style>
 </head>
 <body>
@@ -176,19 +173,14 @@
             <div class="post-avatar" style="background: linear-gradient(135deg, #dbeafe, #bfdbfe);"></div>
             <div class="post-meta">
               <div class="post-name">Maya Chen <span class="conn">&middot; 3rd+</span></div>
-              <div class="post-title">VP of Engineering at Stripe</div>
-              <div class="post-time">2h &middot; &#127758;</div>
+              <div class="post-title">Staff Engineer at Northwind Logistics</div>
+              <div class="post-time">3h &middot; &#127758;</div>
             </div>
             <div class="post-follow">+ Follow</div>
             <div class="post-close">&times;</div>
           </div>
           <div class="post-body">
-            I almost quit my job last year. It was 11pm on a Thursday. I was sitting in my car in the office parking lot, staring at my phone&hellip; <span class="more">see more</span>
-          </div>
-          <div class="post-video">
-            <div class="play">&#9658;</div>
-            <div class="duration">2:14</div>
-            <div class="views">12.4K views</div>
+            We finally retired the cron job that ran our billing pipeline. It had thirty seven downstream consumers and a single point of failure that took us down twice last quarter&hellip; <span class="more">see more</span>
           </div>
           <div class="post-counts">
             <div>&#128077;&#10084;&#128161; <strong>2,847</strong></div>
@@ -208,7 +200,7 @@
               <div class="promoted-followers">1,247,302 followers</div>
             </div>
           </div>
-          <div class="promoted-body">Engineers: are you wasting hours on infra? See how 4,000 teams scaled with Acme&hellip;</div>
+          <div class="promoted-body">Acme Cloud now supports point in time recovery on every plan, including the free tier&hellip;</div>
           <div class="promoted-cta">Learn more</div>
         </div>
 
@@ -216,12 +208,12 @@
           <div class="post-head">
             <div class="post-avatar" style="background: linear-gradient(135deg, #fecaca, #fca5a5);"></div>
             <div class="post-meta">
-              <div class="post-name">James Park</div>
-              <div class="post-title">Former PM at Meta &middot; #OpenToWork</div>
+              <div class="post-name">Priya Nair</div>
+              <div class="post-title">Engineering Manager &middot; #OpenToWork</div>
               <div class="post-time">4h</div>
             </div>
           </div>
-          <div class="post-body">Today I was part of the layoffs at Meta. After 6 years, I'm officially looking. If you have any leads&hellip;</div>
+          <div class="post-body">Friday was my last day at Cobalt. My whole team was cut in the restructure. I am not going to pretend it does not sting&hellip;</div>
           <div class="post-counts">
             <div>&#10084;&#129309; <strong>18,209</strong></div>
             <div>2,847 comments</div>
@@ -255,9 +247,8 @@
         <div class="pin" style="top:284px; left:18px;">4</div>
         <div class="pin" style="top:336px; right:14px;">5</div>
         <div class="pin" style="top:404px; left:18px;">6</div>
-        <div class="pin" style="top:454px; left:80px;">7</div>
-        <div class="pin" style="top:526px; right:18px;">8</div>
-        <div class="pin" style="top:580px; left:18px;">9</div>
+        <div class="pin" style="top:526px; right:18px;">7</div>
+        <div class="pin" style="top:580px; left:18px;">8</div>
       </div>
     </div>
   </div>
@@ -265,7 +256,7 @@
   <div class="side">
 
     <div class="hook">
-      <div class="hook-tag">CASE STUDY HOOK</div>
+      <div class="overline">Case study hook</div>
       <div class="hook-h">Look at the feed for 5 seconds.</div>
       <div class="hook-body">
         Then close your eyes. How many posts mentioned hiring? Did you see the layoff? What color was the second profile photo? How many notification badges were there?
@@ -276,26 +267,25 @@
     </div>
 
     <div class="legend">
-      <div class="legend-tag">ANNOTATED COSTS</div>
+      <div class="overline">Annotated costs</div>
       <div class="legend-list">
-        <div class="legend-row"><div class="legend-num">1</div><div class="legend-text"><strong>Notification badge anchoring.</strong> Red dots prime hypervigilance. ADHD users disproportionately route attention to alert-colored UI (Pessoa, threat-detection bias).</div></div>
+        <div class="legend-row"><div class="legend-num">1</div><div class="legend-text"><strong>Notification badge anchoring.</strong> Red counts prime hypervigilance. ADHD users disproportionately route attention to alert-colored UI (Pessoa, threat-detection bias).</div></div>
         <div class="legend-row"><div class="legend-num">2</div><div class="legend-text"><strong>Tab badges with 99+ counts.</strong> Forces a "something is unfinished" feeling. Triggers task-switching impulses for ADHD; freezes CDS users in indecision.</div></div>
-        <div class="legend-row"><div class="legend-num">3</div><div class="legend-text"><strong>"+ Follow" CTA inside post header.</strong> A decision injected before you've read a single word. Three CTAs visible on this card alone (Follow, dismiss, See more).</div></div>
-        <div class="legend-row"><div class="legend-num">4</div><div class="legend-text"><strong>"See more" truncation.</strong> The first 3 lines are rarely a summary, they're a hook. Forces a sunk-cost decision: commit or skip without knowing what you're committing to.</div></div>
-        <div class="legend-row"><div class="legend-num">5</div><div class="legend-text"><strong>Autoplay video with view count.</strong> Motion captures involuntary attention (well-established perceptual bias). View count anchors judgment before content is processed.</div></div>
-        <div class="legend-row"><div class="legend-num">6</div><div class="legend-text"><strong>Reaction count + 4 action buttons.</strong> "2,847 reactions" anchors social proof before evaluation. 4 ambiguous CTAs (Like, Comment, Repost, Send) compete for the next move.</div></div>
-        <div class="legend-row"><div class="legend-num">7</div><div class="legend-text"><strong>Sponsored content mid-feed.</strong> Indistinguishable in layout from organic content. Forces context-switch between trust modes (social vs commercial).</div></div>
-        <div class="legend-row"><div class="legend-num">8</div><div class="legend-text"><strong>Emotionally heavy post adjacent to ad.</strong> A layoff announcement (18K reactions) immediately follows a vendor pitch. Whiplash in tone is taxing for both ADHD (emotional dysregulation) and CDS (slow context re-orientation).</div></div>
-        <div class="legend-row"><div class="legend-num">9</div><div class="legend-text"><strong>Horizontal-scroll "People you may know."</strong> Introduces a second scroll axis. Multiple "+ Connect" decisions, each requiring social calibration. No off-ramp from the feed.</div></div>
+        <div class="legend-row"><div class="legend-num">3</div><div class="legend-text"><strong>"+ Follow" CTA inside the post header.</strong> A decision injected before you have read a single word. Three CTAs sit on this card alone (Follow, dismiss, See more).</div></div>
+        <div class="legend-row"><div class="legend-num">4</div><div class="legend-text"><strong>"See more" truncation.</strong> The first three lines are rarely a summary, they are a hook. Forces a sunk-cost decision: commit or skip without knowing what you are committing to.</div></div>
+        <div class="legend-row"><div class="legend-num">5</div><div class="legend-text"><strong>Reaction count and four action buttons.</strong> "2,847 reactions" anchors social proof before evaluation. Four CTAs (Like, Comment, Repost, Send) compete for the next move.</div></div>
+        <div class="legend-row"><div class="legend-num">6</div><div class="legend-text"><strong>Sponsored content mid-feed.</strong> Laid out the same as organic content. Forces a context-switch between trust modes (social vs commercial).</div></div>
+        <div class="legend-row"><div class="legend-num">7</div><div class="legend-text"><strong>Emotionally heavy post next to an ad.</strong> A layoff post (18K reactions) follows a vendor pitch. The whiplash in tone taxes both ADHD (emotional dysregulation) and CDS (slow context re-orientation).</div></div>
+        <div class="legend-row"><div class="legend-num">8</div><div class="legend-text"><strong>Horizontal "People you may know."</strong> Introduces a second scroll axis. Multiple "+ Connect" decisions, each needing social calibration. No off-ramp from the feed.</div></div>
       </div>
       <div class="legend-foot">
-        Nine costs in a single screen of content. The feed continues infinitely below, with no natural completion state.
+        Eight costs in a single screen of content. The feed continues below, with no natural completion state.
       </div>
     </div>
 
   </div>
 </div>
 
-<p class="subtitle" style="margin-top:24px;">This is the "before" the reviewer sees right after the selective-attention demo lands. Next: the <strong>end-of-session summary</strong> with the resurface queue made visible.</p>
+<p class="subtitle" style="margin-top:24px;">This is the "before" the reviewer sees right after the selective-attention demo lands. Next: the <strong>active session</strong>, then the <strong>end-of-session summary</strong> with the resurface queue made visible.</p>
 </body>
 </html>
