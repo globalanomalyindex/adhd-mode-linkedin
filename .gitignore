@@ -5,3 +5,6 @@ node_modules/
 coverage/
 *.log
 .claude/
+
+# verification scratch
+.playwright-mcp/

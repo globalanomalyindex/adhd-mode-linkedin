@@ -17,7 +17,7 @@ The mode is built around three load-bearing ideas:
 
 1. **Bounded sessions instead of infinite scroll.** The user enters a Focus Session of a chosen length. The session has a post cap, a visible time box, and ends with a closure ritual. Time blindness, hyperfocus collapse, and the "where did 45 minutes go" failure mode are addressed by external structure rather than user willpower.
 
-2. **LinkedIn reactions as a personal spaced-repetition engine.** Three of LinkedIn's six native reactions (Insightful, Support, Love) quietly schedule the post into a private resurface queue that brings it back at research-supported intervals. The same tap that fires the normal LinkedIn social signal also routes the user's future attention. Anki-style spaced learning, built from primitives users already know.
+2. **LinkedIn reactions as a personal spaced-repetition layer.** Three of LinkedIn's six native reactions (Insightful, Support, Love) schedule the post into a private resurface queue that brings it back at research-supported intervals. The same tap that fires the normal LinkedIn social signal also routes the user's future attention. The shipped mechanic is reaction-seeded fixed spaced intervals: a qualifying reaction seeds the post and the scheduler advances it on a fixed widening curve, deterministically and inspectably. The research build evolves that scheduler toward SM-2 (grade-driven ease factors adjusted by a recall probe at the second touch); see Section 11. Spaced learning built from primitives users already know.
 
 3. **A vertical gesture grammar that respects scroll muscle memory.** Swipe up to skip (private, no signal), swipe down to react (default Like), drift sideways to pick a richer reaction with magnification on hover (Fitts's Law applied). Long posts are reflowed into chunked, paged cards with a TL;DR-first opening, defusing the wall-of-text and sunk-cost traps.
 
@@ -26,6 +26,8 @@ Two sub-modes (Focus for ADHD-C/H days, Re-engage for CDS days) adjust pacing, d
 **Deliverables for this portfolio piece:**
 
 - A working interactive prototype in HTML/CSS/JS demonstrating the full focus mode end-to-end (real drag physics, magnification, gesture commits)
+- A typed React component for the production-track Action Dock (`react/`), with co-located tests, so the interaction reads as buildable rather than as a one-off demo
+- A Python capability-analytics pipeline (`analytics/`) that defines the typed event schema, generates a synthetic event stream, and computes the Tier 1 capability metrics from it
 - Figma-ready specification (component definitions, design tokens in W3C-compatible JSON, frame-by-frame specs for handoff)
 - Case study writeup with cited research, before/after analysis, and a "Pattern, Not Just a Feature" generalization argument extending to streaming surfaces
 
@@ -83,17 +85,19 @@ A pointed surface choice for the portfolio piece. LinkedIn is a professional con
 
 These hypotheses are explicit because the design depends on them being directionally true. If post-launch data refuted them, the design would need rework rather than incremental polish.
 
+Note on framing: the engagement-flavored hypotheses above (7-day return, reaction-mix shift) are guardrails, not success criteria. Section 15 restructures measurement into a capability-first model where these sit underneath the outcome metrics whose only job is to confirm the feature is not draining the business while capability moves.
+
 ---
 
 ## 3. Research foundation
 
-The design responds to specific findings from cognitive science and human-computer interaction. Each finding below traces to one or more mechanics in Section 7.
+The design responds to specific findings from cognitive science and human-computer interaction. Each finding below traces to one or more mechanics in Section 7. The audience is not small: adult ADHD prevalence is commonly estimated at 4 to 8 percent of working adults (Kessler et al., 2006, National Comorbidity Survey Replication). That figure carries the business case, so it cites a source rather than a round number.
 
 ### 3.1. ADHD (Combined and Hyperactive-Impulsive presentations)
 
-**Delay aversion and time blindness.** People with ADHD systematically under-perceive elapsed time and avoid delayed reward (Barkley's executive function model; Sonuga-Barke). *Mechanic:* visible time box, bounded session length, dopamine routed to in-session micro-completions (the gesture-commit feedback).
+**Delay aversion and time blindness.** People with ADHD systematically under-perceive elapsed time and steer away from delayed reward. Sonuga-Barke (2002) models delay aversion as a motivational style in its own right, distinct from a pure attention deficit. *Mechanic:* visible time box, bounded session length, dopamine routed to in-session micro-completions (the gesture-commit feedback).
 
-**Executive function and working memory load.** Holding multiple items in mind while scrolling overwhelms working memory (Barkley). *Mechanic:* per-post TL;DR, single-decision moments, paged long-post reflow.
+**Executive function and working memory load.** Holding multiple items in mind while scrolling overwhelms working memory. Barkley's self-regulation model (the executive-function and working-memory framework, Part II of *ADHD and the Nature of Self-Control*) treats ADHD as a deficit in holding and acting on internally represented information. *Mechanic:* per-post TL;DR, single-decision moments, paged long-post reflow.
 
 **Novelty-seeking and impulse interaction.** Infinite scroll functions as a slot machine for ADHD attention. *Mechanic:* capped post count, no autoload, intentional "continue" choice at the cap, preview-before-commit on every gesture.
 
@@ -103,6 +107,8 @@ The design responds to specific findings from cognitive science and human-comput
 
 CDS, formerly known as Sluggish Cognitive Tempo (SCT), was renamed via expert consensus in 2022 ([Becker et al., JAACAP 2022](https://www.jaacap.org/article/S0890-8567(22)01246-1/fulltext)). It is characterized by excessive daydreaming, mental fog, slowed processing, and hypoactivity, with neurocognitive research showing CDS individuals are "accurate but slow" across attention and executive function tasks ([Mayes et al., PMC10474248](https://pmc.ncbi.nlm.nih.gov/articles/PMC10474248/)).
 
+A marked hypothesis, stated plainly so it is not mistaken for a finding: the Mayes study measured children, not adults. Applying its "accurate but slow" profile to the working adults this design serves is a deliberate generalization, not established science, and it belongs on the list of things to validate (Section 18) before any strong claim rests on it.
+
 **Slowed processing speed.** Content presented at typical density and pace is missed or skimmed past without absorption. *Mechanic:* longer in-card dwell defaults in Re-engage mode, lower visual density, one-post focus.
 
 **Daydreaming and mind-wandering (passive disengagement).** Distinct from active distraction. *Mechanic:* gentle "still with us?" re-engagement prompt after extended dwell-without-action, not a punishing one.
@@ -111,19 +117,21 @@ CDS, formerly known as Sluggish Cognitive Tempo (SCT), was renamed via expert co
 
 ### 3.3. Spaced repetition
 
-Established as a memory consolidation strategy since Ebbinghaus's forgetting curve (1885) and validated extensively in modern learning science. Application to ADHD populations is supported on the basis of working-memory load reduction and alignment with shorter attention spans ([Voovo summary of ADHD-focused research](https://www.voovostudy.com/study-blog/how-to-study-better-with-adhd); [evening-practice consolidation in ADHD, Adi-Japha et al., PMC5540945](https://pmc.ncbi.nlm.nih.gov/articles/PMC5540945/)).
+Established as a memory consolidation strategy since Ebbinghaus mapped the forgetting curve in 1885 ([Ebbinghaus, *Über das Gedächtnis*](https://archive.org/details/berdasgedchtni00ebbiuoft)) and validated extensively in modern learning science. Application to ADHD populations rests on working-memory-load reduction and alignment with shorter attention spans; one of the few ADHD-specific consolidation studies found that scheduling practice well supports procedural memory in this group ([Adi-Japha et al., PMC5540945](https://pmc.ncbi.nlm.nih.gov/articles/PMC5540945/)).
 
 CDS-specific spacing research does not yet exist. The current consensus paper lists ten priority research domains; optimal learning-interval design is not among the active studies. ADHD Mode's Re-engage adaptations therefore target the *encoding phase* (longer dwell, optional in-session re-exposure, pre-card framers) rather than the long-term retention curve. This is marked explicitly as a designer's hypothesis to test, not as established science.
 
 ### 3.4. HCI principles applied
 
-**Fitts's Law.** Magnified targets reduce time-to-acquire and error rate. Applied directly to the reaction-tray magnification.
+**Fitts's Law.** Magnified targets reduce time-to-acquire and error rate (Fitts, 1954). Applied directly to the reaction-tray magnification.
 
-**Preview before commit.** Visible reaction-label preview during swipe gives the user a chance to back out. Addresses ADHD's documented response-inhibition deficit (Barkley).
+**Hick's Law.** Choice time grows with the number of options (Hick, 1952; extended by Hyman, 1953). This is why the common path carries no decisions and the richer reaction set opens only on demand, rather than presenting all six reactions on every card.
+
+**Preview before commit.** Visible reaction-label preview during swipe gives the user a chance to back out. Addresses ADHD's documented response-inhibition deficit (Barkley, *ADHD and the Nature of Self-Control*, the behavioral-inhibition chapter, Part I, cited separately from the executive-function model in 3.1).
 
 **Effort matched to consequence.** Low-stakes Like is one cheap motion; higher-stakes Insightful (which schedules resurfacing) requires hover and drop. Deliberate cognition is aligned with weightier choices.
 
-**Default-easy, deliberate-rich.** A progressive-disclosure pattern: the common path has no decisions, the rich path opens on demand. Reduces decision-load (Hick's Law) without removing capability.
+**Default-easy, deliberate-rich.** A progressive-disclosure pattern: the common path has no decisions, the rich path opens on demand. Reduces decision-load (Hick's Law, above) without removing capability.
 
 ### 3.5. What we are NOT claiming
 
@@ -149,12 +157,12 @@ The constraints held throughout. Each is a falsifiable test the design must pass
 
 ### 5.1. Focus Session
 
-A bounded interaction container the user enters from LinkedIn's home surface. A session has:
+A bounded interaction container the user enters from LinkedIn's home surface. A session is bounded by BOTH a time box AND a soft post cap, and ends when either bound is reached, whichever comes first. A session has:
 
-- A **chosen length** (default 12 minutes for Focus mode, 8 minutes for Re-engage mode; user-adjustable)
-- A **post cap** (12 posts default for Focus, 8 for Re-engage)
+- A **chosen length**, set from three setup presets: 5 minutes, 12 minutes, or 20 minutes (user-adjustable)
+- A **soft post cap** carried by the chosen preset: 5 minutes caps at 8 posts, 12 minutes caps at 15 posts, 20 minutes caps at 25 posts. Time and post count are independent bounds, not a one-to-one coupling
 - A **single visible feed**; messages, notifications, jobs, the right rail, and pull-to-refresh are suppressed
-- An **end state** triggered by whichever comes first: time, cap, or user-initiated wrap
+- An **end state** triggered by whichever bound comes first: time, post cap, or user-initiated wrap
 - A **closure screen** showing what happened in the session
 
 The session is the unit of intentional engagement. Inside the session, the feed is restructured. Outside the session, LinkedIn behaves normally.
@@ -229,17 +237,17 @@ Each LinkedIn reaction has dual function inside ADHD Mode: it still fires the no
 
 | Reaction | Social signal | Resurface behavior |
 |---|---|---|
-| 💡 Insightful | Standard | ~3 days, then Anki-style spaced curve |
-| 🤝 Support | Standard | ~1 week |
-| ❤️ Love | Standard | ~2 weeks |
+| 💡 Insightful | Standard | About 3 days, then a fixed widening interval |
+| 🤝 Support | Standard | About 1 week |
+| ❤️ Love | Standard | About 2 weeks |
 | 🎉 Celebrate | Standard | No feed resurface; surfaces on the user's next visit to that author's profile |
 | 👍 Like | Standard | No resurface |
 | 😄 Funny | Standard | No resurface |
 | *(no reaction / swipe past)* | Nothing | No resurface, no penalty |
 
-Three of the six reactions (Insightful, Support, Love) carry resurfacing weight. The mapping is deliberate: these are the three reactions whose emotional signal most strongly implies "I want to remember this" or "this person matters to me."
+Three of the six reactions (Insightful, Support, Love) carry resurfacing weight. The mapping is deliberate: these are the three reactions whose emotional signal most strongly implies "I want to remember this" or "this person matters to me." The shipped scheduler that turns these reactions into intervals is described in Section 11; the short name for it is reaction-seeded fixed spaced intervals, and it is not the SM-2 algorithm.
 
-Resurfacing is **ambient**, not scheduled-visible. The user does not see "this returns Tuesday." A small `↻ 3` indicator in the session top bar quietly grows during a session to show the queue is building. The full queue is shown at session end and is browsable from a settings surface, but no resurface item ever announces its arrival.
+Resurfacing is **ambient**, not scheduled-visible. The user does not see "this returns Tuesday." A small `↻ 2` indicator in the session top bar quietly grows during a session to show the queue is building (the canonical depicted session ends with 2). The full queue is shown at session end and is browsable from a settings surface, but no resurface item ever announces its arrival.
 
 ### 7.3. Reaction commit feedback
 
@@ -387,16 +395,20 @@ The private layer that makes reactions function as a personal spaced-repetition 
 
 Per-user resurface queue: `{post_id, reaction_type, scheduled_for, exposure_count, last_shown}`.
 
-### 11.2. Scheduling logic
+### 11.2. Scheduling logic: what ships, and what the research build adds
+
+The shipped mechanic is **reaction-seeded fixed spaced intervals**. A qualifying reaction seeds the post into the queue, and the scheduler advances it on a fixed widening curve. The same reaction always produces the same schedule, so the curve is deterministic and inspectable: the user can predict and trust what the queue will do. This is deliberately not the SM-2 algorithm; it is the simplest scheduler that does the job.
 
 ```
-Insightful: initial_interval = 3 days, multiplier = 2.5  (Anki SM-2 base curve)
+Insightful: initial_interval = 3 days, multiplier = 2.5
 Support:    initial_interval = 7 days, multiplier = 2.0
 Love:       initial_interval = 14 days, multiplier = 1.5
 Celebrate:  no feed schedule; surfaces in profile-visit context
 ```
 
 After each resurface exposure, the next interval is `last_interval × multiplier`. Items reaching `exposure_count = 4` are retired from the queue.
+
+The **research build** evolves the scheduler toward **SM-2**, where grade-driven ease factors stretch or compress each interval instead of applying a fixed multiplier. The grade comes from a short recall probe at the second touch: the user states the post's core claim before it is re-shown. That probe does double duty. It tunes the spacing, and it yields a capability signal (recall accuracy on resurfaced posts versus a non-resurfaced control, the Tier 1 metric in Section 15). The shipped version trades that signal away for simplicity and trust; the research version buys it back. The honest framing throughout is that the shipped mechanic is reaction-seeded fixed spaced intervals and SM-2 is the evolution, not the thing that ships.
 
 ### 11.3. Surfacing
 
@@ -414,6 +426,26 @@ A settings surface (outside the session) exposes:
 - Adjust mix ratio
 - Opt out of resurface entirely (Reactions still fire normally; nothing schedules)
 
+### 11.5. The AI boundary
+
+The mode uses a model in a few narrow places, and the line around it is drawn on purpose. The stance, stated once:
+
+> AI orients and scaffolds. It does not decide what you re-see, and it never optimizes for time on app.
+
+The scheduling that gives the feature its point stays deterministic and user-owned, so the parts a person needs to trust are the parts a person can inspect.
+
+**AI may:**
+- Generate the per-post TL;DR for long posts (an LLM call in production; an honest stub in the prototype's `lib/reflow.js`).
+- Power the optional recall and comprehension probes in the research build, writing the question and grading the free-text answer.
+- Draft an optional reflection prompt at closure, which the user can ignore or edit.
+
+**AI must not:**
+- Choose what resurfaces. That is driven by the user's own reactions, deterministically and transparently (Section 11.2), and the queue is always visible and editable.
+- Rank or curate the feed for engagement. The session keeps native chronological or the user's existing feed order and adds no engagement-optimizing ranker.
+- Set or nudge session length. The user sets the bound.
+
+This is not an AI persona bolted onto the product; it is the same honest-judgment framing that runs through the rest of the design, applied to the one place where a model touches the experience.
+
 ---
 
 ## 12. Accessibility
@@ -430,7 +462,7 @@ Contrast meets WCAG AA at all type sizes used (body text against cream backgroun
 
 ### 12.3. Screen readers
 
-Card content is read in linear order: author, role, post content, page-of-pages indicator, available actions. Gesture state changes are announced via ARIA live regions ("Liked Maya Chen's post. Three items will resurface.").
+Card content is read in linear order: author, role, post content, page-of-pages indicator, available actions. Gesture state changes are announced via ARIA live regions ("Marked Maya Chen's post Insightful. Saved to resurface."). The resurface confirmation is count-agnostic by design, so the announcement never contradicts the live queue total.
 
 ### 12.4. Motion
 
@@ -488,7 +520,7 @@ The major design moves, each as a decision with the alternatives considered and 
 
 How this is pitched internally to a product team for buy-in.
 
-**To product leadership:** ADHD Mode is an accessibility and wellbeing artifact that opens a new segment of professional users (estimated 4-8% of working adults have ADHD; CDS prevalence estimates are still emerging but appear comparable). It strengthens LinkedIn's wellbeing posture against regulatory and PR pressure without changing the underlying business model.
+**To product leadership:** ADHD Mode is an accessibility and wellbeing artifact that opens a new segment of professional users (adult ADHD prevalence is estimated at 4 to 8 percent of working adults, per Kessler et al., 2006; CDS prevalence estimates are still emerging but appear comparable). It strengthens LinkedIn's wellbeing posture against regulatory and PR pressure without changing the underlying business model.
 
 **To engineering:** the bulk of the work is a session-state machine, a server-side reflow LLM pass (additive to existing post-NLP), and a private resurface queue. No changes to the core feed-ranking algorithm. Reaction infrastructure is unchanged; we add a parallel scheduling table.
 
@@ -502,21 +534,34 @@ How this is pitched internally to a product team for buy-in.
 
 ## 15. What we'd measure
 
-Metrics to instrument from day one.
+Most feed features get this backwards: they pick an engagement number as the success metric, then call any lift a win. Here the order is inverted on purpose. Capability and outcome come first; engagement sits underneath as a guardrail; three counter-metrics are wired to fail loudly if the design is doing harm.
 
-| Metric | Why it matters |
-|---|---|
-| Opt-in rate (% of eligible users who try ADHD Mode at least once) | Demand signal |
-| Session completion rate (% of started sessions that reach end-of-session) | Container quality |
-| Session length distribution (cap-clustered vs runtime ceiling) | Did the bounded structure hold? |
-| Reaction-mix distribution inside vs outside ADHD Mode | Are users using reactions more deliberately? |
-| Resurface acceptance (% of resurfaced items reacted to on second touch) | Is the spacing logic working? |
-| Mode selection split (Focus vs Re-engage frequency) | Are both sub-modes earning their existence? |
-| 7-day and 30-day return rate, ADHD Mode users vs matched control | The core retention hypothesis |
-| Post-session app exits (% of sessions where user actually closes vs returns to feed) | Closure ritual effectiveness |
-| Skip rate distribution (% of cards skipped per session) | Calibration signal for post-cap defaults |
+State it plainly: engagement metrics here are guardrails, not success criteria. They confirm the feature is not draining the business while capability moves; they do not get to declare it a success. The typed event schema and the metric computations live in `analytics/` (Section 19.3).
 
-Each metric maps to a specific hypothesis from Section 2.2. If a hypothesis is refuted, the corresponding design move is reconsidered.
+### 15.1. Tier 1, capability and outcome (PRIMARY, the success criteria)
+
+These define what "working" means. If they do not move, the feature has not earned its place, however good the engagement chart looks.
+
+| Metric | Instrument | Build |
+|---|---|---|
+| **Resurfaced-content recall.** When a saved post resurfaces, an optional unprompted recall probe asks the user to state its core claim before it is re-shown. Recall accuracy on resurfaced posts versus a non-resurfaced control. | `recall_probe.correct` against a control cohort | Research build |
+| **Comprehension after reflow.** A one-question comprehension probe after a long post shown TL;DR-first versus the same post shown full-text-first. Comprehension-accuracy delta between the two orderings. | probe result keyed on reflow ordering | Research build |
+| **Intentional completion rate.** Share of sessions ended by the user's closure ritual or by the time or post bound, versus sessions abandoned by leaving the app mid-session. A proxy for agency and self-regulation. | `session_wrapped.reason` (`user_closed` / `timebox` / `postcap` versus `abandoned`) | Ships |
+| **Settledness delta.** A single self-report item before and after the session, "Right now I feel scattered" to "Right now I feel settled", on a 1-to-5 scale. Mean shift across the session. | `session_wrapped.settledness_delta` | Ships |
+
+### 15.2. Tier 2, engagement (GUARDRAILS, must not be the success criteria)
+
+Opt-in rate, 7-day return, reaction-mix shift, and resurface acceptance rate. Their only job is to confirm the capability metrics are not moving at the cost of the business. They are watched, not optimized. If they stay flat or improve while capability moves, the mode pays for itself; if capability does not move, the design needs rework rather than incremental polish.
+
+### 15.3. Harm counter-metrics (these must fail loudly)
+
+If any of these rises, the design is doing damage and needs rework, not polish.
+
+- **Compulsive re-entry.** Rate of starting another session within two minutes of a closure. Signals the bound became a binge enabler rather than a stop.
+- **Resurface anxiety.** Resurface-queue opt-out rate plus dismiss-without-view rate on resurfaced items. Signals the queue became a guilt backlog.
+- **Rumination increase.** Share of users whose settledness delta runs the wrong way, more scattered after the session than before. Signals the session is leaving people worse than it found them.
+
+Each Tier 1 and Tier 2 metric still maps to a hypothesis from Section 2.2. If a hypothesis is refuted, the corresponding design move is reconsidered.
 
 ---
 
@@ -560,7 +605,7 @@ Honest acknowledgments.
 
 ## 19. Deliverables scope
 
-Three artifacts ship together.
+The artifacts that ship together.
 
 ### 19.1. Working interactive prototype (HTML/CSS/JS)
 
@@ -575,7 +620,21 @@ A single-file or small multi-file project demonstrating the actual focus mode en
 
 Touch events on mobile, pointer events on desktop. Single page, no build step required. Opens in a browser, works immediately. Demonstrates Principal-level interaction craft in a way Figma cannot.
 
-### 19.2. Figma-ready specification
+### 19.2. Typed React component (`react/`)
+
+The Action Dock rebuilt as a production-track, typed React component (`react/ActionDock.tsx`) with its own stylesheet, a barrel export, and co-located tests (`react/ActionDock.test.tsx`). It takes the dock from "a vanilla-JS demo" to "a component an engineer could drop into a real codebase," with typed props, the reaction union from the shared lib contract, and the accessibility behavior (tap fallback, `aria-live` resurface announcement) covered by tests. This is the artifact that proves the interaction is buildable, not only demonstrable.
+
+### 19.3. Python capability-analytics pipeline (`analytics/`)
+
+A small Python pipeline that makes the Section 15 measurement model concrete:
+
+- `event_schema.py`: the typed event taxonomy (the discriminated union of `session_started`, `card_seen`, `reaction_committed`, `checkpoint_shown`, `recall_probe`, `session_wrapped`, and the rest), matching the TypeScript types field-for-field.
+- `generate_events.py`: a synthetic event-stream generator that emits a labelled JSONL log for a population of sessions.
+- `capability_metrics.py`: computes the Tier 1 capability metrics (resurfaced-content recall, comprehension-after-reflow delta, intentional completion rate, settledness delta) and the harm counter-metrics from the event stream, with figures written to `analytics/figures/`.
+
+Every number this pipeline produces is from synthetic data and is labelled as such; the pipeline exists to show the measurement is wired end-to-end, not to assert a result.
+
+### 19.4. Figma-ready specification
 
 A package suitable for handing off to a designer who would build the Figma file:
 
@@ -587,7 +646,7 @@ A package suitable for handing off to a designer who would build the Figma file:
 
 The designer rebuilding this in Figma should be able to do so without making subjective interpretation calls.
 
-### 19.3. Case study writeup
+### 19.5. Case study writeup
 
 The narrative artifact that ties everything together for the portfolio reviewer:
 
@@ -610,7 +669,7 @@ The narrative artifact that ties everything together for the portfolio reviewer:
 
 Written in the same plain, confident voice as this spec. No marketing copy. No em dashes. Cited where citable.
 
-### 19.4. Out of scope for this portfolio piece
+### 19.6. Out of scope for this portfolio piece
 
 - Real LinkedIn engineering integration (this is a designer's prototype, not a real implementation)
 - The settings surface for the resurface queue (described but not built)
@@ -639,13 +698,18 @@ The implementation plan, produced separately, will phase the work as roughly:
 
 ## References
 
+Citations are split per distinct claim, so the Barkley work appears twice (once for the executive-function model, once for response inhibition) rather than once as a blanket reference.
+
+- Kessler, R. C., et al. (2006). The Prevalence and Correlates of Adult ADHD in the United States: Results From the National Comorbidity Survey Replication. *American Journal of Psychiatry,* 163(4), 716 to 723. PMC2859678. [Link](https://pmc.ncbi.nlm.nih.gov/articles/PMC2859678/) (adult ADHD prevalence, 4 to 8 percent of working adults).
+- Sonuga-Barke, E. J. S. (2002). Psychological heterogeneity in ADHD: a dual pathway model of behaviour and cognition, including the delay-aversion account. *Behavioural Brain Research,* 130(1 to 2), 29 to 36.
+- Barkley, R. A. *ADHD and the Nature of Self-Control.* The Guilford Press. Executive-function and working-memory model (the self-regulation framework, Part II).
+- Barkley, R. A. *ADHD and the Nature of Self-Control.* The Guilford Press. Response-inhibition deficit (the behavioral-inhibition chapter, Part I).
 - Becker, S. P., et al. (2022). Report of a Work Group on Sluggish Cognitive Tempo: Key Research Directions and a Consensus Change in Terminology to Cognitive Disengagement Syndrome. *Journal of the American Academy of Child & Adolescent Psychiatry.* [Link](https://www.jaacap.org/article/S0890-8567(22)01246-1/fulltext)
-- Mayes, S. D., et al. Neurocognition in Children with Cognitive Disengagement Syndrome: Accurate but Slow. PMC10474248. [Link](https://pmc.ncbi.nlm.nih.gov/articles/PMC10474248/)
+- Mayes, S. D., et al. Neurocognition in Children with Cognitive Disengagement Syndrome: Accurate but Slow. PMC10474248. Pediatric sample; generalization to adults is flagged in Section 3.2 as a hypothesis. [Link](https://pmc.ncbi.nlm.nih.gov/articles/PMC10474248/)
 - Adi-Japha, E., et al. (2017). Procedural Memory Consolidation in Attention-Deficit/Hyperactivity Disorder Is Promoted by Scheduling of Practice to Evening Hours. PMC5540945. [Link](https://pmc.ncbi.nlm.nih.gov/articles/PMC5540945/)
-- Barkley, R. A. *ADHD and the Nature of Self-Control.* The Guilford Press.
-- Sonuga-Barke, E. J. S. Causal models of attention-deficit/hyperactivity disorder: from common simple deficits to multiple developmental pathways.
-- Ebbinghaus, H. (1885). *Über das Gedächtnis.*
-- Fitts, P. M. (1954). The information capacity of the human motor system in controlling the amplitude of movement.
+- Ebbinghaus, H. (1885). *Über das Gedächtnis.* The original forgetting-curve work.
+- Fitts, P. M. (1954). The information capacity of the human motor system in controlling the amplitude of movement. *Journal of Experimental Psychology,* 47(6), 381 to 391.
+- Hick, W. E. (1952). On the rate of gain of information. *Quarterly Journal of Experimental Psychology,* 4(1), 11 to 26. (Hyman, R. (1953) extends the result.)
 - LinkedIn Help Center: Reactions on posts (for the six-reaction palette).
 
 ---

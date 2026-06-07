@@ -112,8 +112,18 @@ which doubles as a capability signal. Name it that way wherever the algorithm is
 | Like       | no          | ephemeral      |
 | Funny      | no          | ephemeral      |
 
-(These match lib/spaced-repetition.js. Reaction order in the dock matches
-lib/gestures.js REACTIONS_ORDER: like, celebrate, support, love, insightful, funny.)
+(These match lib/spaced-repetition.js.)
+
+Dock VISUAL order (canonical, thumb-ergonomic), left to right:
+insightful, support, love, celebrate, like, funny.
+Rationale: resurfacing reactions (insightful, support, love) sit on the deliberate-reach
+left; Like sits at position 5, near where a right thumb rests when the React FAB expands
+leftward. This is the order the flagship demo uses and every surface must match it
+(active-session screen included). lib/gestures.js REACTIONS_ORDER is the canonical DATA
+order and need not equal the visual order. The number-key picker (1 to 6) and the
+screen-reader reading order MUST follow the VISUAL order: insightful=1, support=2, love=3,
+celebrate=4, like=5, funny=6. The React ActionDock takes reactions as a prop; pass the
+visual order above.
 
 ## 5. Measurement model (capability first, engagement as guardrail)
 
