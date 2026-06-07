@@ -351,8 +351,10 @@ body.cs-body::before {
 
 .cs-section-body p + p { margin-top: 22px; }
 
-/* Drop cap on first paragraph of a major section */
-.cs-section-body > p:first-of-type::first-letter {
+/* Drop cap on first paragraph of a major section.
+   Skip display-set paragraphs (pull quotes, the guardrail statement) so the
+   cap never lands on an oversized serif line. */
+.cs-section-body > p:first-of-type:not(.cs-pull):not(.cs-statement)::first-letter {
   font-family: var(--serif);
   font-size: 5.2em;
   line-height: 0.85;
@@ -431,6 +433,118 @@ body.cs-body::before {
 .cs-pull em {
   font-style: italic;
   color: var(--coral);
+}
+
+/* =================================================================
+   COMPOSITE VOICE QUOTE (lived empathy near the problem)
+   ================================================================= */
+.cs-voice {
+  margin: 40px 0;
+  padding: 28px 32px 24px;
+  background: var(--paper-warm);
+  border-left: 3px solid var(--coral);
+  border-radius: 0 12px 12px 0;
+}
+
+.cs-voice p {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(22px, 2.6vw, 30px);
+  line-height: 1.3;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  margin: 0 0 14px;
+}
+
+.cs-voice cite {
+  display: block;
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 11px;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+}
+
+/* =================================================================
+   ACCESSIBILITY EVIDENCE CALLOUT (receipts, in Principles)
+   ================================================================= */
+.cs-a11y {
+  margin: 48px 0 8px;
+  padding: 32px 32px 28px;
+  background: var(--paper-warm);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+}
+
+.cs-a11y-head {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--coral);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 16px;
+}
+
+.cs-a11y-head::before {
+  content: '';
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--coral);
+  flex: none;
+}
+
+.cs-a11y-lede {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin: 0 0 20px;
+}
+
+.cs-a11y-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin: 0 0 18px;
+}
+
+.cs-a11y-item dt {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 19px;
+  color: var(--ink);
+  margin-bottom: 8px;
+  letter-spacing: -0.005em;
+}
+
+.cs-a11y-item dd {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.cs-a11y-item dd strong {
+  font-family: var(--mono);
+  font-size: 0.92em;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.cs-a11y-foot {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-faint);
+  margin: 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule);
+}
+
+@media (max-width: 720px) {
+  .cs-a11y-grid { grid-template-columns: 1fr; gap: 20px; }
 }
 
 /* =================================================================
@@ -528,13 +642,50 @@ body.cs-body::before {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 32px;
-  margin: 56px 0;
-  padding: 56px 40px;
+  margin: 40px 0 14px;
+  padding: 40px 40px 56px;
   background: var(--ink);
   color: var(--paper);
   border-radius: 16px;
   position: relative;
   overflow: hidden;
+}
+
+/* Honesty eyebrow: spans the full panel, sits above the counters */
+.cs-counters-eyebrow {
+  grid-column: 1 / -1;
+  position: relative;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--coral-soft);
+  padding-bottom: 18px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cs-counters-eyebrow::before {
+  content: '';
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--coral);
+  flex: none;
+}
+
+/* Caption under the dark panel reinforcing that nothing here is measured */
+.cs-counters-note {
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  color: var(--ink-faint);
+  margin: 0 0 22px;
+  padding-left: 16px;
+  border-left: 2px solid var(--coral-soft);
 }
 
 .cs-counters::before {
@@ -588,8 +739,171 @@ body.cs-body::before {
 }
 
 @media (max-width: 720px) {
-  .cs-counters { grid-template-columns: 1fr; padding: 32px 24px; }
+  .cs-counters { grid-template-columns: 1fr; padding: 28px 24px 32px; }
   .cs-counter-num { font-size: 64px; }
+}
+
+/* =================================================================
+   MEASUREMENT: tiered metric lists, the plain statement, caveats
+   ================================================================= */
+
+/* The one plain sentence: engagement is a guardrail, not success */
+.cs-statement {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(22px, 2.6vw, 28px);
+  line-height: 1.35;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  margin: 28px 0 8px;
+  padding: 20px 28px;
+  background: var(--paper-warm);
+  border-left: 3px solid var(--coral);
+  border-radius: 0 10px 10px 0;
+}
+
+/* Tier metric lists: a definition-style list with a clear lead term */
+.cs-metric-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 8px 0 24px;
+}
+
+.cs-metric-list li {
+  position: relative;
+  padding-left: 26px;
+  margin-bottom: 18px;
+  line-height: 1.6;
+}
+
+.cs-metric-list li::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 11px;
+  width: 9px; height: 9px;
+  border-radius: 2px;
+  background: var(--coral);
+  transform: rotate(45deg);
+}
+
+.cs-metric-list strong { color: var(--ink); font-weight: 600; }
+
+/* Inline "research build" tag on a metric line */
+.cs-metric-tag {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--linkedin);
+  border: 1px solid rgba(10, 102, 194, 0.35);
+  border-radius: 999px;
+  padding: 2px 8px;
+  margin-left: 6px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* A marked-hypothesis caveat: clearly set apart from asserted fact */
+.cs-caveat {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  background: rgba(196, 82, 58, 0.06);
+  border: 1px solid var(--coral-soft);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin: 8px 0 22px;
+}
+
+/* Inline code: keep it quiet, monospace, lightly tinted */
+.cs-section-body code {
+  font-family: var(--mono);
+  font-size: 0.82em;
+  background: var(--paper-warm);
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+  padding: 1px 6px;
+  color: var(--ink);
+}
+
+/* =================================================================
+   AI BOUNDARY: two-column may / must-not
+   ================================================================= */
+.cs-boundary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin: 40px 0 8px;
+}
+
+.cs-boundary-col {
+  padding: 28px 28px 24px;
+  border-radius: 14px;
+  background: var(--paper-warm);
+  border: 1px solid var(--rule);
+}
+
+.cs-boundary-head {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.cs-boundary-head::before {
+  content: '';
+  width: 9px; height: 9px; border-radius: 50%;
+  flex: none;
+}
+
+.cs-boundary-may .cs-boundary-head { color: var(--linkedin); }
+.cs-boundary-may .cs-boundary-head::before { background: var(--linkedin); }
+
+.cs-boundary-mustnot .cs-boundary-head { color: var(--coral); }
+.cs-boundary-mustnot .cs-boundary-head::before { background: var(--coral); }
+
+.cs-boundary-col ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.cs-boundary-col li {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  padding-left: 22px;
+  margin-bottom: 14px;
+  position: relative;
+}
+
+.cs-boundary-col li:last-child { margin-bottom: 0; }
+
+.cs-boundary-may li::before {
+  content: '+';
+  position: absolute; left: 0; top: 0;
+  font-family: var(--mono);
+  color: var(--linkedin);
+  font-weight: 600;
+}
+
+.cs-boundary-mustnot li::before {
+  content: '\00d7';
+  position: absolute; left: 0; top: 0;
+  font-family: var(--mono);
+  color: var(--coral);
+  font-weight: 600;
+}
+
+@media (max-width: 720px) {
+  .cs-boundary { grid-template-columns: 1fr; }
 }
 
 /* =================================================================
@@ -735,6 +1049,17 @@ body.cs-body::before {
 /* =================================================================
    REFERENCES
    ================================================================= */
+.cs-refs-note {
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  color: var(--ink-faint);
+  margin: 0 0 24px;
+  padding-left: 16px;
+  border-left: 2px solid var(--coral-soft);
+}
+
 .cs-refs {
   font-family: var(--mono);
   font-size: 13px;
@@ -814,6 +1139,17 @@ body.cs-body::before {
 .cs-closing-title em {
   font-style: italic;
   color: var(--coral-soft);
+}
+
+.cs-closing-reflection {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(20px, 2.4vw, 26px);
+  line-height: 1.45;
+  color: var(--coral-soft);
+  max-width: 720px;
+  margin: 0 auto 28px;
+  position: relative;
 }
 
 .cs-closing-sub {
