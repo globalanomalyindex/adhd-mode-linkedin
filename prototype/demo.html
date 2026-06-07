@@ -1438,6 +1438,12 @@
   const $$ = s => Array.from(document.querySelectorAll(s));
 
   const screen = $('.device-screen');
+  // Safety net: the phone screen must never scroll. Focusing a control inside an
+  // opening sheet can make the browser scroll this container to reveal it (even
+  // with overflow: hidden), which shoves the whole UI up and strands it. Every
+  // focus() call below passes preventScroll, and this listener snaps any stray
+  // scroll back to 0 on browsers that ignore it.
+  screen.addEventListener('scroll', () => { if (screen.scrollTop !== 0) screen.scrollTop = 0; }, { passive: true });
   const card = $('#card');
   const cardPages = $('#card-pages');
   const reactFab = $('#react-fab');
@@ -1735,7 +1741,7 @@
   function focusSlot(idx) {
     rovingSlotIdx = (idx + trayIcons.length) % trayIcons.length;
     trayIcons.forEach((el, i) => el.setAttribute('tabindex', i === rovingSlotIdx ? '0' : '-1'));
-    trayIcons[rovingSlotIdx].focus();
+    trayIcons[rovingSlotIdx].focus({ preventScroll: true });
   }
 
   function expandReact(source) {
@@ -1807,7 +1813,7 @@
     syncPageInert();
     // Move focus onto the page that just became active so keyboard users are
     // not stranded on a control that just went inert.
-    if (view === 'profile') elProfileBack.focus();
+    if (view === 'profile') elProfileBack.focus({ preventScroll: true });
     refreshChipVisibility();
   }
   elProfileBack.addEventListener('click', () => setView('post'));
@@ -2313,7 +2319,7 @@
     sheetBackdrop.classList.add('open');
     announce(`Comment thread from ${c.author}. ${c.replies.length} replies.`);
     trapFocus(sheet);
-    sheetClose.focus();
+    sheetClose.focus({ preventScroll: true });
   }
   function closeSheet() {
     if (!sheetOpen) return;
@@ -2326,8 +2332,8 @@
     // Comment FAB rather than focusing a hidden, unfocusable element.
     const opener = sheetReturnFocus;
     sheetReturnFocus = null;
-    if (isVisibleTarget(opener)) opener.focus();
-    else commentFab.focus();
+    if (isVisibleTarget(opener)) opener.focus({ preventScroll: true });
+    else commentFab.focus({ preventScroll: true });
     if (!dragging && !composeOpen && viewState === 'post') startCommentCycle();
   }
   sheetClose.addEventListener('click', closeSheet);
@@ -2371,7 +2377,7 @@
     composeSheet.classList.add('open');
     sheetBackdrop.classList.add('open');
     trapFocus(composeSheet);
-    setTimeout(() => composeTextarea.focus(), 320);
+    setTimeout(() => composeTextarea.focus({ preventScroll: true }), 320);
   }
   function closeCompose() {
     if (!composeOpen) return;
@@ -2382,7 +2388,7 @@
     // otherwise release and restore focus to whatever opened compose.
     if (sheetOpen) trapFocus(sheet);
     else releaseFocusTrap();
-    if (composeReturnFocus && composeReturnFocus.focus) composeReturnFocus.focus();
+    if (composeReturnFocus && composeReturnFocus.focus) composeReturnFocus.focus({ preventScroll: true });
     if (!dragging && !sheetOpen && viewState === 'post') startCommentCycle();
   }
   composeClose.addEventListener('click', closeCompose);
@@ -2455,9 +2461,9 @@
     const first = nodes[0];
     const last = nodes[nodes.length - 1];
     if (ev.shiftKey && document.activeElement === first) {
-      ev.preventDefault(); last.focus();
+      ev.preventDefault(); last.focus({ preventScroll: true });
     } else if (!ev.shiftKey && document.activeElement === last) {
-      ev.preventDefault(); first.focus();
+      ev.preventDefault(); first.focus({ preventScroll: true });
     }
   }
 
@@ -2491,7 +2497,7 @@
     if (ev.key === 'Escape') {
       if (composeOpen) { ev.preventDefault(); closeCompose(); return; }
       if (sheetOpen) { ev.preventDefault(); closeSheet(); return; }
-      if (isReactExpanded()) { ev.preventDefault(); collapseReact(); reactFabTrigger.focus(); return; }
+      if (isReactExpanded()) { ev.preventDefault(); collapseReact(); reactFabTrigger.focus({ preventScroll: true }); return; }
       return;
     }
 
