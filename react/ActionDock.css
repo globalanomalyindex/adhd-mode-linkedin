@@ -5,9 +5,11 @@
    leftward. See figma-spec/action-dock.md.
 
    Motion craft notes (Emil Kowalski school):
-   - Only transform and opacity are animated. NEVER width/height.
-     The leftward reveal is a scaleX on the FAB shell with an
-     inverse-scaled content layer so the tray contents do not warp.
+   - Only transform, opacity, and clip-path are animated. NEVER width/height.
+     The leftward reveal is a clip-path inset on the FAB shell (parity with
+     prototype/demo.html): the shell is always its full tray width and the
+     clip hides everything but the trigger circle when collapsed. clip-path
+     runs on the compositor and does not distort the contents.
    - ease-out for enter, faster exit than enter.
    - Reaction slots stagger in right to left (40ms), out left to
      right (30ms), and exit faster than they enter.
@@ -68,6 +70,19 @@
   pointer-events: auto;
 }
 
+/* Visually hidden but available to assistive tech (the React FAB hint). */
+.action-dock__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ---------------------------------------------------------
    Molecule: FAB Round base (shared by Comment + React)
    --------------------------------------------------------- */
@@ -122,21 +137,22 @@
 
 /* ---------------------------------------------------------
    React FAB: the expanding shell
-   The shell scales horizontally; an inverse-scaled inner layer
-   carries the contents so they do not stretch. This keeps the
-   reveal on the compositor (no width animation).
+   The shell is always its full tray width, anchored to the right
+   edge. A clip-path inset hides everything but the trigger circle
+   when collapsed and opens to the full pill when expanded. clip-path
+   runs on the compositor (no width animation) and does not distort
+   the shell or its contents.
    --------------------------------------------------------- */
 
 .action-dock__react {
   position: relative;
   /* React FAB anchors to the right edge and grows leftward */
-  transform-origin: right center;
   overflow: visible;
 }
 
-/* The glass shell that visually widens. It is sized to the full tray
-   width and scaled DOWN to a circle when collapsed, then up to 1 when
-   expanded. scaleX is a transform, so no layout-property animation. */
+/* The glass shell. It is always its full tray width; the clip inset is
+   what reveals it, matching prototype/demo.html exactly. Collapsed, the
+   clip hides the leftmost (tray - fab) so only the 52px trigger shows. */
 .action-dock__react-shell {
   position: absolute;
   top: 0;
@@ -149,17 +165,17 @@
   -webkit-backdrop-filter: blur(40px) saturate(180%);
   backdrop-filter: blur(40px) saturate(180%);
   box-shadow: var(--ad-glass-shadow);
-  transform-origin: right center;
-  /* collapsed: scaled down so visible width == one FAB */
-  transform: scaleX(calc(var(--ad-fab) / var(--ad-tray)));
-  transition: transform var(--ad-d-base) var(--ad-ease-out);
+  /* collapsed: clip off the leftmost (tray - fab), leaving the trigger */
+  clip-path: inset(0 0 0 calc(var(--ad-tray) - var(--ad-fab)) round 999px);
+  transition: clip-path var(--ad-d-base) var(--ad-ease-out);
+  will-change: clip-path;
   pointer-events: none;
 }
 
 /* Enter: gentle spring, slower. Exit: faster, plain ease-out. */
 .action-dock__react[data-state='expanded'] .action-dock__react-shell {
-  transform: scaleX(1);
-  transition: transform var(--ad-d-slow) var(--ad-ease-spring);
+  clip-path: inset(0 0 0 0 round 999px);
+  transition: clip-path var(--ad-d-slow) var(--ad-ease-spring);
 }
 
 /* The actual interactive React button stays a fixed 52x52 circle pinned
@@ -269,10 +285,11 @@
 .action-dock__react[data-state='expanded'] .action-dock__slot {
   opacity: 1;
   transform: translateX(0) scale(1);
-  /* enter: spring, slower; stagger right to left at 40ms steps. The
-     rightmost slot (highest index in REACTIONS_ORDER) leads. */
+  /* enter: slower; stagger right to left at 40ms steps. The rightmost slot
+     (highest index in REACTIONS_ORDER) leads. Spring overshoot belongs on
+     the physical motion only; opacity fades with plain ease-out. */
   transition:
-    opacity var(--ad-d-base) var(--ad-ease-spring),
+    opacity var(--ad-d-base) var(--ad-ease-out),
     transform var(--ad-d-base) var(--ad-ease-spring);
   transition-delay: calc(
     (var(--ad-slots) - 1 - var(--ad-slot-i, 0)) * 40ms
@@ -297,36 +314,52 @@
 }
 
 /* ---------------------------------------------------------
-   Reduced motion: opacity only, no transform travel, near-instant.
+   Reduced motion: no transform travel and no clip jump. The shell
+   and slots fade in on opacity instead of snapping from a circle to
+   a bar in one frame. The reveal still reads as a state change, it
+   just arrives as a soft fade rather than motion.
    --------------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
   .action-dock__fab,
-  .action-dock__react-shell,
   .action-dock__react-icon,
-  .action-dock__slot {
-    transition-duration: 0.01ms !important;
-    transition-delay: 0ms !important;
-  }
-
-  .action-dock__react-shell {
-    /* still reveal, but via instant scale rather than a travelled motion */
-    transition-property: transform;
-  }
-
   .action-dock__react-icon--smile,
   .action-dock__react-icon--close {
     transform: none !important;
   }
 
-  .action-dock__slot {
-    transform: none !important;
+  /* The collapsed trigger circle must stay visible without the shell, so
+     the React button carries its own glass here. With the shell faded out
+     when collapsed, the circle still reads. */
+  .action-dock__react-btn {
+    background: var(--ad-glass-fill);
+    border: var(--ad-glass-border);
+    box-shadow: var(--ad-glass-shadow);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    backdrop-filter: blur(40px) saturate(180%);
   }
 
+  /* Shell: drop the clip travel entirely (no circle-to-bar jump). The shell
+     stays fully unclipped and the tray glass fades in on opacity instead. */
+  .action-dock__react-shell {
+    clip-path: inset(0 0 0 0 round 999px) !important;
+    opacity: 0;
+    transition: opacity var(--ad-d-base) var(--ad-ease-out) !important;
+    transition-delay: 0ms !important;
+  }
+  .action-dock__react[data-state='expanded'] .action-dock__react-shell {
+    opacity: 1;
+  }
+
+  /* Slots: no travel, fade only. */
+  .action-dock__slot,
   .action-dock__react[data-state='expanded'] .action-dock__slot {
     transform: none !important;
+    transition: opacity var(--ad-d-base) var(--ad-ease-out) !important;
+    transition-delay: 0ms !important;
   }
 
+  /* Press feedback still suppressed. */
   .action-dock__fab:active,
   .action-dock__slot:active {
     transform: none !important;

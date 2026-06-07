@@ -957,7 +957,10 @@
     padding: 6px 10px;
     border-radius: 999px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition:
+      background 0.2s var(--ease-out),
+      color 0.2s var(--ease-out),
+      border-color 0.2s var(--ease-out);
   }
   .reset-btn:hover { background: var(--coral); color: #fff; border-color: var(--coral); }
 
@@ -1029,12 +1032,12 @@
         </div>
       </div>
 
-      <div class="skip-target" id="skip-target">
-        <svg class="skip-target-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <div class="skip-target" id="skip-target" role="img" aria-label="Move on, skip this post. Press Arrow Up.">
+        <svg class="skip-target-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M6 15l6-6 6 6"/>
         </svg>
       </div>
-      <div class="skip-label" id="skip-label">Move on</div>
+      <div class="skip-label" id="skip-label" aria-hidden="true">Move on</div>
 
       <div class="card-stage">
         <div class="card idle-wobble" id="card">
@@ -1106,12 +1109,12 @@
 
       <div class="fab react-fab" id="react-fab" data-state="collapsed" aria-label="Add a reaction">
         <div class="react-fab-slots" id="react-fab-slots">
-          <button class="fab-slot" data-r="insightful" aria-label="React with Insightful">💡</button>
-          <button class="fab-slot" data-r="support"    aria-label="React with Support">🤝</button>
-          <button class="fab-slot" data-r="love"       aria-label="React with Love">❤️</button>
-          <button class="fab-slot" data-r="celebrate"  aria-label="React with Celebrate">🎉</button>
-          <button class="fab-slot" data-r="like"       aria-label="React with Like">👍</button>
-          <button class="fab-slot" data-r="funny"      aria-label="React with Funny">😄</button>
+          <button class="fab-slot" data-r="insightful" aria-label="React with Insightful, key 1" tabindex="-1" aria-hidden="true">💡</button>
+          <button class="fab-slot" data-r="support"    aria-label="React with Support, key 2" tabindex="-1" aria-hidden="true">🤝</button>
+          <button class="fab-slot" data-r="love"       aria-label="React with Love, key 3" tabindex="-1" aria-hidden="true">❤️</button>
+          <button class="fab-slot" data-r="celebrate"  aria-label="React with Celebrate, key 4" tabindex="-1" aria-hidden="true">🎉</button>
+          <button class="fab-slot" data-r="like"       aria-label="React with Like, key 5" tabindex="-1" aria-hidden="true">👍</button>
+          <button class="fab-slot" data-r="funny"      aria-label="React with Funny, key 6" tabindex="-1" aria-hidden="true">😄</button>
         </div>
         <button class="react-fab-trigger" id="react-fab-trigger" aria-expanded="false" aria-label="Toggle reactions">
           <svg class="fab-icon icon-smile" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1201,7 +1204,10 @@
   // The lib owns gesture classification and the reaction order; the demo
   // consumes them rather than re-declaring them, so the prototype and the
   // shipped component stay in lockstep (canon section 10).
-  import { classifyGesture, magnificationFor, REACTIONS_ORDER } from '../lib/gestures.js';
+  // The number-key picker maps to the VISUAL slot order (canon section 4), read
+  // off the live DOM slots, so REACTIONS_ORDER (the lib's DATA order) is not
+  // imported here on purpose: it would contradict the on-screen order.
+  import { classifyGesture, magnificationFor } from '../lib/gestures.js';
   import { SAMPLE_FEED, getPostById } from './sample-feed.js';
 
   // ----- Motion tokens -----
@@ -1222,6 +1228,25 @@
   const TAP_DUR_MAX     = 280;  // max press duration (ms) still read as a tap
   const COMMIT_VEL      = 0.85; // flick velocity (px/ms) that commits without distance
   const THROW_CLAMP     = 1400; // min outgoing spring velocity injected on commit
+
+  // Presentation coefficients for the live drag feedback. These shape the
+  // floating preview, the skip target, and the in-tray destination magnify.
+  // Named here so the tuning reads as deliberate craft rather than stray
+  // literals (canon section 8).
+  const PREVIEW = {
+    liftBase:   18,   // px the preview floats above the nearest slot at rest
+    liftPerT:   50,   // extra px of lift as the drag nears commit (t = 0..1)
+    scaleBase:  0.84, // preview scale at the start of the react zone
+    scalePerT:  0.16, // extra scale contributed by descent toward commit
+    scalePerMag:0.28, // extra scale per unit of lateral proximity (mag - 1)
+    popFactor:  0.82, // brief shrink on glyph swap before settling back
+  };
+  const SKIP_TARGET = {
+    scalePerProgress:   0.85, // growth of the skip target across the commit arc
+    opacityBase:        0.35, // resting opacity of the skip target
+    opacityPerProgress: 0.65, // opacity gained as the skip drag nears commit
+  };
+  const DEST_PEAK = 1.6; // peak extra scale of the nearest slot at full commit
 
   // The three reactions that seed a resurface (canon section 4).
   const RESURFACE = new Set(['insightful', 'support', 'love']);
@@ -1585,8 +1610,33 @@
   renderComment(POSTS[0].comments[0]);
   updateMeta();
 
+  // Announce the keyboard affordances once at session start, so a keyboard or
+  // screen-reader user discovers the gestures that are otherwise pointer-only
+  // (canon section 5 keeps the gestures honest; this makes them reachable).
+  setTimeout(() => {
+    announce('Focus session ready. Skip a post with Arrow Up, react with number keys 1 through 6, flip to the author profile with Arrow Right.');
+  }, 600);
+
   // ----- Spring loop -----
-  let lastT = performance.now();
+  // The loop only runs while there is work to do. It parks itself when every
+  // spring has reached its target AND nothing is in flight (no drag, commit, or
+  // active animation), then any interaction calls kickLoop() to restart it. A
+  // perpetual rAF wastes work and contradicts the spirit of reduced motion
+  // (canon section 8), so it idles instead of spinning forever.
+  const REST_VALUE_EPS = 0.01; // px / deg distance to target counted as settled
+  const REST_VEL_EPS   = 0.01; // velocity small enough to count as settled
+  let loopRunning = false;
+  let lastT = 0;
+
+  function springAtRest(s) {
+    return Math.abs(s.value - s.target) < REST_VALUE_EPS &&
+           Math.abs(s.velocity) < REST_VEL_EPS;
+  }
+  function allSpringsAtRest() {
+    return springAtRest(sX) && springAtRest(sY) && springAtRest(sRot) &&
+           springAtRest(sScale) && springAtRest(sOpacity);
+  }
+
   function frame(now) {
     const dt = Math.min((now - lastT) / 1000, 0.05);
     lastT = now;
@@ -1602,9 +1652,26 @@
       `scale(${sScale.value.toFixed(3)})`;
     card.style.opacity = sOpacity.value.toFixed(3);
 
+    // Keep running while the user is interacting or a commit is mid-flight, or
+    // while any spring is still travelling. Otherwise park until kicked.
+    if (dragging || committing || !allSpringsAtRest()) {
+      requestAnimationFrame(frame);
+    } else {
+      loopRunning = false;
+    }
+  }
+
+  // Start the loop if it is parked. Called by every interaction that moves a
+  // spring or changes a target, so the demo never animates while idle.
+  function kickLoop() {
+    if (loopRunning) return;
+    loopRunning = true;
+    lastT = performance.now();
     requestAnimationFrame(frame);
   }
-  requestAnimationFrame(frame);
+
+  // One initial pass settles the card into place, then the loop parks itself.
+  kickLoop();
 
   // ----- Cycling comment chip -----
   function startCommentCycle() {
@@ -1647,12 +1714,38 @@
   // card drag entering the react zone (auto-collapses when leaving).
   let reactExpansionSource = null; // 'tap' | 'drag' | null
 
+  // Collapsed slots are invisible, so they must leave both the tab order and the
+  // accessibility tree (tabindex -1, aria-hidden). Expanded, they become a
+  // single composite widget: a roving tabindex puts exactly one slot in the tab
+  // order and the rest reachable by arrow keys, and aria-hidden is removed so a
+  // screen reader can read them in DOM (visual) order (canon section 4).
+  let rovingSlotIdx = 0; // index of the slot currently holding tabindex 0
+  function setSlotsExposed(exposed) {
+    trayIcons.forEach((el, i) => {
+      if (exposed) {
+        el.removeAttribute('aria-hidden');
+        el.setAttribute('tabindex', i === rovingSlotIdx ? '0' : '-1');
+      } else {
+        el.setAttribute('aria-hidden', 'true');
+        el.setAttribute('tabindex', '-1');
+      }
+    });
+  }
+  // Move the roving tabindex to a slot and optionally focus it (arrow nav).
+  function focusSlot(idx) {
+    rovingSlotIdx = (idx + trayIcons.length) % trayIcons.length;
+    trayIcons.forEach((el, i) => el.setAttribute('tabindex', i === rovingSlotIdx ? '0' : '-1'));
+    trayIcons[rovingSlotIdx].focus();
+  }
+
   function expandReact(source) {
     if (reactExpansionSource === source) return;
     reactExpansionSource = source;
     reactFab.classList.remove('collapsing');
     reactFab.dataset.state = 'expanded';
     reactFabTrigger.setAttribute('aria-expanded', 'true');
+    rovingSlotIdx = 0; // first visual slot (insightful) enters the tab order
+    setSlotsExposed(true);
   }
   function collapseReact() {
     if (reactExpansionSource === null) return;
@@ -1660,6 +1753,7 @@
     reactFab.classList.add('collapsing');
     reactFab.dataset.state = 'collapsed';
     reactFabTrigger.setAttribute('aria-expanded', 'false');
+    setSlotsExposed(false);
     // Clear any nearest/dragging visuals on the slots
     reactFab.classList.remove('dragging-react');
     for (const el of trayIcons) {
@@ -1671,13 +1765,55 @@
   function isReactExpanded() { return reactFab.dataset.state === 'expanded'; }
 
   // ----- Post / profile view state -----
+  // The two card pages sit side by side inside one horizontally translated
+  // wrapper, so the off-screen page is still in the DOM and, without help, its
+  // controls stay focusable and reachable by assistive tech. inert removes the
+  // inactive page from the tab order and the accessibility tree at once; a
+  // tabindex / aria-hidden fallback covers engines without inert.
+  const pagePost = $('.page-post');
+  const pageProfile = $('.page-profile');
+  function setPageActive(pageEl, active) {
+    if (!pageEl) return;
+    if ('inert' in HTMLElement.prototype) {
+      pageEl.inert = !active;
+    }
+    // Fallback (and belt-and-suspenders) for the controls inside the page.
+    pageEl.setAttribute('aria-hidden', active ? 'false' : 'true');
+    pageEl.querySelectorAll('button, [href], input, textarea, [tabindex]').forEach(node => {
+      if (active) {
+        if (node.dataset.prevTabindex !== undefined) {
+          node.setAttribute('tabindex', node.dataset.prevTabindex);
+          delete node.dataset.prevTabindex;
+        } else {
+          node.removeAttribute('tabindex');
+        }
+      } else {
+        if (node.dataset.prevTabindex === undefined) {
+          node.dataset.prevTabindex = node.getAttribute('tabindex') ?? '';
+        }
+        node.setAttribute('tabindex', '-1');
+      }
+    });
+  }
+  function syncPageInert() {
+    setPageActive(pagePost, viewState === 'post');
+    setPageActive(pageProfile, viewState === 'profile');
+  }
+
   function setView(view) {
     if (view === viewState) return;
     viewState = view;
     cardPages.classList.toggle('show-profile', view === 'profile');
+    syncPageInert();
+    // Move focus onto the page that just became active so keyboard users are
+    // not stranded on a control that just went inert.
+    if (view === 'profile') elProfileBack.focus();
     refreshChipVisibility();
   }
   elProfileBack.addEventListener('click', () => setView('post'));
+
+  // Establish the initial inert state: the profile page starts off-screen.
+  syncPageInert();
 
   function wiggleCard(direction) {
     const cls = direction === 'right' ? 'wiggle-right' : 'wiggle-left';
@@ -1713,7 +1849,7 @@
     // Position the floating preview centered horizontally on the nearest
     // tray icon, lifted above it; rises with proximity.
     const previewX = iconRect.left + iconRect.width / 2 - screenRect.left;
-    const previewY = iconRect.top - 18 - 50 * t - screenRect.top;
+    const previewY = iconRect.top - PREVIEW.liftBase - PREVIEW.liftPerT * t - screenRect.top;
     reactPreview.style.left = previewX + 'px';
     reactPreview.style.top  = previewY + 'px';
 
@@ -1721,13 +1857,13 @@
     // font-size change (canon section 8). The lib's magnificationFor supplies
     // the lateral proximity factor (1.0..1.8); vertical descent `t` adds the
     // final stretch toward commit.
-    const previewScale = 0.84 + 0.16 * t + 0.28 * (mag - 1);
+    const previewScale = PREVIEW.scaleBase + PREVIEW.scalePerT * t + PREVIEW.scalePerMag * (mag - 1);
     setPreviewScale(previewScale);
 
     if (reactPreviewEmoji.textContent !== REACTION_EMOJI[reaction]) {
       reactPreviewEmoji.textContent = REACTION_EMOJI[reaction];
       // A brief pop on glyph swap, then settle back to the proximity scale.
-      setPreviewScale(previewScale * 0.82);
+      setPreviewScale(previewScale * PREVIEW.popFactor);
       requestAnimationFrame(() => requestAnimationFrame(() => setPreviewScale(previewScale)));
     }
     reactPreviewLabel.textContent = REACTION_NAMES[reaction];
@@ -1738,8 +1874,8 @@
 
   function updateSkipTarget(progress) {
     // progress 0..1 along the way to commit
-    const scale = (1 + 0.85 * progress).toFixed(3);
-    const opacity = (0.35 + 0.65 * progress).toFixed(2);
+    const scale = (1 + SKIP_TARGET.scalePerProgress * progress).toFixed(3);
+    const opacity = (SKIP_TARGET.opacityBase + SKIP_TARGET.opacityPerProgress * progress).toFixed(2);
     skipTarget.style.transform = `translateX(-50%) scale(${scale})`;
     skipTarget.style.opacity = opacity;
     if (progress > 0.55) skipTarget.classList.add('armed');
@@ -1795,7 +1931,7 @@
         const lt = Math.max(0, 1 - d / REACT_RADIUS);
         const eased = lt * lt;
         if (el === nearest) {
-          const peak = 1 + 1.6 * eased * t;
+          const peak = 1 + DEST_PEAK * eased * t;
           el.style.transform = `scale(${peak.toFixed(3)}) translateY(${(-14 * eased * t).toFixed(2)}px)`;
           el.classList.add('nearest');
         } else {
@@ -1866,6 +2002,7 @@
     samples.length = 0;
     pushSample(e.clientX, e.clientY, performance.now());
     sX.setVelocity(0); sY.setVelocity(0);
+    kickLoop(); // wake the spring loop for the drag
     e.preventDefault();
   }
 
@@ -1891,6 +2028,7 @@
   function onPointerUp(e) {
     if (!dragging) return;
     dragging = false;
+    kickLoop(); // keep the loop alive to settle the release
     card.classList.remove('dragging', 'show-tap-hints');
     hint.style.opacity = '';
 
@@ -1949,6 +2087,7 @@
 
   function commitSkip(vel) {
     committing = true;
+    kickLoop(); // a keyboard skip can fire while the loop is parked
     clearFeedback();
     flashAura(SKIP_AURA);
     vibrate(12); // a short tick on commit
@@ -1964,6 +2103,7 @@
 
   function commitReaction(reaction, vel) {
     committing = true;
+    kickLoop(); // a keyboard or slot-tap react can fire while the loop is parked
     clearFeedback();
     flashAura(REACTION_AURA[reaction]);
     vibrate(18); // a slightly firmer pulse than skip
@@ -1999,6 +2139,7 @@
     sX.set(0); sY.set(40); sRot.set(0); sScale.set(0.96); sOpacity.set(0);
     requestAnimationFrame(() => {
       sY.setTarget(0); sScale.setTarget(1); sOpacity.setTarget(1);
+      kickLoop(); // ensure the entrance animation runs even if the loop parked
     });
     committing = false;
     pos = { x: 0, y: 0 };
@@ -2091,6 +2232,24 @@
       clearSlotPreview();
       slotPressedIcon = null;
     });
+    // Keyboard operation of the roving-tabindex group. Left / Right (and Home /
+    // End) walk the slots in visual order; Enter or Space commits the reaction.
+    el.addEventListener('keydown', (ev) => {
+      const idx = trayIcons.indexOf(el);
+      if (ev.key === 'ArrowRight' || ev.key === 'ArrowDown') {
+        ev.preventDefault(); ev.stopPropagation(); focusSlot(idx + 1);
+      } else if (ev.key === 'ArrowLeft' || ev.key === 'ArrowUp') {
+        ev.preventDefault(); ev.stopPropagation(); focusSlot(idx - 1);
+      } else if (ev.key === 'Home') {
+        ev.preventDefault(); ev.stopPropagation(); focusSlot(0);
+      } else if (ev.key === 'End') {
+        ev.preventDefault(); ev.stopPropagation(); focusSlot(trayIcons.length - 1);
+      } else if (ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault(); ev.stopPropagation();
+        commitReaction(el.dataset.r, { vx: 0, vy: 1.6 });
+        collapseReact();
+      }
+    });
   }
 
   // ----- Comment FAB tap -> open compose -----
@@ -2116,9 +2275,13 @@
     openSheet();
   });
 
+  // Remember what opened the comment sheet so focus returns there on close.
+  let sheetReturnFocus = null;
+
   function openSheet() {
     if (sheetOpen) return;
     sheetOpen = true;
+    sheetReturnFocus = document.activeElement;
     collapseReact();
     stopCommentCycle();
     const p = POSTS[postIdx];
@@ -2158,7 +2321,13 @@
     sheet.classList.remove('open');
     sheetBackdrop.classList.remove('open');
     releaseFocusTrap();
-    chip.focus();
+    // Restore focus to the opener if it is still visible; the comment chip hides
+    // on drag and on the profile view, so fall back to the always-present
+    // Comment FAB rather than focusing a hidden, unfocusable element.
+    const opener = sheetReturnFocus;
+    sheetReturnFocus = null;
+    if (isVisibleTarget(opener)) opener.focus();
+    else commentFab.focus();
     if (!dragging && !composeOpen && viewState === 'post') startCommentCycle();
   }
   sheetClose.addEventListener('click', closeSheet);
@@ -2244,6 +2413,19 @@
 
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
+  // True only when an element can actually receive and show focus: it is in the
+  // document, laid out (offsetParent), visible, and operable. The comment chip
+  // hides via opacity plus pointer-events: none (which keeps offsetParent
+  // non-null and can read mid-transition opacity), so pointer-events is the
+  // reliable synchronous signal that the chip is in its hidden state.
+  function isVisibleTarget(el) {
+    if (!el || !el.isConnected || typeof el.focus !== 'function') return false;
+    if (el.offsetParent === null) return false;
+    const cs = getComputedStyle(el);
+    if (cs.visibility === 'hidden' || cs.pointerEvents === 'none') return false;
+    return parseFloat(cs.opacity) > 0;
+  }
+
   // ----- Focus trap (shared by both sheets) -----
   // Keeps Tab cycling within the open sheet and remembers where to return focus
   // when it closes. Only one trap is active at a time.
@@ -2285,10 +2467,16 @@
   });
 
   // ----- Global keyboard layer -----
-  // Additive to the pointer choreography: ArrowUp skips, ArrowDown opens or
-  // picks a reaction, number keys 1..6 pick by REACTIONS_ORDER, Escape closes
-  // the open sheet, and Enter / Space activate whatever holds focus. Typing in
+  // Additive to the pointer choreography: ArrowUp skips, ArrowRight / ArrowLeft
+  // flip to and from the author profile, ArrowDown opens or closes the dock,
+  // number keys 1..6 pick a reaction in VISUAL (DOM) slot order, Escape closes
+  // the open surface, and Enter / Space activate whatever holds focus. Typing in
   // the compose box is never intercepted.
+  function focusWithinDock() {
+    const a = document.activeElement;
+    return !!a && (reactFab.contains(a) || commentFab.contains(a));
+  }
+
   document.addEventListener('keydown', (ev) => {
     if (ev.target === composeTextarea) return; // let the user type freely
 
@@ -2296,7 +2484,7 @@
     if (ev.key === 'Escape') {
       if (composeOpen) { ev.preventDefault(); closeCompose(); return; }
       if (sheetOpen) { ev.preventDefault(); closeSheet(); return; }
-      if (isReactExpanded()) { ev.preventDefault(); collapseReact(); return; }
+      if (isReactExpanded()) { ev.preventDefault(); collapseReact(); reactFabTrigger.focus(); return; }
       return;
     }
 
@@ -2308,17 +2496,39 @@
       commitSkip({ vx: 0, vy: 0 });
       return;
     }
-    if (ev.key === 'ArrowDown') {
+    // Flip the card to the author profile and back with the horizontal arrows,
+    // mirroring the tap-the-sides pointer affordance for keyboard users.
+    if (ev.key === 'ArrowRight') {
       ev.preventDefault();
-      if (!isReactExpanded()) { expandReact('tap'); announce('Reactions open. Press 1 through 6 to pick one.'); }
-      else collapseReact();
+      if (viewState === 'post') { setView('profile'); announce('Showing author profile. Press Arrow Left or Back to return.'); }
       return;
     }
-    // Number keys pick a reaction by canonical order (canon section 4).
-    const n = parseInt(ev.key, 10);
-    if (n >= 1 && n <= REACTIONS_ORDER.length) {
+    if (ev.key === 'ArrowLeft') {
       ev.preventDefault();
-      commitReaction(REACTIONS_ORDER[n - 1], { vx: 0, vy: 1.6 });
+      if (viewState === 'profile') { setView('post'); announce('Back to the post.'); }
+      return;
+    }
+    if (ev.key === 'ArrowDown') {
+      ev.preventDefault();
+      if (!isReactExpanded()) {
+        expandReact('tap');
+        announce('Reactions open. Press 1 through 6 to pick one: Insightful, Support, Love, Celebrate, Like, Funny.');
+      } else {
+        collapseReact();
+      }
+      return;
+    }
+    // Number keys 1..6 pick a reaction in VISUAL slot order by indexing the
+    // actual DOM slot elements, so keys, on-screen order, and the screen-reader
+    // reading order all agree (canon section 4). Gated on the tray being open or
+    // focus already inside the dock, so a stray digit never silently reacts.
+    const n = parseInt(ev.key, 10);
+    if (n >= 1 && n <= trayIcons.length) {
+      if (!isReactExpanded() && !focusWithinDock()) return;
+      ev.preventDefault();
+      const slot = trayIcons[n - 1];
+      if (!slot) return;
+      commitReaction(slot.dataset.r, { vx: 0, vy: 1.6 });
       collapseReact();
     }
   });
@@ -2328,6 +2538,7 @@
     if (reduceMotion.matches) {
       sX.set(sX.target); sY.set(sY.target); sRot.set(sRot.target);
       sScale.set(sScale.target); sOpacity.set(sOpacity.target);
+      kickLoop(); // one pass flushes the snapped values to the card, then parks
     }
   });
 </script>

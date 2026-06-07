@@ -179,11 +179,23 @@
     display: flex; align-items: center; gap: 2px; flex: 1;
   }
   .react-slot {
+    position: relative; cursor: pointer;
     width: 36px; height: 40px; border-radius: var(--r-md);
     display: flex; align-items: center; justify-content: center;
     font-size: 22px; line-height: 1;
     transition: transform var(--d-fast) var(--ease-spring),
                 background var(--d-fast) var(--ease-out);
+  }
+  .react-slot:focus-visible {
+    outline: 2px solid var(--brand); outline-offset: 2px;
+  }
+  /* Keep the dense ~36px visual but guarantee a >=44px touch target with a
+     centered pseudo-element. The hit area overflows the slot without changing
+     the layout footprint. */
+  .react-slot::before {
+    content: ""; position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 44px; height: 44px; border-radius: var(--r-md);
   }
   .react-slot:hover { transform: scale(1.18); background: var(--brand-tint); }
   /* The Insightful slot is the committed reaction on this post. */
@@ -289,21 +301,25 @@
         </svg>
       </button>
 
-      <div class="fab react-fab" aria-label="Add a reaction" aria-expanded="true">
-        <div class="react-fab-slots">
-          <button class="react-slot" aria-label="React with Like">&#128077;</button>
-          <button class="react-slot" aria-label="React with Celebrate">&#127881;</button>
-          <button class="react-slot" aria-label="React with Support">&#129309;</button>
-          <button class="react-slot" aria-label="React with Love">&#10084;&#65039;</button>
-          <button class="react-slot committed" aria-label="React with Insightful">&#128161;</button>
-          <button class="react-slot" aria-label="React with Funny">&#128516;</button>
-        </div>
-        <button class="react-fab-trigger" aria-label="Close reactions">
+      <button class="fab react-fab" aria-label="Add a reaction" aria-expanded="true">
+        <!-- Slots are role=button (not nested <button>s, which would be invalid
+             inside this <button>). Each is focusable and gets a >=44px hit area
+             via .react-slot::before. Number-key picker and reading order follow
+             the canonical VISUAL order: insightful=1 ... funny=6. -->
+        <span class="react-fab-slots">
+          <span class="react-slot committed" role="button" tabindex="0" aria-label="React with Insightful (press 1)" aria-pressed="true">&#128161;</span>
+          <span class="react-slot" role="button" tabindex="0" aria-label="React with Support (press 2)">&#129309;</span>
+          <span class="react-slot" role="button" tabindex="0" aria-label="React with Love (press 3)">&#10084;&#65039;</span>
+          <span class="react-slot" role="button" tabindex="0" aria-label="React with Celebrate (press 4)">&#127881;</span>
+          <span class="react-slot" role="button" tabindex="0" aria-label="React with Like (press 5)">&#128077;</span>
+          <span class="react-slot" role="button" tabindex="0" aria-label="React with Funny (press 6)">&#128516;</span>
+        </span>
+        <span class="react-fab-trigger" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>
           </svg>
-        </button>
-      </div>
+        </span>
+      </button>
     </div>
 
   </div>

@@ -18,6 +18,18 @@ the same interaction; both it and this component share the `Reaction` type from
 import { useState } from 'react';
 import { ActionDock, type Reaction } from './react';
 
+// Canonical dock VISUAL order, left to right (build-canon.md section 4):
+// resurfacing reactions sit on the deliberate-reach left, Like near the
+// right thumb. Pass this to match every other surface.
+const VISUAL_ORDER: Reaction[] = [
+  'insightful',
+  'support',
+  'love',
+  'celebrate',
+  'like',
+  'funny',
+];
+
 function SessionCard() {
   const [expanded, setExpanded] = useState(false);
 
@@ -25,6 +37,7 @@ function SessionCard() {
     <div style={{ position: 'relative' }}>
       {/* ...the post card... */}
       <ActionDock
+        reactions={VISUAL_ORDER}
         expanded={expanded}
         onExpandedChange={setExpanded}
         onReact={(r: Reaction) => commitReaction(r)}
@@ -38,7 +51,11 @@ function SessionCard() {
 Uncontrolled is just as valid; drop the `expanded` / `onExpandedChange` pair:
 
 ```tsx
-<ActionDock onReact={commitReaction} onComment={openComposeSheet} />
+<ActionDock
+  reactions={VISUAL_ORDER}
+  onReact={commitReaction}
+  onComment={openComposeSheet}
+/>
 ```
 
 The dock is `position: absolute`, anchored to `bottom: 26px` with `left`/`right`
@@ -48,7 +65,7 @@ insets of `18px`, so place it inside a positioned container (the session card).
 
 | Prop               | Type                        | Default            | Notes                                                                                  |
 | ------------------ | --------------------------- | ------------------ | -------------------------------------------------------------------------------------- |
-| `reactions`        | `Reaction[]`                | canon order        | Slots in display order. Defaults to `lib/gestures.js` `REACTIONS_ORDER`.                |
+| `reactions`        | `Reaction[]`                | lib data order     | Slots render in this exact order. Defaults to `lib/gestures.js` `REACTIONS_ORDER` (the DATA order). Pass the VISUAL order (`insightful, support, love, celebrate, like, funny`, canon section 4) to match every other surface. |
 | `onReact`          | `(r: Reaction) => void`     | required           | Called when a slot is activated (click, Enter, or Space). The dock then collapses.      |
 | `onComment`        | `() => void`                | required           | Called when the Comment FAB is activated. The dock stays collapsed.                     |
 | `expanded`         | `boolean`                   | undefined          | Controlled expanded state. When set, the component is controlled.                       |
@@ -77,16 +94,20 @@ insets of `18px`, so place it inside a positioned container (the session card).
 All motion lives in [`ActionDock.css`](./ActionDock.css) and follows the canon
 motion table (`docs/build-canon.md` section 8):
 
-- Only `transform` and `opacity` are animated; width is never animated. The
-  leftward reveal is a `scaleX` on the glass shell off the compositor.
-- Canon easings: `--ease-out` `cubic-bezier(0.16, 1, 0.3, 1)` for enter and
-  exit, `--ease-spring` `cubic-bezier(0.34, 1.56, 0.64, 1)` for the expand and
-  slot reveal.
+- Only `transform`, `opacity`, and `clip-path` are animated; width is never
+  animated. The leftward reveal is a `clip-path` inset on the glass shell off
+  the compositor (parity with `prototype/demo.html`), which does not distort
+  the shell or its contents.
+- Canon easings: `--ease-out` `cubic-bezier(0.16, 1, 0.3, 1)` for the clip
+  enter/exit and for slot opacity, `--ease-spring`
+  `cubic-bezier(0.34, 1.56, 0.64, 1)` for the expand and slot transform/scale
+  (overshoot belongs on physical motion, not on opacity).
 - **Exit is faster than enter** (collapse and slot-out use the fast duration).
 - Slots **stagger** in right to left (40ms steps) and out left to right (30ms).
 - Press feedback is `scale(0.97)` on `:active` (never `scale(0)`).
-- `prefers-reduced-motion: reduce` drops all transform travel and reduces
-  durations to near-zero; transitions become opacity-only.
+- `prefers-reduced-motion: reduce` drops all transform travel and the clip
+  reveal; the shell and slots fade in on opacity instead of snapping from a
+  circle to a bar in one frame.
 
 The component reads its tokens from `design-system/tokens.css` when present and
 falls back to inlined canon values otherwise, so it is drop-in without the global

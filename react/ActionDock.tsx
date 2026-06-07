@@ -21,6 +21,7 @@
 import {
   useCallback,
   useEffect,
+  useId,
   useReducer,
   useRef,
   useState,
@@ -222,6 +223,9 @@ export function ActionDock({
 
   const reactFabRef = useRef<HTMLButtonElement>(null);
   const slotRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  // Stable id for the React FAB's screen-reader hint. useId keeps it unique
+  // when several docks mount on one page.
+  const hintId = useId();
   // Index of the slot that currently holds tabindex=0 (roving tabindex). Held
   // in state so the rendered tabIndex attributes stay in sync with focus: if
   // the user Tabs out of and back into the tray, the last-focused slot is the
@@ -392,6 +396,7 @@ export function ActionDock({
           className="action-dock__fab action-dock__react-btn"
           aria-label={expanded ? 'Close reactions' : 'Add a reaction'}
           aria-expanded={expanded}
+          aria-describedby={hintId}
           onClick={handleReactFabClick}
           onKeyDown={handleReactFabKeyDown}
         >
@@ -402,6 +407,12 @@ export function ActionDock({
             <CloseIcon />
           </span>
         </button>
+
+        {/* Visually hidden hint so Tab-only users discover the roving-focus
+            model. Referenced by the React FAB via aria-describedby. */}
+        <span id={hintId} className="action-dock__sr-only">
+          Use arrow keys to choose a reaction
+        </span>
       </div>
     </div>
   );

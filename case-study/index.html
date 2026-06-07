@@ -111,7 +111,7 @@
         <cite>Composite account, drawn from public ADHD and CDS community threads. Not a single attributable quote.</cite>
       </blockquote>
 
-      <p>ADHD Mode is the credible version of the wellbeing promise. It is not an attack on the business model, not a competing app, and not a punishing time-limit tool. It is a feature that says: when you need to use this platform with your kind of brain, here is a way to do that without the bottom falling out.</p>
+      <p>ADHD Mode closes that gap honestly. It is not an attack on the business model, not a competing app, and not a punishing time-limit tool. It is a feature that says: when you need to use this platform with your kind of brain, here is a way to do that without the bottom falling out.</p>
     </div>
   </section>
 
@@ -127,7 +127,7 @@
 
         <div class="cs-stats-strip">
           <div class="cs-stat-cell">
-            <div class="cs-stat-num">61</div>
+            <div class="cs-stat-num">64</div>
             <div class="cs-stat-label">design tokens</div>
           </div>
           <div class="cs-stat-cell">
@@ -187,14 +187,14 @@
     </aside>
     <div class="cs-section-body">
       <h2>The <em>cognitive science</em> the design responds to</h2>
-      <p>Every mechanic in this design traces to a finding in the cognitive science literature, a documented HCI principle, or an explicit designer's hypothesis marked as such. The audience this serves is not small: adult ADHD prevalence is commonly estimated at 4 to 8 percent of working adults.<sup><a href="#ref-prevalence">1</a></sup> That figure is load-bearing for the business case, so it gets a source rather than a round number.</p>
+      <p>Every mechanic in this design traces to a finding in the cognitive science literature, a documented HCI principle, or an explicit designer's hypothesis marked as such. The audience this serves is not small: adult ADHD prevalence in the United States is estimated at roughly 4 to 5 percent.<sup><a href="#ref-prevalence">1</a></sup> That figure carries the business case, so it gets a source rather than a round number.</p>
 
       <h3>ADHD cognition</h3>
       <p>Combined and hyperactive-impulsive ADHD presentations share four documented patterns relevant to feed design. Delay aversion and time blindness: people with ADHD systematically under-perceive elapsed time and steer away from delayed reward, a pattern Sonuga-Barke models as a motivational style in its own right.<sup><a href="#ref-sonuga">2</a></sup> Executive-function and working-memory load: Barkley's self-regulation model treats ADHD as a deficit in holding and acting on internally represented information.<sup><a href="#ref-barkley-ef">3</a></sup> Novelty-seeking and impulse interaction. And hyperfocus collapse, where time perception disappears once attention is captured.</p>
 
       <h3>Cognitive Disengagement Syndrome</h3>
       <p>CDS, formerly known as Sluggish Cognitive Tempo, was renamed via expert consensus in 2022.<sup><a href="#ref-becker2022">4</a></sup> Its defining cognitive signature is "accurate but slow" across attention and executive-function tasks.<sup><a href="#ref-mayes">5</a></sup> CDS users reach correct answers but at significantly reduced processing speed. The implication for feed design is not faster forgetting; it is slower encoding. Content presented at typical density or pace is missed or skimmed past without absorption.</p>
-      <p class="cs-caveat">A marked hypothesis: the Mayes study measured children, not adults.<sup><a href="#ref-mayes">5</a></sup> Applying its "accurate but slow" profile to the working adults this design serves is a deliberate generalization, not a finding, and it sits on the list of things to validate before any strong claim is made.</p>
+      <p class="cs-caveat">A marked hypothesis: the Mayes study measured children, not adults.<sup><a href="#ref-mayes">5</a></sup> Applying its "accurate but slow" profile to the working adults this design serves is a deliberate generalization that stops short of a finding, and it sits on the list of things to validate before any strong claim is made.</p>
 
       <h3>Spaced repetition</h3>
       <p>Spaced repetition has been a documented memory-consolidation strategy since Ebbinghaus mapped the forgetting curve in 1885,<sup><a href="#ref-ebbinghaus">6</a></sup> and it is validated extensively in modern learning science. Its application to ADHD populations rests on working-memory-load reduction and alignment with shorter attention spans; one of the few ADHD-specific consolidation studies found that scheduling practice well supports procedural memory in this group.<sup><a href="#ref-adijapha">7</a></sup></p>
@@ -214,14 +214,14 @@
     </aside>
     <div class="cs-section-body">
       <h2>Seven <em>falsifiable</em> principles</h2>
-      <p>The constraints held throughout. Each one is a test the design must pass, not a vague aspiration.</p>
+      <p>The constraints held throughout. Each one is a test the design must pass rather than a vague aspiration.</p>
       <ol>
         <li><strong>Embedded, not bolted on.</strong> Every visual, every interaction, every piece of copy reads as something LinkedIn could ship. No competing identity. No wellness-app pastel.</li>
         <li><strong>Beauty in simplicity.</strong> If a screen needs more than its data and structure to be understood, the design has failed. No marketing copy on operational screens.</li>
         <li><strong>Research-grounded.</strong> Every mechanic traces to a cited finding, a documented HCI principle, or an explicit designer's hypothesis marked as such.</li>
         <li><strong>Respects the business model.</strong> The design preserves LinkedIn's social signal: reactions fire normally, notifications go out, content reaches authors. It improves engagement quality without attacking engagement quantity.</li>
         <li><strong>Respects scroll muscle memory.</strong> Every swipe and drag moves in the direction the thumb already travels on a feed, so nothing has to be unlearned.</li>
-        <li><strong>Accessible by default.</strong> Every gesture has a tap-based fallback. Motor coordination differences are accommodated. <code>prefers-reduced-motion</code> is honored everywhere with meaningful, not degraded, fallbacks.</li>
+        <li><strong>Accessible by default.</strong> Every gesture has a tap-based fallback. Motor coordination differences are accommodated. <code>prefers-reduced-motion</code> is honored everywhere, and the fallbacks stay meaningful instead of stripped-down.</li>
         <li><strong>Closure, not abandonment.</strong> Sessions end with a calm finish, not a "you've been here too long" scold.</li>
       </ol>
 
@@ -257,7 +257,7 @@
       <h2>The product, <em>screen by screen</em></h2>
 
       <h3>Entry point</h3>
-      <p>The ADHD Mode entry is a card inserted second in the LinkedIn home feed. Discoverable but quiet. The brand-gradient mark and the single-line description signal what the mode does without overselling it.</p>
+      <p>The ADHD Mode entry is a card placed near the top of the LinkedIn home feed. Discoverable but quiet. The brand-gradient mark and the single-line description signal what the mode does without overselling it.</p>
       <div class="cs-figure">
         <iframe src="../screens/entry-point.html" title="Entry point" loading="lazy"></iframe>
         <div class="cs-figure-caption">A discoverable card on LinkedIn home. The mode is opted into, not opted out of.</div>
@@ -300,7 +300,7 @@
       </div>
 
       <h3>End of session</h3>
-      <p>The closure ritual. A calm card, the word "Done.", three numbers, three items returning later, and a primary action that takes the user out of LinkedIn rather than back into more feed.</p>
+      <p>The closure ritual. A calm card, a plain headline of the session in numbers, three summary stats, two items returning later, and a primary action that takes the user out of LinkedIn rather than back into more feed.</p>
       <div class="cs-figure">
         <iframe src="../screens/end-of-session.html" title="End of session" loading="lazy"></iframe>
         <div class="cs-figure-caption">No celebration screen. No "great job!" The structure communicates completion; the design gives permission to leave.</div>
@@ -340,7 +340,7 @@
 
       <h3>What ships, and what the research build adds</h3>
       <p>The shipped mechanic is <strong>reaction-seeded fixed spaced intervals</strong>. A qualifying reaction seeds the post into the resurface queue and schedules it on a fixed widening curve (about three days, then a week, then longer). It is deterministic and inspectable: the same reaction always produces the same schedule, so the user can predict and trust it. This is not the SM-2 algorithm. It is the simplest scheduler that does the job.</p>
-      <p>The research build evolves the scheduler toward <strong>SM-2</strong>, where grade-driven ease factors stretch or compress each interval. The grade comes from a short recall probe at the second touch: the user states the post's core claim before it is re-shown. That probe is doing double duty. It tunes the spacing, and it yields a capability signal we can measure (recall accuracy on resurfaced posts versus a non-resurfaced control). The shipped version trades that signal away for simplicity and trust; the research version buys it back.</p>
+      <p>The research build evolves the scheduler toward <strong>SM-2</strong>, where grade-driven ease factors stretch or compress each interval. The grade comes from a short recall probe at the second touch: the user states the post's core claim before it is re-shown. That probe earns its keep twice over. It tunes the spacing, and it yields a capability signal we can measure (recall accuracy on resurfaced posts versus a non-resurfaced control). The shipped version trades that signal away for simplicity and trust; the research version buys it back.</p>
 
       <p>The scheduling stays out of the way. The user does not see "this returns Tuesday." A small &#8635; counter in the session topbar grows during a session. The full queue is browsable in settings, and every item in it can be inspected or removed; no resurface item announces its arrival.</p>
 
@@ -388,7 +388,7 @@
           <div class="cs-boundary-head">AI must not</div>
           <ul>
             <li>Choose what resurfaces. That is driven by the user's own reactions, deterministically and transparently, and the queue is always visible and editable.</li>
-            <li>Rank or curate the feed for engagement. The session keeps native chronological order and adds no engagement-optimizing ranker.</li>
+            <li>Rank or curate the feed for engagement. The session preserves native chronological order or the user's existing feed order, and adds no engagement-optimizing ranker.</li>
             <li>Set or nudge session length. The user sets the bound.</li>
           </ul>
         </div>
@@ -418,7 +418,7 @@
     <div class="cs-section-body">
       <h2>What I would <em>measure</em></h2>
       <p>This is the part most feed features get backwards. They pick engagement as the success metric, then call any lift a win. Here the order is inverted on purpose: capability and outcome come first, engagement sits underneath as a guardrail, and three counter-metrics are wired to fail loudly if the design is hurting.</p>
-      <p class="cs-statement">Engagement metrics here are guardrails, not success criteria. They confirm the feature is not draining the business while capability moves; they do not get to declare it a success.</p>
+      <p class="cs-statement">Engagement metrics here sit underneath as guardrails; the success criteria live one tier up. They confirm the feature is not draining the business while capability moves, and they never get to declare it a success.</p>
 
       <h3>Tier 1, capability and outcome (the success criteria)</h3>
       <p>These define what "working" means. If they do not move, the feature has not earned its place, however good the engagement chart looks.</p>
@@ -430,7 +430,7 @@
       </ul>
 
       <h3>Tier 2, engagement (guardrails only)</h3>
-      <p>Opt-in rate, 7-day return, reaction-mix shift, and resurface acceptance rate. Their only job is to confirm the capability metrics are not moving at the cost of the business. They are watched, not optimized.</p>
+      <p>Opt-in rate, 7-day return, reaction-mix shift, and resurface acceptance rate. Their only job is to confirm the capability metrics are not moving at the cost of the business. The team keeps an eye on them without ever chasing them.</p>
 
       <div class="cs-counters" role="group" aria-labelledby="cs-counters-eyebrow">
         <div class="cs-counters-eyebrow" id="cs-counters-eyebrow">Target / hypothesis, not measured</div>
@@ -453,7 +453,7 @@
       <p class="cs-counters-note">No figure above has been measured. Each is a pre-registered hypothesis to test against a matched control, shown so the bar is set in public before any data exists.</p>
 
       <h3>Harm counter-metrics (these must fail loudly)</h3>
-      <p>If any of these rises, the design is doing damage and needs rework, not polish.</p>
+      <p>If any of these rises, the design is doing damage and has to be reworked at the root, well past anything polish could fix.</p>
       <ul class="cs-metric-list">
         <li><strong>Compulsive re-entry.</strong> Rate of starting another session within two minutes of a closure. Detects the bound becoming a binge enabler rather than a stop.</li>
         <li><strong>Resurface anxiety.</strong> Resurface-queue opt-out rate plus dismiss-without-view rate on resurfaced items. Detects the queue becoming a guilt backlog.</li>
@@ -524,7 +524,7 @@
       <h2>References</h2>
       <p class="cs-refs-note">Citations are split per distinct claim, so the Barkley work appears twice (once for the executive-function model, once for response inhibition) rather than once as a blanket reference.</p>
       <ol class="cs-refs">
-        <li id="ref-prevalence">Adult ADHD prevalence, 4 to 8 percent of working adults. See Kessler, R. C., et al. (2006). The Prevalence and Correlates of Adult ADHD in the United States: Results From the National Comorbidity Survey Replication. <em>American Journal of Psychiatry,</em> 163(4), 716 to 723. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2859678/">PMC2859678</a></li>
+        <li id="ref-prevalence">Adult ADHD prevalence in the United States, about 4.4 percent. See Kessler, R. C., et al. (2006). The Prevalence and Correlates of Adult ADHD in the United States: Results From the National Comorbidity Survey Replication. <em>American Journal of Psychiatry,</em> 163(4), 716 to 723. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2859678/">PMC2859678</a></li>
         <li id="ref-sonuga">Sonuga-Barke, E. J. S. (2002). Psychological heterogeneity in ADHD: a dual pathway model of behaviour and cognition, including the delay-aversion account. <em>Behavioural Brain Research,</em> 130(1 to 2), 29 to 36.</li>
         <li id="ref-barkley-ef">Barkley, R. A. <em>ADHD and the Nature of Self-Control.</em> The Guilford Press. Executive-function and working-memory model (the self-regulation framework, Part II).</li>
         <li id="ref-becker2022">Becker, S. P., et al. (2022). Report of a Work Group on Sluggish Cognitive Tempo: Key Research Directions and a Consensus Change in Terminology to Cognitive Disengagement Syndrome. <em>Journal of the American Academy of Child &amp; Adolescent Psychiatry.</em> <a href="https://www.jaacap.org/article/S0890-8567(22)01246-1/fulltext">jaacap.org</a></li>
