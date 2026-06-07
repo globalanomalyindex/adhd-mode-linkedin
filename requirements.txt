@@ -1,0 +1,7 @@
+# Analytics pipeline dependencies (analytics/).
+# Pinned to widely available, recent releases. The pipeline only uses the stable
+# core of each library, so nearby versions also work; these are the versions the
+# synthetic numbers in analytics/README.md were computed against.
+numpy==2.0.2
+pandas==2.2.3
+matplotlib==3.9.2
