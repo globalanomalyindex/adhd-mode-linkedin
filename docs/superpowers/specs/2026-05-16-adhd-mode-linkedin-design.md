@@ -2,7 +2,7 @@
 
 A research-grounded Focus Session experience embedded inside LinkedIn's existing surface, designed for people with ADHD and Cognitive Disengagement Syndrome (CDS).
 
-**Designer:** Chris Fiore
+**Designer:** globalanomalyindex
 **Date:** 2026-05-16
 **Status:** Design specification, ready for implementation planning
 **Audience for this document:** the designer (review), and through them, future hiring reviewers (Disney Streaming Principal Product Designer track and equivalent FAANG roles)

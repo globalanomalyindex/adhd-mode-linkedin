@@ -1,6 +1,8 @@
 # ADHD Mode for LinkedIn
 
-A portfolio piece by Chris Fiore. A research-grounded "Focus Session" inside LinkedIn for
+**Live case study:** https://globalanomalyindex.github.io/adhd-mode-linkedin/
+
+A portfolio piece by globalanomalyindex. A research-grounded "Focus Session" inside LinkedIn for
 people with ADHD and Cognitive Disengagement Syndrome. The argument: this is the credible
 version of the wellbeing promise platforms already make. It optimizes for capability and
 recall, not time on app.

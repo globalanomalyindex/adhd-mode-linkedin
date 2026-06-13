@@ -94,7 +94,7 @@ coverage/
 ```markdown
 # ADHD Mode for LinkedIn
 
-A portfolio piece by Chris Fiore. Designs a research-grounded "Focus Session" feature inside LinkedIn for people with ADHD and Cognitive Disengagement Syndrome.
+A portfolio piece by globalanomalyindex. Designs a research-grounded "Focus Session" feature inside LinkedIn for people with ADHD and Cognitive Disengagement Syndrome.
 
 ## Contents
 
@@ -3524,7 +3524,7 @@ Replace the contents of `README.md` with:
 ```markdown
 # ADHD Mode for LinkedIn
 
-A portfolio piece by Chris Fiore. A research-grounded "Focus Session" feature designed inside LinkedIn for people with ADHD and Cognitive Disengagement Syndrome.
+A portfolio piece by globalanomalyindex. A research-grounded "Focus Session" feature designed inside LinkedIn for people with ADHD and Cognitive Disengagement Syndrome.
 
 ## Deliverables
 
