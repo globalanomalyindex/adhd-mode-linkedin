@@ -414,6 +414,28 @@ def save_figures(df: pd.DataFrame, results: dict) -> list:
     saved = []
     title_tag = "SYNTHETIC, illustrative"
 
+    # Case study identity: paper background, ink text, coral for the
+    # capability/treatment arm, muted warm grey for the control/guardrail arm.
+    PAPER = "#f4f2ee"
+    INK = (0.0, 0.0, 0.0, 0.85)
+    CORAL = "#c4523a"
+    WARM_GREY = "#8a857c"
+    GRID = "#ded9d0"
+
+    def _style_axes(ax_target):
+        """Apply the paper/ink identity to one axes: facecolor, spines, ticks, grid."""
+        ax_target.set_facecolor(PAPER)
+        ax_target.spines["top"].set_visible(False)
+        ax_target.spines["right"].set_visible(False)
+        ax_target.spines["left"].set_color(INK)
+        ax_target.spines["bottom"].set_color(INK)
+        ax_target.tick_params(colors=INK, labelcolor=INK)
+        ax_target.xaxis.label.set_color(INK)
+        ax_target.yaxis.label.set_color(INK)
+        ax_target.title.set_color(INK)
+        ax_target.grid(True, axis="y", color=GRID, linewidth=0.8, zorder=0)
+        ax_target.set_axisbelow(True)
+
     # Figure 1: Tier 1 capability bars (recall arms + comprehension arms).
     recall = results["recall"]
     comp = results["comprehension"]
@@ -424,9 +446,11 @@ def save_figures(df: pd.DataFrame, results: dict) -> list:
         comp["fulltext_first"]["accuracy"],
         comp["tldr_first"]["accuracy"],
     ]
-    colors = ["#b0b7c0", "#0a66c2", "#b0b7c0", "#0a66c2"]
+    colors = [WARM_GREY, CORAL, WARM_GREY, CORAL]
     fig, ax = plt.subplots(figsize=(7, 4.2))
-    bars = ax.bar(labels, [v * 100 for v in values], color=colors)
+    fig.patch.set_facecolor(PAPER)
+    _style_axes(ax)
+    bars = ax.bar(labels, [v * 100 for v in values], color=colors, zorder=3)
     ax.set_ylabel("accuracy (%)")
     ax.set_ylim(0, 100)
     ax.set_title(f"Tier 1 capability: probe accuracy by arm ({title_tag})")
@@ -438,10 +462,11 @@ def save_figures(df: pd.DataFrame, results: dict) -> list:
             ha="center",
             va="bottom",
             fontsize=9,
+            color=INK,
         )
     fig.tight_layout()
     p1 = FIG_DIR / "fig1_capability_arms.png"
-    fig.savefig(p1, dpi=130)
+    fig.savefig(p1, dpi=130, facecolor=PAPER)
     plt.close(fig)
     saved.append(p1)
 
@@ -449,23 +474,29 @@ def save_figures(df: pd.DataFrame, results: dict) -> list:
     settledness = results["settledness"]
     if settledness["n"]:
         fig, ax = plt.subplots(figsize=(7, 4.2))
+        fig.patch.set_facecolor(PAPER)
+        _style_axes(ax)
         vals = settledness["values"]
         bins = range(-4, 6)
-        ax.hist(vals, bins=bins, color="#128161", edgecolor="white", align="left")
-        ax.axvline(0, color="#cb112d", linestyle="--", linewidth=1.2, label="no change")
+        ax.hist(vals, bins=bins, color=CORAL, edgecolor=PAPER, align="left", zorder=3)
+        ax.axvline(0, color=WARM_GREY, linestyle="--", linewidth=1.2, label="no change")
         ax.axvline(
             settledness["mean"],
-            color="#0a66c2",
+            color=INK,
             linewidth=1.6,
             label=f"mean {settledness['mean']:+.2f}",
         )
         ax.set_xlabel("settledness delta (after minus before, 1..5 scale)")
         ax.set_ylabel("sessions")
         ax.set_title(f"Settledness shift per session ({title_tag})")
-        ax.legend()
+        legend = ax.legend()
+        legend.get_frame().set_facecolor(PAPER)
+        legend.get_frame().set_edgecolor(INK)
+        for text in legend.get_texts():
+            text.set_color(INK)
         fig.tight_layout()
         p2 = FIG_DIR / "fig2_settledness_delta.png"
-        fig.savefig(p2, dpi=130)
+        fig.savefig(p2, dpi=130, facecolor=PAPER)
         plt.close(fig)
         saved.append(p2)
 
@@ -473,12 +504,15 @@ def save_figures(df: pd.DataFrame, results: dict) -> list:
     completion = results["completion"]
     harm = results["harm"]
     fig, axes = plt.subplots(1, 2, figsize=(10, 4.2))
+    fig.patch.set_facecolor(PAPER)
+    _style_axes(axes[0])
+    _style_axes(axes[1])
     reasons = completion["by_reason"]
     intentional = {"timebox", "postcap", "user_closed"}
     r_labels = list(reasons.keys())
     r_vals = [reasons[k] for k in r_labels]
-    r_colors = ["#0a66c2" if k in intentional else "#cb112d" for k in r_labels]
-    axes[0].bar(r_labels, r_vals, color=r_colors)
+    r_colors = [CORAL if k in intentional else WARM_GREY for k in r_labels]
+    axes[0].bar(r_labels, r_vals, color=r_colors, zorder=3)
     axes[0].set_title(f"Session end reasons ({title_tag})")
     axes[0].set_ylabel("sessions")
     axes[0].tick_params(axis="x", rotation=20)
@@ -491,15 +525,15 @@ def save_figures(df: pd.DataFrame, results: dict) -> list:
         else 0,
         harm["rumination"]["rate"] * 100 if not pd.isna(harm["rumination"]["rate"]) else 0,
     ]
-    axes[1].bar(h_labels, h_vals, color="#cb112d")
+    axes[1].bar(h_labels, h_vals, color=WARM_GREY, zorder=3)
     axes[1].set_ylim(0, max(20, max(h_vals) * 1.4 + 1))
     axes[1].set_title(f"Harm metrics, lower is better ({title_tag})")
     axes[1].set_ylabel("rate (%)")
     for i, v in enumerate(h_vals):
-        axes[1].text(i, v + 0.4, f"{v:.0f}%", ha="center", va="bottom", fontsize=9)
+        axes[1].text(i, v + 0.4, f"{v:.0f}%", ha="center", va="bottom", fontsize=9, color=INK)
     fig.tight_layout()
     p3 = FIG_DIR / "fig3_guardrails.png"
-    fig.savefig(p3, dpi=130)
+    fig.savefig(p3, dpi=130, facecolor=PAPER)
     plt.close(fig)
     saved.append(p3)
 
