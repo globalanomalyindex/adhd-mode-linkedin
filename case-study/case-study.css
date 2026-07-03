@@ -584,7 +584,11 @@ body.cs-body::before {
   background: transparent;
 }
 @media (max-width: 720px) {
-  .cs-figure-demo iframe { height: 760px; }
+  /* The demo scales its whole device to the iframe width on small screens;
+     the frame height fits the scaled shell plus its page chrome. Doubled
+     selector so this beats the later generic 580px mobile figure rule,
+     which shares specificity with the single-class form. */
+  .cs-figure.cs-figure-demo iframe { height: 800px; }
 }
 
 .cs-figure-caption {

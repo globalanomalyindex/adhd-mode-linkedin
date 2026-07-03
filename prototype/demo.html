@@ -1002,9 +1002,32 @@
     .sheet.open, .compose-sheet.open { opacity: 1; }
   }
 
+  /* Small screens: the device KEEPS its designed 396x836 layout and the whole
+     shell scales uniformly (JS sets --device-fit from the available width).
+     The old approach resized the shell while the interior stayed pixel-fixed,
+     which distorted: the 264px tray and the fixed dock insets no longer fit
+     their own screen. A uniform scale preserves every internal ratio, and the
+     pointer math divides by the same factor so the card tracks the finger 1:1. */
+  .device {
+    transform: scale(var(--device-fit, 1));
+    transform-origin: top center;
+    /* transform never changes layout size; reclaim the space under the shell */
+    margin-bottom: calc(836px * (var(--device-fit, 1) - 1));
+  }
+
   @media (max-width: 480px) {
     body { padding: 16px 8px; }
-    .device { width: 90vw; max-width: 396px; height: auto; aspect-ratio: 396 / 836; }
+    /* Blur under a fractional ancestor scale is expensive and artifact-prone
+       on mobile GPUs (the blur input re-rasters every frame the card moves).
+       At phone sizes the glass becomes a solid translucent fill: visually
+       close, cheap, and artifact-free. */
+    .fab,
+    .comment-chip,
+    .skip-target {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      background: rgba(255, 255, 255, 0.93);
+    }
   }
 </style>
 </head>
@@ -1445,6 +1468,23 @@
   // scroll back to 0 on browsers that ignore it.
   screen.addEventListener('scroll', () => { if (screen.scrollTop !== 0) screen.scrollTop = 0; }, { passive: true });
   const card = $('#card');
+
+  // ----- Device fit -----
+  // The device keeps its designed 396x836 coordinate space at every viewport;
+  // when the window is narrower, the whole shell scales uniformly via
+  // --device-fit. fitK is that scale factor, and every pointer delta below
+  // divides by it so the gesture math lives in DESIGN pixels: the card tracks
+  // the finger exactly, and the commit thresholds keep the same proportion of
+  // the screen at any size.
+  const DEVICE_W = 396;
+  let fitK = 1;
+  function updateDeviceFit() {
+    const avail = document.documentElement.clientWidth - 16;
+    fitK = Math.max(0.4, Math.min(1, avail / DEVICE_W));
+    document.documentElement.style.setProperty('--device-fit', fitK.toFixed(4));
+  }
+  window.addEventListener('resize', updateDeviceFit, { passive: true });
+  updateDeviceFit();
   const cardPages = $('#card-pages');
   const reactFab = $('#react-fab');
   const reactFabTrigger = $('#react-fab-trigger');
@@ -1854,8 +1894,11 @@
 
     // Position the floating preview centered horizontally on the nearest
     // tray icon, lifted above it; rises with proximity.
-    const previewX = iconRect.left + iconRect.width / 2 - screenRect.left;
-    const previewY = iconRect.top - PREVIEW.liftBase - PREVIEW.liftPerT * t - screenRect.top;
+    // Rect differences are visual px; the style below is applied INSIDE the
+    // scaled device, so convert to design px before mixing in the design-px
+    // lift constants.
+    const previewX = (iconRect.left + iconRect.width / 2 - screenRect.left) / fitK;
+    const previewY = (iconRect.top - screenRect.top) / fitK - PREVIEW.liftBase - PREVIEW.liftPerT * t;
     reactPreview.style.left = previewX + 'px';
     reactPreview.style.top  = previewY + 'px';
 
@@ -1933,7 +1976,7 @@
       for (const el of trayIcons) {
         const r = el.getBoundingClientRect();
         const cx = r.left + r.width / 2;
-        const d = Math.abs(clientX - cx);
+        const d = Math.abs(clientX - cx) / fitK; // visual gap into design px
         const lt = Math.max(0, 1 - d / REACT_RADIUS);
         const eased = lt * lt;
         if (el === nearest) {
@@ -1990,8 +2033,10 @@
   // WHICH reaction slot the thumb is over, since the slots are laid out on
   // screen rather than along the lib's abstract arc.
   function viewOf() {
+    // The lib's gesture math runs in the same design-px space as dx/dy, so
+    // the visual rect is unscaled back to design dimensions.
     const r = screen.getBoundingClientRect();
-    return { width: r.width, height: r.height };
+    return { width: r.width / fitK, height: r.height / fitK };
   }
 
   function onPointerDown(e) {
@@ -2006,7 +2051,7 @@
     dragStart = { x: e.clientX, y: e.clientY };
     dragStartTime = performance.now();
     samples.length = 0;
-    pushSample(e.clientX, e.clientY, performance.now());
+    pushSample(e.clientX / fitK, e.clientY / fitK, performance.now());
     sX.setVelocity(0); sY.setVelocity(0);
     kickLoop(); // wake the spring loop for the drag
     e.preventDefault();
@@ -2014,9 +2059,9 @@
 
   function onPointerMove(e) {
     if (!dragging) return;
-    const dx = e.clientX - dragStart.x;
-    const dy = e.clientY - dragStart.y;
-    pushSample(e.clientX, e.clientY, performance.now());
+    const dx = (e.clientX - dragStart.x) / fitK;
+    const dy = (e.clientY - dragStart.y) / fitK;
+    pushSample(e.clientX / fitK, e.clientY / fitK, performance.now());
 
     sX.setValue(dx);
     sY.setValue(dy);
