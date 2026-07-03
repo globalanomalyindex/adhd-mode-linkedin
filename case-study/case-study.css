@@ -1212,6 +1212,430 @@ body.cs-body::before {
 .cs-foot a:hover { color: var(--ink); }
 
 /* =================================================================
+   READING CHROME: progress, counter, mode toggles, fast path
+   ================================================================= */
+.cs-sticky-center {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  min-width: 0;
+}
+
+.cs-sticky-count {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Reading progress: a thin coral line under the sticky nav, scaleX-driven
+   so it never touches layout. The page's own visible bound. */
+.cs-progress {
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 2px;
+  pointer-events: none;
+}
+
+.cs-progress-fill {
+  display: block;
+  height: 100%;
+  background: var(--coral);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.cs-sticky-anchors .cs-anchor-demo { color: var(--coral); }
+
+.cs-mode-toggle {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+.cs-mode-toggle:hover { border-color: var(--coral); color: var(--coral); }
+.cs-mode-toggle:focus-visible { outline: 2px solid var(--coral); outline-offset: 3px; }
+.cs-mode-toggle[aria-pressed="true"] {
+  background: var(--coral);
+  border-color: var(--coral);
+  color: var(--paper);
+}
+
+.cs-fastpath {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 32px;
+  opacity: 0;
+  animation: cs-rise 0.9s var(--ease) 0.75s forwards;
+}
+
+.cs-mode-toggle-hero { font-size: 11px; padding: 11px 20px; flex: none; }
+
+.cs-fastpath-note {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--ink-faint);
+  max-width: 480px;
+}
+
+.cs-hero-nav .cs-hero-nav-demo { color: var(--coral); }
+
+/* Quiet product anchor in the hero's negative space, wide viewports only.
+   Decorative (the same screen appears, annotated, in the walkthrough). */
+.cs-hero-still {
+  display: none;
+  position: absolute;
+  right: 5vw;
+  top: 50%;
+  width: clamp(220px, 20vw, 300px);
+  height: auto;
+  transform: translateY(-54%) rotate(2.4deg);
+  border-radius: 26px;
+  box-shadow: 0 0 0 1px var(--rule), 0 44px 88px rgba(0, 0, 0, 0.16);
+  z-index: 0;
+}
+@media (min-width: 1180px) {
+  .cs-hero-still { display: block; }
+}
+
+/* Screen-reader-only live region */
+.cs-vh {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* =================================================================
+   FOCUS READING MODE: the product's TL;DR-first reflow, on itself
+   ================================================================= */
+.cs-tldr { display: none; max-width: var(--measure); }
+
+.cs-tldr p {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 23px;
+  line-height: 1.45;
+  color: var(--ink);
+  letter-spacing: -0.005em;
+  margin: 0 0 14px;
+}
+
+.cs-tldr p::before {
+  content: 'tl;dr';
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--coral);
+  border: 1px solid var(--coral-soft);
+  border-radius: 999px;
+  padding: 3px 9px;
+  margin-right: 14px;
+  vertical-align: middle;
+  position: relative;
+  top: -3px;
+}
+
+.cs-tldr-more {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--coral);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--coral-soft);
+  text-underline-offset: 3px;
+}
+.cs-tldr-more:hover { text-decoration-color: var(--coral); }
+.cs-tldr-more:focus-visible { outline: 2px solid var(--coral); outline-offset: 3px; border-radius: 4px; }
+
+/* Collapsed state: only the tldr and anything explicitly marked data-keep
+   (the live demo) survive. Everything stays in the DOM. */
+body.cs-focus .cs-collapsible:not(.cs-expanded) .cs-section-body > *:not(.cs-tldr):not([data-keep]) { display: none; }
+body.cs-focus .cs-collapsible:not(.cs-expanded) .cs-tldr { display: block; }
+body.cs-focus .cs-section { margin-top: 88px; }
+body.cs-focus .cs-collapsible:not(.cs-expanded) .cs-figure { margin: 32px 0 0; }
+
+/* =================================================================
+   OPTION SPACE: the tried / kept / killed / evolved map
+   ================================================================= */
+.cs-ov-lede { max-width: var(--measure); }
+
+.cs-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin: 44px 0 28px;
+}
+
+.cs-option {
+  padding: 24px 26px 22px;
+  background: var(--paper-warm);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+}
+
+.cs-option h4 {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: -0.005em;
+  margin: 12px 0 8px;
+}
+
+.cs-option p {
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.cs-ov {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+.cs-ov-kept { background: var(--coral); color: #fff; }
+.cs-ov-killed { color: var(--ink-faint); border: 1px solid var(--rule); }
+.cs-ov-evolved { color: var(--coral); border: 1px solid var(--coral-soft); }
+
+.cs-ov-foot {
+  max-width: var(--measure);
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 16px;
+  color: var(--ink-faint);
+}
+
+@media (max-width: 720px) {
+  .cs-options { grid-template-columns: 1fr; }
+}
+
+/* =================================================================
+   SECOND-FORK CALLOUT (reactions section)
+   ================================================================= */
+.cs-callout {
+  margin: 36px 0;
+  padding: 26px 30px 24px;
+  background: rgba(196, 82, 58, 0.05);
+  border: 1px solid var(--coral-soft);
+  border-radius: 12px;
+}
+
+.cs-callout-kicker {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: var(--coral);
+  margin-bottom: 10px;
+}
+
+.cs-callout p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+/* =================================================================
+   REFLOW BEFORE / AFTER
+   ================================================================= */
+.cs-reflow-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 44px 0 8px;
+}
+
+.cs-reflow-panel {
+  background: var(--paper-warm);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.cs-reflow-head {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: var(--ink-faint);
+  margin-bottom: 14px;
+}
+
+.cs-reflow-mock {
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 158px;
+}
+
+.cs-rl {
+  display: block;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.09);
+}
+.cs-rl-ink { background: rgba(0, 0, 0, 0.16); }
+
+.cs-rl-more {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-faint);
+  margin-top: 4px;
+}
+
+.cs-rl-tag {
+  align-self: flex-start;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--coral);
+  border: 1px solid var(--coral-soft);
+  border-radius: 999px;
+  padding: 2px 9px;
+  margin-bottom: 6px;
+}
+
+.cs-rl-dots {
+  display: flex;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 14px;
+}
+.cs-rl-dots i {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.15);
+}
+.cs-rl-dots i.on { background: var(--coral); }
+
+.cs-reflow-note {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin: 14px 0 0;
+}
+
+@media (max-width: 720px) {
+  .cs-reflow-compare { grid-template-columns: 1fr; }
+}
+
+/* =================================================================
+   DATA FIGURES (synthetic pipeline output, restyled in-system)
+   ================================================================= */
+.cs-datafig {
+  margin: 38px 0;
+  padding: 18px 18px 14px;
+  background: var(--paper-warm);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+}
+
+.cs-datafig img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.cs-datafig figcaption {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  padding: 14px 6px 2px;
+}
+
+/* =================================================================
+   COMPOSITE-VOICE DISCLOSURE + LIVE DEMO CHIP
+   ================================================================= */
+.cs-voice-eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: var(--coral);
+  margin-bottom: 12px;
+}
+
+.cs-voice cite { color: var(--ink-soft); font-size: 12px; }
+
+.cs-live-chip {
+  position: absolute;
+  top: 16px; right: 16px;
+  z-index: 2;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: #fff;
+  background: var(--coral);
+  border-radius: 999px;
+  padding: 7px 14px;
+  box-shadow: 0 6px 18px rgba(196, 82, 58, 0.35);
+  pointer-events: none;
+}
+
+/* =================================================================
+   MOBILE WAYFINDING: keep the anchors, make them a thumb strip
+   ================================================================= */
+@media (max-width: 720px) {
+  .cs-sticky-nav { padding: 12px 16px; gap: 12px; }
+  .cs-sticky-mark { display: none; }
+  .cs-sticky-section { display: none; }
+  .cs-sticky-anchors {
+    display: flex;
+    overflow-x: auto;
+    gap: 16px;
+    min-width: 0;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .cs-sticky-anchors::-webkit-scrollbar { display: none; }
+  .cs-sticky-anchors a { flex: none; }
+  .cs-mode-toggle { flex: none; }
+  .cs-hero-top { flex-wrap: wrap; gap: 12px; }
+  .cs-fastpath { flex-direction: column; align-items: flex-start; gap: 12px; }
+}
+
+/* =================================================================
    ANIMATIONS
    ================================================================= */
 @keyframes cs-rise {

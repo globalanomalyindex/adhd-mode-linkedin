@@ -4,6 +4,33 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>adhd mode for linkedin  ·  a case study by globalanomalyindex</title>
+
+<!-- Link-sharing surface: the page's first impression happens in a chat or a
+     feed before anyone clicks. Absolute URLs because unfurl bots resolve
+     nothing relative and run no scripts. -->
+<meta name="description" content="a bounded focus session inside linkedin, designed for adhd and cds cognition. a product design case study with a working prototype, a typed react component, and capability-first measurement." />
+<link rel="canonical" href="https://globalanomalyindex.github.io/adhd-mode-linkedin/case-study/" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://globalanomalyindex.github.io/adhd-mode-linkedin/case-study/" />
+<meta property="og:title" content="adhd mode for linkedin  ·  a product design case study" />
+<meta property="og:description" content="the credible version of a wellbeing promise: a bounded focus session built on linkedin's own primitives, with a live prototype inside." />
+<meta property="og:image" content="https://globalanomalyindex.github.io/adhd-mode-linkedin/case-study/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="adhd mode for linkedin  ·  a product design case study" />
+<meta name="twitter:description" content="the credible version of a wellbeing promise: a bounded focus session built on linkedin's own primitives, with a live prototype inside." />
+<meta name="twitter:image" content="https://globalanomalyindex.github.io/adhd-mode-linkedin/case-study/og.png" />
+<meta name="theme-color" content="#f4f2ee" />
+<link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png" />
+<link rel="apple-touch-icon" href="../apple-touch-icon.png" />
+
+<!-- Fonts arrive via CSS @import; warming both origins saves the serial
+     stylesheet-then-font round trip. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
 <link rel="stylesheet" href="./case-study.css" />
 </head>
 <body class="cs-body">
@@ -11,14 +38,21 @@
 <!-- STICKY NAV (appears on scroll past hero) -->
 <nav class="cs-sticky-nav" id="sticky-nav" aria-hidden="true">
   <div class="cs-sticky-mark">globalanomalyindex  ·  ADHD Mode</div>
-  <div class="cs-sticky-section" id="sticky-section">Summary</div>
+  <div class="cs-sticky-center">
+    <span class="cs-sticky-count" id="sticky-count">01 / 16</span>
+    <div class="cs-sticky-section" id="sticky-section">Summary</div>
+  </div>
   <div class="cs-sticky-anchors">
-    <a href="#deliverables">Deliverables</a>
-    <a href="#walkthrough">Walkthrough</a>
+    <a class="cs-anchor-demo" href="#demo">Demo</a>
+    <a href="#option-space">Options</a>
     <a href="#mechanics">Mechanics</a>
     <a href="#ai-boundary">AI boundary</a>
     <a href="#refs">References</a>
+    <button class="cs-mode-toggle" id="focus-toggle-sticky" aria-pressed="false">Focus read</button>
   </div>
+  <!-- Reading progress, the session-bound made visible: the same "you can see
+       where the edge is" idea the product argues for. -->
+  <div class="cs-progress" aria-hidden="true"><span class="cs-progress-fill" id="cs-progress-fill"></span></div>
 </nav>
 
 <!-- HERO -->
@@ -26,6 +60,7 @@
   <div class="cs-hero-top">
     <div class="cs-hero-mark">globalanomalyindex, Product designer</div>
     <nav class="cs-hero-nav">
+      <a class="cs-hero-nav-demo" href="#demo">Live demo  →</a>
       <a href="#walkthrough">Walkthrough</a>
       <a href="#mechanics">Mechanics</a>
       <a href="#deliverables">Deliverables</a>
@@ -36,7 +71,14 @@
     <div class="cs-eyebrow">Portfolio  ·  Product design  ·  2026</div>
     <h1 class="cs-title">ADHD Mode<br/>for <span class="cs-title-italic">LinkedIn</span><span class="cs-title-dot">.</span></h1>
     <p class="cs-deck">The credible version of a wellbeing promise. A bounded Focus Session, built on LinkedIn's own primitives, designed for people whose attention works differently.</p>
+
+    <div class="cs-fastpath">
+      <button class="cs-mode-toggle cs-mode-toggle-hero" id="focus-toggle" aria-pressed="false">Short on time? Focus read</button>
+      <span class="cs-fastpath-note">Every section collapses to its TL;DR, the live demo stays. This page practices the pattern it proposes.</span>
+    </div>
   </div>
+
+  <img class="cs-hero-still" src="./hero-still.png" width="792" height="980" alt="" aria-hidden="true" loading="lazy" decoding="async" />
 
   <div class="cs-hero-foot">
     <div class="cs-meta-item">
@@ -61,7 +103,7 @@
 <article class="cs-page">
 
   <!-- 01 Summary -->
-  <section class="cs-section" data-title="Summary">
+  <section class="cs-section" data-title="Summary" data-tldr="A bounded Focus Session inside LinkedIn, built on its own primitives, that optimizes for capability and recall instead of time on app.">
     <aside class="cs-section-aside">
       <span class="cs-section-num">01</span>
       <span class="cs-section-kicker">Summary</span>
@@ -75,7 +117,7 @@
   </section>
 
   <!-- 02 Hook -->
-  <section class="cs-section" data-title="The hook" id="hook">
+  <section class="cs-section" data-title="The hook" id="hook" data-tldr="Five seconds on a realistic feed, then a recall test you will mostly fail. That miss, with neurotypical attention, is the problem statement.">
     <aside class="cs-section-aside">
       <span class="cs-section-num">02</span>
       <span class="cs-section-kicker">The hook</span>
@@ -96,7 +138,7 @@
   </section>
 
   <!-- 03 Problem -->
-  <section class="cs-section" data-title="The problem">
+  <section class="cs-section" data-title="The problem" data-tldr="Platforms promise wellbeing and ship infinite scroll. For ADHD and CDS users, who must use LinkedIn professionally, that gap is exclusionary rather than just uncomfortable.">
     <aside class="cs-section-aside">
       <span class="cs-section-num">03</span>
       <span class="cs-section-kicker">The problem</span>
@@ -107,8 +149,9 @@
       <p>For attention-typical users the gap between promise and product is uncomfortable. For ADHD and CDS users it is exclusionary. These users are required to use LinkedIn for professional reasons (job search, network maintenance, industry awareness) and are then confronted with a surface that is structurally hostile to how their attention works.</p>
 
       <blockquote class="cs-voice">
+        <div class="cs-voice-eyebrow">A composite voice, disclosed up front</div>
         <p>"I open LinkedIn to find one job posting, lose forty minutes, and could not tell you a single thing I read."</p>
-        <cite>Composite account, drawn from public ADHD and CDS community threads. Not a single attributable quote.</cite>
+        <cite>Drawn from public ADHD and CDS community threads. Not a single attributable quote, and not presented as one.</cite>
       </blockquote>
 
       <p>ADHD Mode closes that gap honestly. It is not an attack on the business model, not a competing app, and not a punishing time-limit tool. It is a feature that says: when you need to use this platform with your kind of brain, here is a way to do that without the bottom falling out.</p>
@@ -116,7 +159,7 @@
   </section>
 
   <!-- 04 Deliverables -->
-  <section class="cs-section" data-title="Deliverables" id="deliverables">
+  <section class="cs-section" data-title="Deliverables" id="deliverables" data-tldr="A working prototype with real spring physics, a dev-ready Figma file, component specs, a typed React build of the dock, and a Python capability-metrics pipeline.">
     <aside class="cs-section-aside">
       <span class="cs-section-num">04</span>
       <span class="cs-section-kicker">Deliverables</span>
@@ -180,7 +223,7 @@
   </section>
 
   <!-- 05 Research -->
-  <section class="cs-section" data-title="Research">
+  <section class="cs-section" data-title="Research" data-tldr="Delay aversion, working-memory load, and accurate-but-slow encoding, each cited and each tied to a specific mechanic. Hypotheses are marked as hypotheses.">
     <aside class="cs-section-aside">
       <span class="cs-section-num">05</span>
       <span class="cs-section-kicker">Research</span>
@@ -207,7 +250,7 @@
   </section>
 
   <!-- 06 Principles -->
-  <section class="cs-section" data-title="Principles">
+  <section class="cs-section" data-title="Principles" data-tldr="Seven constraints written as tests the design must pass, from LinkedIn-native fidelity to closure without scolding, with the accessibility receipts measured rather than claimed.">
     <aside class="cs-section-aside">
       <span class="cs-section-num">06</span>
       <span class="cs-section-kicker">Principles</span>
@@ -247,10 +290,67 @@
     </div>
   </section>
 
-  <!-- 07 Walkthrough -->
-  <section class="cs-section" data-title="Walkthrough" id="walkthrough">
+  <!-- 07 The option space -->
+  <section class="cs-section" data-title="The option space" id="option-space" data-tldr="Eight directions tried on the way here: what was kept, what was killed, and why. Every cell is verifiable in the commit history and the exploration archive.">
     <aside class="cs-section-aside">
       <span class="cs-section-num">07</span>
+      <span class="cs-section-kicker">The option space</span>
+    </aside>
+    <div class="cs-section-body" style="max-width: none;">
+      <h2>The option <em>space</em></h2>
+      <p class="cs-ov-lede">A finished design reads as inevitable, which hides the part worth evaluating: the directions considered and the reasons they lived or died. This is that map. Nothing here is reconstructed for the writeup; each cell survives in the commit history or the exploration archive.</p>
+
+      <div class="cs-options">
+        <div class="cs-option">
+          <span class="cs-ov cs-ov-killed">killed</span>
+          <h4>Always-on reaction tray</h4>
+          <p>Six standing targets on every card is exactly the decision load Hick's Law warns about, placed on the audience least able to pay it. Reacting is the rare action; it was crowding the common one.</p>
+        </div>
+        <div class="cs-option">
+          <span class="cs-ov cs-ov-kept">kept</span>
+          <h4>Corner action dock</h4>
+          <p>Two resting FABs, with the full reaction set one tap or one drag away. The common path carries zero decisions; the richer set opens only on demand.</p>
+        </div>
+        <div class="cs-option">
+          <span class="cs-ov cs-ov-killed">killed</span>
+          <h4>Metaball goo connector</h4>
+          <p>A gooey blob stretched between card and reaction as you dragged. It demoed beautifully, centered the mechanism instead of the decision, and could not honor reduced motion. Reverted in one commit.</p>
+        </div>
+        <div class="cs-option">
+          <span class="cs-ov cs-ov-killed">killed</span>
+          <h4>Horizontal card grammar</h4>
+          <p>Early sketches dealt cards sideways on the horizontal axis. It fought years of vertical feed muscle memory, so the grammar moved to the axis thumbs already travel.</p>
+        </div>
+        <div class="cs-option">
+          <span class="cs-ov cs-ov-killed">killed</span>
+          <h4>Editorial closure screen</h4>
+          <p>The first end-of-session screen was sleek and magazine-grade, and wrong: it read as a brand moment inside a product surface. Rebuilt LinkedIn-native; three versions sit in the archive.</p>
+        </div>
+        <div class="cs-option">
+          <span class="cs-ov cs-ov-evolved">evolved</span>
+          <h4>Time-only session bound</h4>
+          <p>A single time box ignored volume doomscrolling. The shipped session is bounded by time and a post cap, whichever lands first.</p>
+        </div>
+        <div class="cs-option">
+          <span class="cs-ov cs-ov-evolved">evolved</span>
+          <h4>Width-animated tray reveal</h4>
+          <p>The first reveal animated the tray's geometry over live glass and stalled real GPUs. The shipped reveal is a static mask with slots staggering in on the compositor.</p>
+        </div>
+        <div class="cs-option">
+          <span class="cs-ov cs-ov-evolved">evolved</span>
+          <h4>Proximity magnification</h4>
+          <p>The activation radius was tightened mid-build after neighboring reactions kept responding to drags meant elsewhere. Fitts's Law is a starting point; thumbs are the tiebreaker.</p>
+        </div>
+      </div>
+
+      <p class="cs-ov-foot">The fork that mattered most, the tray becoming the dock, is unpacked in the walkthrough below.</p>
+    </div>
+  </section>
+
+  <!-- 08 Walkthrough -->
+  <section class="cs-section" data-title="Walkthrough" id="walkthrough" data-tldr="Entry, setup, the active session, check-in, closure. The live demo stays below; the fork that turned an always-on tray into the corner dock is unpacked here.">
+    <aside class="cs-section-aside">
+      <span class="cs-section-num">08</span>
       <span class="cs-section-kicker">Walkthrough</span>
     </aside>
     <div class="cs-section-body">
@@ -281,7 +381,8 @@
       </div>
 
       <p>And the live version, where the physics are the point:</p>
-      <div class="cs-figure cs-figure-demo">
+      <div class="cs-figure cs-figure-demo" id="demo" data-keep="true">
+        <div class="cs-live-chip" aria-hidden="true">Interactive  ·  drag the card</div>
         <iframe src="../prototype/demo.html" title="Interactive demo, tap or drag to react" loading="lazy"></iframe>
         <div class="cs-figure-caption">Try it. Tap the right-side React FAB to expand the tray, then tap a reaction. Or drag the card down past the activation threshold to auto-expand, with the floating preview tracking your thumb. The bottom dock proves the same component can serve both common (skip past) and rare (react or comment) actions without cluttering the screen.</div>
       </div>
@@ -308,10 +409,10 @@
     </div>
   </section>
 
-  <!-- 08 Mechanic: Reactions -->
-  <section class="cs-section" data-title="Mechanic, reactions" id="mechanics">
+  <!-- 09 Mechanic: Reactions -->
+  <section class="cs-section" data-title="Mechanic, reactions" id="mechanics" data-tldr="The six reactions LinkedIn already has become a private spaced-repetition layer. Insightful, Support, and Love schedule a post's return; Like stays cheap; nothing is penalized.">
     <aside class="cs-section-aside">
-      <span class="cs-section-num">08</span>
+      <span class="cs-section-num">09</span>
       <span class="cs-section-kicker">Mechanic, reactions</span>
     </aside>
     <div class="cs-section-body">
@@ -338,6 +439,11 @@
 
       <p>The mapping is deliberate. Insightful, Support, and Love are the three reactions whose emotional signal most strongly implies "I want to remember this" or "this person matters to me." Like and Funny are ephemeral acknowledgments; they don't deserve future attention bandwidth. Celebrate is moment-specific; it surfaces only when relevant (next profile visit).</p>
 
+      <div class="cs-callout">
+        <div class="cs-callout-kicker">A second fork, hidden in the tray order</div>
+        <p>The reaction order is not LinkedIn's default. The three resurfacing reactions sit at the deliberate far end of the tray, and Like sits under the resting thumb, so the cheap acknowledgment is the easy reach and the reactions that schedule future attention take one beat more intent. The ergonomics enforce the memory mechanic; the layout is doing metric design.</p>
+      </div>
+
       <h3>What ships, and what the research build adds</h3>
       <p>The shipped mechanic is <strong>reaction-seeded fixed spaced intervals</strong>. A qualifying reaction seeds the post into the resurface queue and schedules it on a fixed widening curve (about three days, then a week, then longer). It is deterministic and inspectable: the same reaction always produces the same schedule, so the user can predict and trust it. This is not the SM-2 algorithm. It is the simplest scheduler that does the job.</p>
       <p>The research build evolves the scheduler toward <strong>SM-2</strong>, where grade-driven ease factors stretch or compress each interval. The grade comes from a short recall probe at the second touch: the user states the post's core claim before it is re-shown. That probe earns its keep twice over. It tunes the spacing, and it yields a capability signal we can measure (recall accuracy on resurfaced posts versus a non-resurfaced control). The shipped version trades that signal away for simplicity and trust; the research version buys it back.</p>
@@ -348,10 +454,10 @@
     </div>
   </section>
 
-  <!-- 09 Mechanic: Reflow -->
-  <section class="cs-section" data-title="Mechanic, reflow">
+  <!-- 10 Mechanic: Reflow -->
+  <section class="cs-section" data-title="Mechanic, reflow" data-tldr="Long posts become TL;DR-first paged cards, so the reader decides before sinking cost. The focus mode on this page is the same move, applied to itself.">
     <aside class="cs-section-aside">
-      <span class="cs-section-num">09</span>
+      <span class="cs-section-num">10</span>
       <span class="cs-section-kicker">Mechanic, reflow</span>
     </aside>
     <div class="cs-section-body">
@@ -360,14 +466,42 @@
 
       <p>The TL;DR-first ordering is the key move. "See more" hides text but forces a sunk-cost decision: once you start reading, ADHD users feel obligated to finish even when the post is not paying off. TL;DR-first lets you decide before starting. If the summary is not for you, skip the post entirely. If it is, the paged structure means you always know how much further the post goes and you can choose to continue or wrap.</p>
 
+      <div class="cs-reflow-compare" role="img" aria-label="Comparison of a long post as one unbroken block with a see-more link, versus the same post reflowed as a TL;DR-first paged card">
+        <div class="cs-reflow-panel">
+          <div class="cs-reflow-head">The wall</div>
+          <div class="cs-reflow-mock">
+            <span class="cs-rl" style="width:94%"></span>
+            <span class="cs-rl" style="width:88%"></span>
+            <span class="cs-rl" style="width:96%"></span>
+            <span class="cs-rl" style="width:82%"></span>
+            <span class="cs-rl" style="width:91%"></span>
+            <span class="cs-rl" style="width:86%"></span>
+            <span class="cs-rl" style="width:93%"></span>
+            <span class="cs-rl" style="width:64%"></span>
+            <span class="cs-rl-more">...see more</span>
+          </div>
+          <p class="cs-reflow-note">One block, one sunk-cost decision, no sense of how deep it goes.</p>
+        </div>
+        <div class="cs-reflow-panel">
+          <div class="cs-reflow-head">Reflowed</div>
+          <div class="cs-reflow-mock">
+            <span class="cs-rl-tag">tl;dr</span>
+            <span class="cs-rl cs-rl-ink" style="width:78%"></span>
+            <span class="cs-rl cs-rl-ink" style="width:52%"></span>
+            <span class="cs-rl-dots"><i class="on"></i><i></i><i></i><i></i></span>
+          </div>
+          <p class="cs-reflow-note">Summary first, beats paged, and you always know how far it goes.</p>
+        </div>
+      </div>
+
       <p>The pipeline is five steps: detect and classify, generate TL;DR (third-person referent so the summary reads as orientation rather than the author's voice), chunk by beat (paragraph boundaries and narrative breaks, not arbitrary word counts), preserve visual hierarchy (lists stay together, quotes stay intact), and in Re-engage mode only, prepend a "what you'll find" comprehension scaffold.</p>
     </div>
   </section>
 
-  <!-- 10 AI boundary -->
-  <section class="cs-section" data-title="AI boundary" id="ai-boundary">
+  <!-- 11 AI boundary -->
+  <section class="cs-section" data-title="AI boundary" id="ai-boundary" data-tldr="AI summarizes and scaffolds. It never chooses what resurfaces, never ranks for engagement, and never sets the session bound.">
     <aside class="cs-section-aside">
-      <span class="cs-section-num">10</span>
+      <span class="cs-section-num">11</span>
       <span class="cs-section-kicker">AI boundary</span>
     </aside>
     <div class="cs-section-body">
@@ -396,10 +530,10 @@
     </div>
   </section>
 
-  <!-- 11 Business framing -->
-  <section class="cs-section" data-title="Business framing">
+  <!-- 12 Business framing -->
+  <section class="cs-section" data-title="Business framing" data-tldr="Every revenue-relevant signal still fires. The mode improves the quality of attention without spending the business to do it.">
     <aside class="cs-section-aside">
-      <span class="cs-section-num">11</span>
+      <span class="cs-section-num">12</span>
       <span class="cs-section-kicker">Business framing</span>
     </aside>
     <div class="cs-section-body">
@@ -409,10 +543,10 @@
     </div>
   </section>
 
-  <!-- 12 Measurement -->
-  <section class="cs-section" data-title="What I'd measure">
+  <!-- 13 Measurement -->
+  <section class="cs-section" data-title="What I'd measure" data-tldr="Capability metrics are the success criteria, engagement is demoted to guardrails, and three harm counter-metrics are wired to fail loudly. The pipeline that computes them ships in the repo.">
     <aside class="cs-section-aside">
-      <span class="cs-section-num">12</span>
+      <span class="cs-section-num">13</span>
       <span class="cs-section-kicker">Measurement</span>
     </aside>
     <div class="cs-section-body">
@@ -428,6 +562,11 @@
         <li><strong>Intentional completion rate.</strong> Share of sessions ended by the closure ritual or by a time or post bound, versus sessions abandoned by leaving the app mid-session. Instrument: the <code>session_wrapped</code> reason field. A proxy for agency and self-regulation.</li>
         <li><strong>Settledness delta.</strong> One self-report item before and after the session, "Right now I feel scattered" to "Right now I feel settled", on a 1-to-5 scale. Instrument: mean shift across the session.</li>
       </ul>
+
+      <figure class="cs-datafig">
+        <img src="../analytics/figures/fig1_capability_arms.png" width="910" height="546" loading="lazy" decoding="async" alt="Bar chart comparing recall accuracy for resurfaced posts against a non-resurfaced control, and comprehension for TL;DR-first against full-text-first ordering. Synthetic data." />
+        <figcaption>Output of the Python pipeline that ships in this repo, run on the synthetic event log and restyled in the same token palette as this page. Labeled synthetic everywhere; the point is that the capability metrics are computable, not that they are results.</figcaption>
+      </figure>
 
       <h3>Tier 2, engagement (guardrails only)</h3>
       <p>Opt-in rate, 7-day return, reaction-mix shift, and resurface acceptance rate. Their only job is to confirm the capability metrics are not moving at the cost of the business. The team keeps an eye on them without ever chasing them.</p>
@@ -459,46 +598,69 @@
         <li><strong>Resurface anxiety.</strong> Resurface-queue opt-out rate plus dismiss-without-view rate on resurfaced items. Detects the queue becoming a guilt backlog.</li>
         <li><strong>Rumination increase.</strong> Share of users whose settledness delta runs the wrong way, more scattered after the session than before. Detects the session leaving people worse than it found them.</li>
       </ul>
+
+      <figure class="cs-datafig">
+        <img src="../analytics/figures/fig3_guardrails.png" width="1300" height="546" loading="lazy" decoding="async" alt="Bar charts of engagement guardrails and the three harm counter-metrics computed from the synthetic event log. Synthetic data." />
+        <figcaption>The guardrails and harm counters from the same synthetic run. Guardrail and harm arms render in the muted grey on purpose: nothing on this chart is allowed to be the success story.</figcaption>
+      </figure>
     </div>
   </section>
 
-  <!-- 13 Pattern -->
-  <section class="cs-section" data-title="Pattern">
+  <!-- 14 The pattern, and a second surface -->
+  <section class="cs-section" data-title="The pattern" data-tldr="Three portable primitives, then the proof of portability: a concrete treatment of the same pattern on a streaming surface, mapped from signals the platform already has.">
     <aside class="cs-section-aside">
-      <span class="cs-section-num">13</span>
-      <span class="cs-section-kicker">Pattern</span>
+      <span class="cs-section-num">14</span>
+      <span class="cs-section-kicker">The pattern</span>
     </aside>
     <div class="cs-section-body">
-      <h2>Pattern, <em>not just a feature</em></h2>
+      <h2>The pattern, <em>and a second surface</em></h2>
       <p>ADHD Mode is composed of three reusable design primitives that any feed-style surface could adopt:</p>
       <ol>
         <li><strong>The bounded session container with a closure ritual.</strong> Applies anywhere infinite content meets time-blind users.</li>
-        <li><strong>Existing-reaction-primitives as a private attention-scheduling layer.</strong> Applies to any platform with reactions, likes, or saves.</li>
-        <li><strong>The vertical gesture grammar with magnification.</strong> Applies to any card-based interface where users currently react via tap.</li>
+        <li><strong>Existing engagement primitives repurposed as a private attention-scheduling layer.</strong> Applies to any platform with reactions, ratings, or saves.</li>
+        <li><strong>The vertical gesture grammar with magnification.</strong> Applies to any card-based interface where users currently act by tap.</li>
       </ol>
-      <p>These are the patterns. ADHD Mode for LinkedIn is one instantiation.</p>
-    </div>
-  </section>
+      <p>A pattern claim is cheap until it survives contact with a second surface. So here is the same design worked through the nearest one: streaming, where autoplay-next is the infinite scroll, the episode boundary is the natural session unit, and "I have no idea what I just watched" is the same encoding failure this whole piece started from.</p>
 
-  <!-- 14 Generalization -->
-  <section class="cs-section" data-title="Generalization">
-    <aside class="cs-section-aside">
-      <span class="cs-section-num">14</span>
-      <span class="cs-section-kicker">Generalization</span>
-    </aside>
-    <div class="cs-section-body">
-      <h2>How this <em>generalizes</em></h2>
-      <p>Streaming surfaces have most of the same attention failure modes as social feeds: autoplay-next, infinite suggested content, episode binging, the "I have no idea what I just watched" effect. The ADHD Mode pattern translates directly.</p>
-      <ul>
-        <li><strong>Disney+ session container:</strong> bounded viewing session with a chosen length. After session end, autoplay-next is suppressed and a closure screen shows what was watched and what is queued for a future session.</li>
-        <li><strong>Reactions-as-spaced-repetition for content:</strong> a "this stuck with me" reaction that brings the episode (or related content) back in 1-2 weeks. Particularly useful for documentary and kids' educational programming.</li>
-        <li><strong>Vertical gesture grammar for content browsing:</strong> swipe up to skip a suggested title, swipe down to add to a personal queue with magnification picking the queue type (Watch later, Watch with kids, Save for binge weekend).</li>
-      </ul>
+      <table class="cs-table cs-table-map">
+        <thead>
+          <tr>
+            <th>Primitive</th>
+            <th>On LinkedIn</th>
+            <th>On a streaming surface</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Bounded session</td>
+            <td>A time box and a post cap, whichever lands first, then a closure card.</td>
+            <td>A chosen-length viewing session. Autoplay-next keeps firing inside the bound, capped by it; at the bound the countdown gives way to the closure moment. Time blindness does not care whether the content is posts or episodes.</td>
+          </tr>
+          <tr>
+            <td>Attention scheduling</td>
+            <td>Insightful, Support, and Love seed a private resurface queue on fixed widening intervals.</td>
+            <td>No new controls invented. The signals already exist: a watchlist add seeds a short-interval return, a finished documentary plus a positive rating seeds a stuck-with-me return in a week or two, and an abandoned episode seeds nothing and costs nothing.</td>
+          </tr>
+          <tr>
+            <td>Gesture grammar</td>
+            <td>Swipe up moves on, drag down reacts, with magnification and a preview before commit.</td>
+            <td>Row browsing keeps the same axis: swipe up dismisses a suggestion, a short drag down saves it, with magnification choosing the queue: tonight, with the kids, or the long weekend.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>The session taxonomy streaming actually has</h3>
+      <p>Feeds have one boundary; streaming has four, and the pattern lands differently on each. Mid-episode pause and resume stays untouched, that is the platform doing its job. End-of-episode is the autoplay moment: inside an active session the next episode still plays, because interrupting a chosen binge would be the scolding this design refuses to do; the bound simply caps how long the chain can run. End-of-season and the session bound are the two true closure points, and both get the ritual: what was watched, one thing queued for a future session, and a primary action that ends the evening cleanly instead of opening another row. On a kids profile the bound belongs to the parent and the closure screen belongs to the child, a calm off-ramp rather than a cliff.</p>
+
+      <h3>The measurement inversion, translated</h3>
+      <p>The same tier structure from the measurement section, with viewing words in it. Tier one, the success criteria: recall of what was watched when a documentary resurfaces, intentional session completion (ended by choice or by the bound, versus abandoned mid-episode), and settledness after an evening of viewing. Tier two, guardrails only: hours watched, completion rate, retention: watched, never chased. The harm counters translate one to one: instant re-entry after a closure screen, and a watchlist curdling into a guilt backlog.</p>
+
+      <p class="cs-caveat">This is a treatment, not a shipped design. It exists to show the primitives carry across a surface with different physics, and the open questions below say plainly where the transfer is still hypothesis.</p>
     </div>
   </section>
 
   <!-- 15 Open questions -->
-  <section class="cs-section" data-title="Open questions">
+  <section class="cs-section" data-title="Open questions" data-tldr="CDS spacing intervals, reaction-mix authenticity, sub-mode selection friction, and the honest limits of the streaming treatment.">
     <aside class="cs-section-aside">
       <span class="cs-section-num">15</span>
       <span class="cs-section-kicker">Open questions</span>
@@ -509,13 +671,13 @@
         <li><strong>CDS spacing intervals.</strong> No empirical research yet exists for optimal long-term spacing in CDS populations. The current design adapts the encoding phase only; the long-term curve is identical across sub-modes. This is a stated designer's hypothesis to validate post-launch.</li>
         <li><strong>Reaction-mix authenticity.</strong> If most users gravitate to Insightful for everything, the resurface queue over-triggers. Mitigations: the queue cap (4 exposures) and the secondary metric of resurface acceptance rate.</li>
         <li><strong>Sub-mode selection friction.</strong> Asking users to self-classify puts cognitive load up front. Worth testing a smart default that uses prior-session signals.</li>
-        <li><strong>Generalization validity.</strong> The Disney/streaming generalization is partly speculative. Validation requires building the same primitives inside a different surface and observing whether the mechanics still hold.</li>
+        <li><strong>Generalization validity.</strong> The streaming treatment in the pattern section is exactly that, a treatment. Validation requires building the same primitives inside a different surface and observing whether the mechanics still hold.</li>
       </ul>
     </div>
   </section>
 
   <!-- 16 References -->
-  <section class="cs-section" data-title="References" id="refs">
+  <section class="cs-section" data-title="References" id="refs" data-tldr="Ten citations, split per distinct claim, with the pediatric-to-adult generalization flagged exactly where it is used.">
     <aside class="cs-section-aside">
       <span class="cs-section-num">16</span>
       <span class="cs-section-kicker">References</span>
@@ -551,7 +713,8 @@
 
 <footer class="cs-foot">
   <p>ADHD Mode for LinkedIn  ·  globalanomalyindex  ·  2026</p>
-  <p>Built with HTML, CSS, vanilla JavaScript, Source Sans 3, Instrument Serif, JetBrains Mono. No build step. <a href="../README.md">View repository</a>.</p>
+  <p>Built with HTML, CSS, vanilla JavaScript, Source Sans 3, Instrument Serif, JetBrains Mono. No build step. <a href="https://github.com/globalanomalyindex/adhd-mode-linkedin">View repository</a>.</p>
+  <p>This page ships a focus mode because the argument should survive its own constraint.</p>
 </footer>
 
 <script>
@@ -580,6 +743,8 @@
   // ============================================================
   const stickyNav = document.getElementById('sticky-nav');
   const stickySection = document.getElementById('sticky-section');
+  const stickyCount = document.getElementById('sticky-count');
+  const progressFill = document.getElementById('cs-progress-fill');
   const hero = document.querySelector('.cs-hero');
 
   function updateSticky() {
@@ -595,14 +760,26 @@
 
     // Find the section nearest to top of viewport
     const sections = document.querySelectorAll('.cs-section[data-title]');
-    let current = null;
+    let current = null, currentIdx = 0;
+    let i = 0;
     for (const s of sections) {
+      i += 1;
       const r = s.getBoundingClientRect();
-      if (r.top < window.innerHeight * 0.4) current = s;
+      if (r.top < window.innerHeight * 0.4) { current = s; currentIdx = i; }
     }
     if (current && stickySection) {
       const t = current.dataset.title;
       if (stickySection.textContent !== t) stickySection.textContent = t;
+    }
+    if (stickyCount) {
+      const label = String(Math.max(currentIdx, 1)).padStart(2, '0') + ' / ' + String(sections.length).padStart(2, '0');
+      if (stickyCount.textContent !== label) stickyCount.textContent = label;
+    }
+    // Reading progress: the page's own session bound, made visible.
+    if (progressFill) {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const p = max > 0 ? Math.min(window.scrollY / max, 1) : 0;
+      progressFill.style.transform = 'scaleX(' + p.toFixed(4) + ')';
     }
   }
 
@@ -653,6 +830,68 @@
   } else {
     document.querySelectorAll('.cs-counter-num').forEach(animateCounter);
   }
+
+  // ============================================================
+  // Focus reading mode: the product's TL;DR-first reflow, applied
+  // to this page. Every section collapses to a hand-written
+  // summary with depth on demand; the live demo stays. The full
+  // text remains in the DOM (display toggling only), so screen
+  // readers, find-in-page after expand, and copy keep working.
+  // ============================================================
+  const csLive = document.createElement('div');
+  csLive.className = 'cs-vh';
+  csLive.setAttribute('aria-live', 'polite');
+  document.body.appendChild(csLive);
+  const csAnnounce = (msg) => { requestAnimationFrame(() => { csLive.textContent = msg; }); };
+
+  const collapsible = Array.from(document.querySelectorAll('.cs-section[data-tldr]'));
+  for (const s of collapsible) {
+    s.classList.add('cs-collapsible');
+    const body = s.querySelector('.cs-section-body');
+    if (!body) continue;
+    const wrap = document.createElement('div');
+    wrap.className = 'cs-tldr';
+    const line = document.createElement('p');
+    line.textContent = s.dataset.tldr;
+    const more = document.createElement('button');
+    more.className = 'cs-tldr-more';
+    more.textContent = 'Read this section';
+    more.addEventListener('click', () => {
+      s.classList.add('cs-expanded');
+      csAnnounce(s.dataset.title + ' expanded.');
+    });
+    wrap.appendChild(line);
+    wrap.appendChild(more);
+    body.insertBefore(wrap, body.firstChild);
+  }
+
+  const modeToggles = ['focus-toggle', 'focus-toggle-sticky']
+    .map(id => document.getElementById(id)).filter(Boolean);
+
+  function setFocusMode(on) {
+    document.body.classList.toggle('cs-focus', on);
+    for (const s of collapsible) s.classList.remove('cs-expanded');
+    for (const b of modeToggles) {
+      b.setAttribute('aria-pressed', String(on));
+      b.textContent = on
+        ? 'Full read'
+        : (b.id === 'focus-toggle' ? 'Short on time? Focus read' : 'Focus read');
+    }
+    csAnnounce(on
+      ? 'Focus reading on. Sections collapsed to summaries; the live demo stays. Each section can be expanded.'
+      : 'Full reading restored.');
+    if (history.replaceState) {
+      history.replaceState(null, '', on ? '#focus' : location.pathname + location.search);
+    }
+    updateSticky();
+  }
+
+  for (const b of modeToggles) {
+    b.addEventListener('click', () => setFocusMode(!document.body.classList.contains('cs-focus')));
+  }
+
+  // A shareable fast path: linking to #focus opens the bounded read.
+  if (location.hash === '#focus') setFocusMode(true);
 </script>
 
 </body>
