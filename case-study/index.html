@@ -827,6 +827,36 @@
 
   // A shareable fast path: linking to #focus opens the bounded read.
   if (location.hash === '#focus') setFocusMode(true);
+
+  // ============================================================
+  // Warm the centerpiece. loading="lazy" is right for the five
+  // secondary screens but wrong for the demo: it scheduled the
+  // demo's entire boot at the exact moment the reader clicked
+  // "live demo", so the first click landed on a blank frame for
+  // seconds (measured: the demo finished loading last, about four
+  // seconds after a cold click). After the page's own assets
+  // settle, script flips the demo to eager during idle time, then
+  // the screen that shares its landing viewport. Lazy stays in the
+  // markup for no-script visitors, and slow-data users are left
+  // alone.
+  // ============================================================
+  if (!(navigator.connection && navigator.connection.saveData)) {
+    window.addEventListener('load', () => {
+      const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 700));
+      idle(() => {
+        const warm = (el) => new Promise((resolve) => {
+          if (!el || el.loading !== 'lazy') { resolve(); return; }
+          let settled = false;
+          const finish = () => { if (!settled) { settled = true; resolve(); } };
+          el.addEventListener('load', finish, { once: true });
+          setTimeout(finish, 4000); // do not stall the queue on a dead frame
+          el.loading = 'eager';
+        });
+        warm(document.querySelector('#demo iframe'))
+          .then(() => warm(document.querySelector('iframe[src*="active-session"]')));
+      });
+    });
+  }
 </script>
 
 </body>

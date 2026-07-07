@@ -582,6 +582,36 @@ body.cs-body::before {
 .cs-figure-demo iframe {
   height: 980px;
   background: transparent;
+  position: relative;
+  z-index: 1;
+}
+
+/* Boot state, no script required: this label sits under the transparent
+   iframe, so it shows while the demo document is still loading and is
+   covered the instant the demo paints its opaque paper background. A cold
+   click that outruns the idle warm-up reads as "warming up", never as
+   frozen. */
+.cs-figure-demo::before {
+  content: 'warming up the live prototype...';
+  position: absolute;
+  top: 465px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+/* Anchor landings clear the fixed sticky nav instead of tucking the
+   target's top edge (and the demo's interactive chip) underneath it.
+   The margin also absorbs the 30px the scroll-reveal transition lifts
+   content by after the jump lands. */
+.cs-section[id],
+.cs-figure[id] {
+  scroll-margin-top: 104px;
 }
 @media (max-width: 720px) {
   /* The demo scales its whole device to the iframe width on small screens;
