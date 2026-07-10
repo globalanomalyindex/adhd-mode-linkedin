@@ -42,7 +42,7 @@
     "@vitest/coverage-v8": "^4.1.10",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
-    "html-validate": "^10.10.0",
+    "html-validate": "^11.5.5",
     "jsdom": "^29.1.1",
     "prettier": "^3.8.1",
     "sharp": "^0.34.5",
