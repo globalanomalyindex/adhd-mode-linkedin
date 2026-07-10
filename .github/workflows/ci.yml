@@ -59,16 +59,15 @@ jobs:
           python analytics/generate_events.py
           python analytics/capability_metrics.py
 
-      - name: Generated artifacts are current
+      - name: Deterministic generated artifacts are current
         run: |
+          # Raster rendering varies across libpng and font stacks. The build steps
+          # above smoke-test those outputs; freshness is byte-checked for the
+          # platform-stable text artifacts.
           git diff --exit-code -- \
             design-system/tokens.css \
             design-system/tokens.json \
-            case-study/og.png \
-            favicon-32.png \
-            apple-touch-icon.png \
-            analytics/sample_events.jsonl \
-            analytics/figures/
+            analytics/sample_events.jsonl
 
   browser:
     name: Chromium interaction and accessibility checks

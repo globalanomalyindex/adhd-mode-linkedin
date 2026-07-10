@@ -11,7 +11,7 @@ test('case study leads with scope and supports Focus read', async ({
   await expect(page.getByText('Independent coded concept')).toBeVisible();
   await expect(page.getByText('No participant study yet')).toBeVisible();
 
-  const focusToggle = page.getByRole('button', { name: /Focus read/ }).first();
+  const focusToggle = page.locator('#focus-toggle-sticky');
   await focusToggle.click();
   await expect(focusToggle).toHaveAttribute('aria-pressed', 'true');
   await expect(page.locator('body')).toHaveClass(/cs-focus/);
