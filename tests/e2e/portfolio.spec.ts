@@ -16,7 +16,8 @@ test('case study leads with scope and supports Focus read', async ({
   await expect(focusToggle).toHaveAttribute('aria-pressed', 'true');
   await expect(page.locator('body')).toHaveClass(/cs-focus/);
 
-  const collapsed = page.locator('.cs-collapsible:not(.cs-expanded)').first();
+  const collapsed = page.locator('section[aria-labelledby="brief-heading"]');
+  await expect(collapsed).not.toHaveClass(/cs-expanded/);
   await expect(collapsed.locator('.cs-tldr')).toBeVisible();
   await collapsed.getByRole('button', { name: 'Read this section' }).click();
   await expect(collapsed).toHaveClass(/cs-expanded/);
