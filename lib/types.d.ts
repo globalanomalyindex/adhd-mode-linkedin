@@ -13,9 +13,9 @@
 // Domain primitives
 
 /**
- * The six LinkedIn reactions, in dock display order (canon section 4).
- * Order matches gestures.js REACTIONS_ORDER:
- * like, celebrate, support, love, insightful, funny.
+ * The six supported LinkedIn reactions (canon section 4). This union has no
+ * presentation order: gestures.js keeps a data order, while the Action Dock
+ * uses the separate thumb-ergonomic visual order.
  */
 export type Reaction =
   | 'like'
@@ -177,6 +177,8 @@ export interface Session {
   mode: SessionMode | null;
   durationSec: number | null;
   postCap: number | null;
+  /** Whether this session's one-time midpoint check-in has appeared. */
+  checkpointShown: boolean;
   cardsSeen: number;
   reactionsSent: number;
   queueAdds: number;
@@ -226,7 +228,7 @@ export interface ReactAction {
   via?: 'tap' | 'drag';
 }
 
-/** active -> end: the time box elapsed. */
+/** active|checkpoint -> end: the time box elapsed. */
 export interface TimeUpAction {
   type: 'TIME_UP';
   /** Optional analytics payload for session_wrapped. */
@@ -243,7 +245,7 @@ export interface WrapAction {
   settledness_delta?: number | null;
 }
 
-/** checkpoint -> active: the user chose to continue past the cap. */
+/** checkpoint -> active: the user chose to continue after the midpoint check-in. */
 export interface ContinueAction {
   type: 'CONTINUE';
 }
@@ -324,6 +326,15 @@ export interface RecallProbeEvent {
   ts: number;
 }
 
+/** Research build only. Kept distinct from second-touch recall. */
+export interface ComprehensionProbeEvent {
+  type: 'comprehension_probe';
+  post_id: string;
+  variant: 'tldr_first' | 'full_text_first';
+  correct: boolean;
+  ts: number;
+}
+
 export interface SessionWrappedEvent {
   type: 'session_wrapped';
   reason: 'timebox' | 'postcap' | 'user_closed' | 'abandoned';
@@ -343,6 +354,7 @@ export type SessionEvent =
   | PostSkippedEvent
   | CheckpointShownEvent
   | RecallProbeEvent
+  | ComprehensionProbeEvent
   | SessionWrappedEvent;
 
 /**

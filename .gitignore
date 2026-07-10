@@ -4,7 +4,11 @@ node_modules/
 .vitest-cache/
 coverage/
 *.log
+__pycache__/
+*.pyc
 .claude/
 
 # verification scratch
 .playwright-mcp/
+playwright-report/
+test-results/

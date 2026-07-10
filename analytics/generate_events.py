@@ -1,9 +1,8 @@
-"""Deterministic synthetic event-log generator.
+"""Deterministic fixture generator for a synthetic measurement rehearsal.
 
-WARNING: every row this writes is SYNTHETIC and illustrative. It is a simulation
-used to exercise the metrics pipeline and to give the case study a concrete (and
-clearly labeled) example table. It is NOT measured data and makes no claim about
-real user outcomes.
+Every row this writes is synthetic. The generator exists to exercise event
+validation, metric transforms, report formatting, and figure generation. It is
+not observed behavior, a study result, or evidence that the product works.
 
 What it produces
 ----------------
@@ -20,25 +19,20 @@ Simulation shape
   three are ephemeral.
 - Long posts (Priya, Maya, Daniel by canon section 3 bodies) get a
   long_post_reflowed event and, in the research build, a comprehension probe.
-- Resurfaced posts at their SECOND touch get a recall_probe. A matched CONTROL
-  group of non-resurfaced posts also gets a recall probe at a comparable later
-  point, so the metrics script has a real baseline to difference against.
+- Resurfaced posts at their second touch get a recall_probe. Fresh posts form an
+  illustrative nonresurfaced comparison arm. The arms are not randomized,
+  matched, counterbalanced, or evidence about people.
 - Settledness is sampled before and after each session; the delta is attached to
-  session_wrapped. A small share of sessions move the wrong way (rumination), on
-  purpose, so the harm counter-metric is non-zero and honest.
+  session_wrapped. A small share of fixture sessions move toward lower
+  settledness so that code path is exercised.
 
-Baked-in capability effect (modest, documented, honest)
--------------------------------------------------------
-We bake a deliberately MODEST effect so the metrics are non-trivial without
-looking like a miracle:
-- Resurfaced-post recall accuracy is higher than the non-resurfaced control.
-  Targets roughly 0.78 vs 0.55. This is the spacing effect, simulated.
-- Comprehension after a TL;DR-first reflow is higher than full-text-first.
-  Targets roughly 0.80 vs 0.62.
-- Most sessions end intentionally (timebox / postcap / user_closed); a minority
-  are abandoned, so intentional completion rate lands around 0.85.
-- Mean settledness delta is modestly positive (calmer after), around +0.9 on the
-  1..5 self-report, with a rumination tail.
+Baked-in fixture probabilities
+------------------------------
+The apparent differences are inputs, not discoveries. Resurfaced recall is
+sampled at 0.78 vs 0.55 for the comparison arm. TL;DR-first comprehension is
+sampled at 0.80 vs 0.62 for full-text-first. Intentional endings and positive
+settledness shifts are also encoded below. The output only proves the pipeline
+can preserve and summarize those authored differences.
 
 Determinism
 -----------
@@ -54,15 +48,13 @@ from pathlib import Path
 
 import numpy as np
 
-from event_schema import RESURFACE_INTERVAL_DAYS
+from event_schema import RESURFACE_INTERVAL_DAYS, validate_event
 
 # --- Reproducibility knobs ---------------------------------------------------
 
 SEED = 7
-# About 40 primary sessions is the canon-friendly cohort size. The probe arms
-# (recall, comprehension) draw from a subset of those sessions, so the per-arm
-# sample is smaller than the session count; the metrics script reports a Wilson
-# CI on each arm to keep the small-N honesty visible rather than hidden.
+# About 40 primary sessions keeps the generated file inspectable. Probe arms
+# draw from subsets, so each transform also exercises uneven fixture counts.
 N_SESSIONS = 42
 # Fixed anchor so timestamps are deterministic. 2026-01-05 12:00:00 UTC in ms.
 BASE_TS = 1_767_614_400_000
@@ -92,12 +84,13 @@ PRESETS = [
     {"time_box_s": 20 * 60, "post_cap": 25},
 ]
 
-# --- Effect-size targets (SYNTHETIC, documented above) ------------------------
+# --- Authored fixture probabilities (SYNTHETIC, documented above) ------------
 
 RECALL_P_RESURFACED = 0.78
-RECALL_P_CONTROL = 0.55
+RECALL_P_COMPARISON = 0.55
 COMPREHENSION_P_TLDR_FIRST = 0.80
 COMPREHENSION_P_FULLTEXT_FIRST = 0.62
+P_RESURFACED_DISMISSED = 0.22
 
 # Share of sessions that end intentionally vs abandoned.
 P_ABANDONED = 0.15
@@ -105,8 +98,8 @@ P_ABANDONED = 0.15
 INTENTIONAL_REASONS = ["timebox", "postcap", "user_closed"]
 INTENTIONAL_REASON_WEIGHTS = [0.45, 0.30, 0.25]
 
-# Settledness self-report (1..5) before/after. Mean delta lands modestly positive
-# with a rumination tail (some sessions go the wrong way). The delta is sampled
+# Settledness self-report (1..5) before/after. The fixture includes some sessions
+# with worsened settledness so that harm-signal path is non-zero. The delta is sampled
 # on a continuous scale, then the after-report is rounded to the nearest whole
 # point and clamped to 1..5; the stored delta is the difference of the integer
 # endpoints, so it stays a valid 5-point-scale shift.
@@ -128,6 +121,7 @@ def _emit(rows, session_id, build, event):
     """Attach the envelope (session_id, build) and append one event row."""
     row = {"session_id": session_id, "build": build}
     row.update(event)
+    validate_event(row, require_envelope=True)
     rows.append(row)
 
 
@@ -175,7 +169,7 @@ def generate():
         step += 1
 
         # Scattered-ish start, weighted low but with room to move either way so
-        # the rumination counter-metric can be genuinely non-zero (a clamp at 1
+        # the worsened-settledness signal can be non-zero (a clamp at 1
         # would otherwise silently erase the negative tail).
         settledness_before = int(rng.choice([1, 2, 3, 4], p=[0.30, 0.35, 0.25, 0.10]))
 
@@ -194,6 +188,30 @@ def generate():
 
         seen_count = 0
         seeded_in_this_session: list[dict] = []
+        checkpoint_shown = False
+
+        def emit_checkpoint_if_due():
+            """Emit the one-time midpoint check-in when the post midpoint is crossed."""
+            nonlocal checkpoint_shown, step
+            midpoint = (post_cap + 1) // 2
+            if checkpoint_shown or seen_count < midpoint:
+                return
+            _emit(
+                rows,
+                session_id,
+                build,
+                {
+                    "type": "checkpoint_shown",
+                    "posts_seen": seen_count,
+                    "elapsed_s": min(
+                        time_box_s,
+                        int(time_box_s * seen_count / max(post_cap, 1)),
+                    ),
+                    "ts": _ts(s, step),
+                },
+            )
+            step += 1
+            checkpoint_shown = True
 
         # 1) Resurfaced second touches first (reengage only).
         for item in resurfaced_this_session:
@@ -228,7 +246,23 @@ def generate():
                     },
                 )
                 step += 1
+            # Exercise the dismiss-without-engage transform for a subset of
+            # resurfaced fixture rows. This probability is authored, not observed.
+            if _bernoulli(rng, P_RESURFACED_DISMISSED):
+                _emit(
+                    rows,
+                    session_id,
+                    build,
+                    {
+                        "type": "post_skipped",
+                        "post_id": post["id"],
+                        "via": "swipe" if _bernoulli(rng, 0.8) else "key",
+                        "ts": _ts(s, step),
+                    },
+                )
+                step += 1
             seen_count += 1
+            emit_checkpoint_if_due()
 
         # 2) Fresh posts for the rest of the session.
         # Sample without replacement from the canonical six, cycling if the
@@ -261,6 +295,7 @@ def generate():
             )
             step += 1
             seen_count += 1
+            emit_checkpoint_if_due()
 
             # Long posts get a reflow event. In the research build we attach a
             # comprehension probe. We A/B the presentation: TL;DR-first vs
@@ -293,22 +328,15 @@ def generate():
                         else COMPREHENSION_P_FULLTEXT_FIRST
                     )
                     correct = _bernoulli(rng, p)
-                    # Comprehension probes ride on the recall_probe channel in
-                    # the shipped taxonomy (canon section 9 has one probe event);
-                    # we tag the arm via a post_id suffix so the metrics script
-                    # can separate comprehension probes from recall probes
-                    # without inventing a new event type. Suffix is envelope-ish
-                    # but kept inside post_id to stay within the taxonomy.
                     _emit(
                         rows,
                         session_id,
                         build,
                         {
-                            "type": "recall_probe",
-                            "post_id": (
-                                f"{post_id}#comp_tldrfirst"
-                                if tldr_first
-                                else f"{post_id}#comp_fulltext"
+                            "type": "comprehension_probe",
+                            "post_id": post_id,
+                            "variant": (
+                                "tldr_first" if tldr_first else "full_text_first"
                             ),
                             "correct": correct,
                             "ts": _ts(s, step),
@@ -363,55 +391,39 @@ def generate():
                 step += 1
             # else: the user just moved on (no react, no explicit skip).
 
-        # Checkpoint fires if the session hit the soft post cap.
+        # The session itself still ends at the post cap when that bound is hit.
         hit_cap = seen_count >= post_cap
-        if hit_cap:
-            _emit(
-                rows,
-                session_id,
-                build,
-                {
-                    "type": "checkpoint_shown",
-                    "posts_seen": seen_count,
-                    "elapsed_s": int(rng.uniform(0.6, 1.0) * time_box_s),
-                    "ts": _ts(s, step),
-                },
-            )
-            step += 1
 
-        # Control-group recall probe (research build only): a non-resurfaced
-        # post the user saw THIS session gets a recall probe at session end, so
-        # the metrics script has a baseline matched to the resurfaced arm. We
+        # Illustrative comparison recall probe (research build only): a
+        # nonresurfaced post seen this session gets a recall probe at session
+        # end. This is a synthetic comparison arm, not a matched control. We
         # pick one fresh, non-long post id seen this session to avoid mixing
         # with the comprehension arm.
         if build == "research":
-            control_candidates = [
+            comparison_candidates = [
                 pid
                 for pid in fresh_ids
                 if not POST_BY_ID[pid]["long"]
             ]
             # Probe up to two distinct non-resurfaced posts per research session.
-            # Two keeps the control arm large enough that its accuracy estimate
-            # is stable and its Wilson CI separates from the resurfaced arm,
-            # without inventing implausible per-session probe volume.
-            seen_controls = []
-            uniq = list(dict.fromkeys(control_candidates))
+            # Two gives the transform enough rows to exercise the comparison
+            # branch without inventing excessive per-session probe volume.
+            uniq = list(dict.fromkeys(comparison_candidates))
             rng.shuffle(uniq)
-            for control_id in uniq[:2]:
-                correct = _bernoulli(rng, RECALL_P_CONTROL)
+            for comparison_id in uniq[:2]:
+                correct = _bernoulli(rng, RECALL_P_COMPARISON)
                 _emit(
                     rows,
                     session_id,
                     build,
                     {
                         "type": "recall_probe",
-                        "post_id": f"{control_id}#control",
+                        "post_id": f"{comparison_id}#comparison",
                         "correct": correct,
                         "ts": _ts(s, step),
                     },
                 )
                 step += 1
-                seen_controls.append(control_id)
 
         # End the session. Most end intentionally; a minority are abandoned.
         abandoned = _bernoulli(rng, P_ABANDONED)

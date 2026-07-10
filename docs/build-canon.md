@@ -148,13 +148,15 @@ Tier 2, engagement metrics (GUARDRAILS, must not be the success criteria):
 - Their only job is to confirm the feature is not quietly tanking the business while the
   capability metrics move.
 
-Harm counter-metrics (these must fail loudly; if any rises, the design is hurting):
+Candidate harm signals for a future study. Define thresholds and stop conditions
+before participant enrollment; the synthetic rehearsal does not implement them:
 - Compulsive re-entry: rate of starting another session within two minutes of a closure.
   Signals the bound became a binge enabler rather than a stop.
 - Resurface anxiety: resurface-queue opt-out rate, plus dismiss-without-view rate on
   resurfaced items. Signals the queue became a guilt backlog.
-- Rumination increase: share of users whose settledness delta goes the wrong way
-  (more scattered after the session than before).
+- Worsened settledness: share of participants whose settledness delta goes the wrong way
+  (more scattered after the session than before). This is not a validated clinical
+  measure.
 
 ## 6. Grounding prompt (mid-session check-in)
 
@@ -230,6 +232,7 @@ are canonical; the Python pipeline and the TS types must match exactly.
 - post_skipped: { post_id: string, via: 'swipe' | 'key', ts: number }
 - checkpoint_shown: { posts_seen: number, elapsed_s: number, ts: number }
 - recall_probe: { post_id: string, correct: boolean, ts: number }   (research build)
+- comprehension_probe: { post_id: string, variant: 'tldr_first' | 'full_text_first', correct: boolean, ts: number }   (research build)
 - session_wrapped: { reason: 'timebox' | 'postcap' | 'user_closed' | 'abandoned', posts_seen: number, elapsed_s: number, resurfaced_count: number, settledness_delta: number | null, ts: number }
 
 Reaction union (canonical): 'like' | 'celebrate' | 'support' | 'love' | 'insightful' | 'funny'.

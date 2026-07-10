@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>ADHD Mode · Prototype</title>
+<title>ADHD Mode · Full-flow prototype</title>
 <style>
   @import url('../design-system/base.css');
 
@@ -12,6 +12,14 @@
     padding: 24px; }
 
   .stage { width: 100%; max-width: 420px; height: min(720px, 95vh); position: relative; }
+
+  .prototype-status {
+    position: fixed; top: 10px; left: 50%; z-index: 20;
+    transform: translateX(-50%); padding: 6px 10px;
+    background: var(--card); border: 1px solid var(--hairline-2);
+    color: var(--text-secondary); font-size: 11px; text-align: center;
+  }
+  .prototype-status a { color: var(--brand); font-weight: 600; }
 
   .panel { position: absolute; inset: 0; display: none;
     background: var(--card); border-radius: var(--r-md); box-shadow: var(--shadow);
@@ -164,6 +172,7 @@
 </style>
 </head>
 <body>
+  <div class="prototype-status">Full-flow prototype with the earlier tray. <a href="./demo.html">Open the current Action Dock study</a>.</div>
   <div id="app">
     <div class="stage">
 

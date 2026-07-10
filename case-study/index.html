@@ -1,863 +1,444 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>adhd mode for linkedin  ·  a case study by Christopher Robin Fiore</title>
-
-<!-- Link-sharing surface: the page's first impression happens in a chat or a
-     feed before anyone clicks. Absolute URLs because unfurl bots resolve
-     nothing relative and run no scripts. -->
-<meta name="description" content="a bounded focus session inside linkedin, designed for adhd and cds cognition. a product design case study with a working prototype, a typed react component, and capability-first measurement." />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ADHD Mode for LinkedIn | Christopher Robin Fiore</title>
+<meta name="description" content="An independent product design concept for a bounded LinkedIn session that turns reactions into private future attention." />
 <link rel="canonical" href="https://globalanomalyindex.github.io/adhd-mode-linkedin/case-study/" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://globalanomalyindex.github.io/adhd-mode-linkedin/case-study/" />
-<meta property="og:title" content="adhd mode for linkedin  ·  a product design case study" />
-<meta property="og:description" content="the credible version of a wellbeing promise: a bounded focus session built on linkedin's own primitives, with a live prototype inside." />
+<meta property="og:title" content="ADHD Mode for LinkedIn" />
+<meta property="og:description" content="A finish line for the feed, with a coded interaction study and an inspectable product system." />
 <meta property="og:image" content="https://globalanomalyindex.github.io/adhd-mode-linkedin/case-study/og.png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="adhd mode for linkedin  ·  a product design case study" />
-<meta name="twitter:description" content="the credible version of a wellbeing promise: a bounded focus session built on linkedin's own primitives, with a live prototype inside." />
+<meta name="twitter:title" content="ADHD Mode for LinkedIn" />
+<meta name="twitter:description" content="A finish line for the feed, with a coded interaction study and an inspectable product system." />
 <meta name="twitter:image" content="https://globalanomalyindex.github.io/adhd-mode-linkedin/case-study/og.png" />
-<meta name="theme-color" content="#f4f2ee" />
+<meta name="theme-color" content="#f2efe7" />
 <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png" />
 <link rel="apple-touch-icon" href="../apple-touch-icon.png" />
-
-<!-- Fonts arrive via CSS @import; warming both origins saves the serial
-     stylesheet-then-font round trip. -->
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
 <link rel="stylesheet" href="./case-study.css" />
 </head>
 <body class="cs-body">
+<a class="cs-skip-link" href="#case-study">Skip to case study</a>
 
-<!-- STICKY NAV (appears on scroll past hero) -->
-<nav class="cs-sticky-nav" id="sticky-nav" aria-hidden="true">
-  <div class="cs-sticky-mark">Christopher Robin Fiore  ·  ADHD Mode</div>
-  <div class="cs-sticky-center">
-    <span class="cs-sticky-count" id="sticky-count">01 / 15</span>
-    <div class="cs-sticky-section" id="sticky-section">Summary</div>
+<nav class="cs-sticky-nav" id="sticky-nav" aria-label="Case study navigation">
+  <a class="cs-sticky-brand" href="#top">CRF / ADHD MODE</a>
+  <div class="cs-sticky-state" aria-live="polite">
+    <span id="sticky-count">01 / 10</span>
+    <span id="sticky-section">Brief</span>
   </div>
-  <div class="cs-sticky-anchors">
-    <a class="cs-anchor-demo" href="#demo">Demo</a>
-    <a href="#option-space">Options</a>
-    <a href="#mechanics">Mechanics</a>
-    <a href="#ai-boundary">AI boundary</a>
-    <a href="#refs">References</a>
-    <button class="cs-mode-toggle" id="focus-toggle-sticky" aria-pressed="false">Focus read</button>
+  <div class="cs-sticky-actions">
+    <a href="#demo">Prototype</a>
+    <a href="#evidence">Evidence</a>
+    <button class="cs-focus-toggle" id="focus-toggle-sticky" type="button" aria-pressed="false">Focus read</button>
   </div>
-  <!-- Reading progress, the session-bound made visible: the same "you can see
-       where the edge is" idea the product argues for. -->
-  <div class="cs-progress" aria-hidden="true"><span class="cs-progress-fill" id="cs-progress-fill"></span></div>
+  <span class="cs-progress" aria-hidden="true"><span id="cs-progress-fill"></span></span>
 </nav>
 
-<!-- HERO -->
-<section class="cs-hero">
-  <div class="cs-hero-top">
-    <div class="cs-hero-mark">Christopher Robin Fiore, Product designer</div>
-    <nav class="cs-hero-nav">
-      <a class="cs-hero-nav-demo" href="#demo">Live demo  →</a>
-      <a href="#walkthrough">Walkthrough</a>
-      <a href="#mechanics">Mechanics</a>
-    </nav>
+<header class="cs-hero" id="top">
+  <div class="cs-hero-bar">
+    <a href="https://github.com/globalanomalyindex">Christopher Robin Fiore</a>
+    <span>Product design + design engineering</span>
+    <span>CASE 01 / 2026</span>
   </div>
 
-  <div class="cs-hero-body">
-    <div class="cs-eyebrow">Portfolio  ·  Product design  ·  2026</div>
-    <h1 class="cs-title">ADHD Mode<br/>for <span class="cs-title-italic">LinkedIn</span><span class="cs-title-dot">.</span></h1>
-    <p class="cs-deck">The credible version of a wellbeing promise. A bounded Focus Session, built on LinkedIn's own primitives, designed for people whose attention works differently.</p>
+  <div class="cs-hero-grid">
+    <div class="cs-hero-copy">
+      <p class="cs-kicker">A finish line for the feed</p>
+      <h1>ADHD Mode<br />for LinkedIn.</h1>
+      <p class="cs-deck">I replaced an infinite feed with a bounded session that turns three existing reactions into a private return queue.</p>
 
-    <div class="cs-fastpath">
-      <button class="cs-mode-toggle cs-mode-toggle-hero" id="focus-toggle" aria-pressed="false">Short on time? Focus read</button>
-      <span class="cs-fastpath-note">Every section collapses to its TL;DR, the live demo stays. This page practices the pattern it proposes.</span>
+      <div class="cs-status" role="group" aria-label="Project status">
+        <span>Independent coded concept</span>
+        <span>Not affiliated with LinkedIn</span>
+        <span>No participant study yet</span>
+      </div>
+
+      <div class="cs-hero-actions">
+        <a class="cs-button cs-button-primary" href="#demo">Try the Action Dock</a>
+        <a class="cs-button" href="https://github.com/globalanomalyindex/adhd-mode-linkedin">Inspect the repository</a>
+        <a class="cs-text-link" href="https://www.figma.com/design/ZFEmkHeen3nXUy6ogyGQW0">Figma file</a>
+      </div>
+    </div>
+
+    <div class="cs-hero-system" role="img" aria-label="Bounded session system diagram">
+      <div class="cs-system-head">
+        <span>FOCUS SESSION / ACTIVE</span>
+        <strong>11:42</strong>
+      </div>
+      <div class="cs-bound-rail" aria-hidden="true">
+        <span class="cs-bound-progress"></span>
+        <i></i><i></i><i></i><i></i><i></i>
+      </div>
+      <div class="cs-system-post">
+        <span class="cs-system-label">CURRENT MODULE</span>
+        <strong>One post. One next action.</strong>
+        <p>The feed becomes a session with a visible edge. Time and post count are both real bounds.</p>
+      </div>
+      <div class="cs-system-joint">
+        <span>INSIGHTFUL</span>
+        <b aria-hidden="true">+</b>
+        <span>PRIVATE RETURN</span>
+      </div>
+      <div class="cs-trace" role="img" aria-label="Authored prototype return schedule">
+        <span>NOW</span><i></i><span>D+3</span><i></i><span>D+7</span><i></i><span>D+14</span>
+      </div>
     </div>
   </div>
 
-  <img class="cs-hero-still" src="./hero-still.png" width="792" height="980" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+  <dl class="cs-hero-meta">
+    <div><dt>Ownership</dt><dd>Product concept, research synthesis, UX/UI, prototyping, system, evaluation framing, code</dd></div>
+    <div><dt>Core thesis</dt><dd>Capability and intentional completion over time on app</dd></div>
+    <div><dt>Build</dt><dd>Vanilla JS, React, TypeScript, Python, Style Dictionary</dd></div>
+    <div><dt>Current proof</dt><dd>Interaction, logic, accessibility automation, synthetic measurement rehearsal</dd></div>
+  </dl>
 
-  <div class="cs-hero-foot">
-    <div class="cs-meta-item">
-      <div class="cs-meta-label">Role</div>
-      <div class="cs-meta-value">Sole designer</div>
-    </div>
-    <div class="cs-meta-item">
-      <div class="cs-meta-label">Duration</div>
-      <div class="cs-meta-value">Three weeks</div>
-    </div>
-    <div class="cs-meta-item">
-      <div class="cs-meta-label">Deliverables</div>
-      <div class="cs-meta-value">Prototype, Figma, case study</div>
-    </div>
-    <div class="cs-meta-item">
-      <div class="cs-meta-label">Research base</div>
-      <div class="cs-meta-value">Becker 2022, Barkley, Sonuga-Barke, Ebbinghaus, Fitts, Hick</div>
-    </div>
+  <div class="cs-focus-entry">
+    <button class="cs-focus-toggle" id="focus-toggle" type="button" aria-pressed="false">Short on time? Focus read</button>
+    <span>Shows the thesis, decisions, evidence, and prototype. This page practices the bounded-reading pattern it proposes.</span>
   </div>
-</section>
+</header>
 
-<article class="cs-page">
-
-  <!-- 01 Summary -->
-  <section class="cs-section" data-title="Summary" data-tldr="A bounded Focus Session inside LinkedIn, built on its own primitives, that optimizes for capability and recall instead of time on app.">
-    <aside class="cs-section-aside">
-      <span class="cs-section-num">01</span>
-      <span class="cs-section-kicker">Summary</span>
-    </aside>
+<main class="cs-main" id="case-study">
+  <section class="cs-section" aria-labelledby="brief-heading" data-title="Brief" data-tldr="A voluntary LinkedIn session with two visible bounds: elapsed time and posts viewed. The product succeeds when people finish intentionally and remember what mattered.">
+    <div class="cs-section-aside"><span>01</span><p>Product brief</p></div>
     <div class="cs-section-body">
-      <h2>Executive <em>summary</em></h2>
-      <p>LinkedIn and its peers publicly commit to caring about user wellbeing. ADHD Mode is what that promise looks like when it is designed seriously: a bounded Focus Session, embedded inside LinkedIn's native surface, that reshapes the feed around how ADHD and Cognitive Disengagement Syndrome (CDS) cognition actually works.</p>
-      <p>The design hinges on three load-bearing ideas: bounded sessions instead of infinite scroll, LinkedIn reactions repurposed as a personal spaced-repetition layer (reaction-seeded fixed spaced intervals), and a set of vertical gestures that move in the directions users already scroll. Long posts are reflowed into TL;DR-first paged cards. Sessions end with a closure ritual that gives users permission to leave.</p>
-      <p>Two sub-modes (Focus for scattered-but-energetic days, Re-engage for foggy days) adjust pacing and density. The design preserves every revenue-relevant signal LinkedIn already collects.</p>
-    </div>
-  </section>
-
-  <!-- 02 Hook -->
-  <section class="cs-section" data-title="The hook" id="hook" data-tldr="Five seconds on a realistic feed, then a recall test you will mostly fail. That miss, with neurotypical attention, is the problem statement.">
-    <aside class="cs-section-aside">
-      <span class="cs-section-num">02</span>
-      <span class="cs-section-kicker">The hook</span>
-    </aside>
-    <div class="cs-section-body">
-      <h2>Selective attention <em>on LinkedIn</em></h2>
-      <p>Before you read another sentence, look at this feed for five seconds. Then close your eyes.</p>
-
-      <div class="cs-figure">
-        <iframe src="../screens/before-feed-annotated.html" title="Annotated LinkedIn feed" loading="lazy"></iframe>
-        <div class="cs-figure-caption">A realistic LinkedIn home feed, annotated with nine attention-cost vectors on a single screen.</div>
+      <div class="cs-section-heading">
+        <p class="cs-kicker">THE PRODUCT IN ONE MINUTE</p>
+        <h2 id="brief-heading">Professional access without the bottomless feed.</h2>
       </div>
-
-      <p>How many posts mentioned hiring? Did you see the layoff? What color was the second profile photo? How many notification badges were there?</p>
-
-      <p class="cs-pull">You had <em>neurotypical</em> attention and you still missed most of it. This is what people with ADHD and CDS navigate every time they open the app.</p>
-    </div>
-  </section>
-
-  <!-- 03 Problem -->
-  <section class="cs-section" data-title="The problem" data-tldr="Platforms promise wellbeing and ship infinite scroll. For ADHD and CDS users, who must use LinkedIn professionally, that gap is exclusionary rather than just uncomfortable.">
-    <aside class="cs-section-aside">
-      <span class="cs-section-num">03</span>
-      <span class="cs-section-kicker">The problem</span>
-    </aside>
-    <div class="cs-section-body">
-      <h2>The wellbeing-<em>promise gap</em></h2>
-      <p>Major platforms have made public commitments to user wellbeing. Instagram's "Take a Break," screen-time tools across iOS and Android, LinkedIn's own member wellbeing pages. These commitments exist alongside product surfaces optimized for indefinite engagement: infinite scroll, autoplay, escalating notification counts, algorithmically novel content, reaction counts that anchor judgment before evaluation.</p>
-      <p>For attention-typical users the gap between promise and product is uncomfortable. For ADHD and CDS users it is exclusionary. These users are required to use LinkedIn for professional reasons (job search, network maintenance, industry awareness) and are then confronted with a surface that is structurally hostile to how their attention works.</p>
-
-      <blockquote class="cs-voice">
-        <div class="cs-voice-eyebrow">A composite voice, disclosed up front</div>
-        <p>"I open LinkedIn to find one job posting, lose forty minutes, and could not tell you a single thing I read."</p>
-        <cite>Drawn from public ADHD and CDS community threads. Not a single attributable quote, and not presented as one.</cite>
-      </blockquote>
-
-      <p>ADHD Mode closes that gap honestly. It is not an attack on the business model, not a competing app, and not a punishing time-limit tool. It is a feature that says: when you need to use this platform with your kind of brain, here is a way to do that without the bottom falling out.</p>
-    </div>
-  </section>
-
-  <!-- 04 Research -->
-  <section class="cs-section" data-title="Research" data-tldr="Delay aversion, working-memory load, and accurate-but-slow encoding, each cited and each tied to a specific mechanic. Hypotheses are marked as hypotheses.">
-    <aside class="cs-section-aside">
-      <span class="cs-section-num">04</span>
-      <span class="cs-section-kicker">Research</span>
-    </aside>
-    <div class="cs-section-body">
-      <h2>The <em>cognitive science</em> the design responds to</h2>
-      <p>Every mechanic in this design traces to a finding in the cognitive science literature, a documented HCI principle, or an explicit designer's hypothesis marked as such. The audience this serves is not small: adult ADHD prevalence in the United States is estimated at roughly 4 to 5 percent.<sup><a href="#ref-prevalence">1</a></sup> That figure carries the business case, so it gets a source rather than a round number.</p>
-
-      <h3>ADHD cognition</h3>
-      <p>Combined and hyperactive-impulsive ADHD presentations share four documented patterns relevant to feed design. Delay aversion and time blindness: people with ADHD systematically under-perceive elapsed time and steer away from delayed reward, a pattern Sonuga-Barke models as a motivational style in its own right.<sup><a href="#ref-sonuga">2</a></sup> Executive-function and working-memory load: Barkley's self-regulation model treats ADHD as a deficit in holding and acting on internally represented information.<sup><a href="#ref-barkley-ef">3</a></sup> Novelty-seeking and impulse interaction. And hyperfocus collapse, where time perception disappears once attention is captured.</p>
-
-      <h3>Cognitive Disengagement Syndrome</h3>
-      <p>CDS, formerly known as Sluggish Cognitive Tempo, was renamed via expert consensus in 2022.<sup><a href="#ref-becker2022">4</a></sup> Its defining cognitive signature is "accurate but slow" across attention and executive-function tasks.<sup><a href="#ref-mayes">5</a></sup> CDS users reach correct answers but at significantly reduced processing speed. The implication for feed design is not faster forgetting; it is slower encoding. Content presented at typical density or pace is missed or skimmed past without absorption.</p>
-      <p class="cs-caveat">A marked hypothesis: the Mayes study measured children, not adults.<sup><a href="#ref-mayes">5</a></sup> Applying its "accurate but slow" profile to the working adults this design serves is a deliberate generalization that stops short of a finding, and it sits on the list of things to validate before any strong claim is made.</p>
-
-      <h3>Spaced repetition</h3>
-      <p>Spaced repetition has been a documented memory-consolidation strategy since Ebbinghaus mapped the forgetting curve in 1885,<sup><a href="#ref-ebbinghaus">6</a></sup> and it is validated extensively in modern learning science. Its application to ADHD populations rests on working-memory-load reduction and alignment with shorter attention spans; one of the few ADHD-specific consolidation studies found that scheduling practice well supports procedural memory in this group.<sup><a href="#ref-adijapha">7</a></sup></p>
-
-      <h3>Interaction principles</h3>
-      <p>The design also draws on documented HCI principles. Fitts's Law: magnified targets reduce time-to-acquire and error rate.<sup><a href="#ref-fitts">8</a></sup> Hick's Law: choice time grows with the number of options, which is why the common path carries no decisions and the richer reaction set opens only on demand.<sup><a href="#ref-hick">9</a></sup> Preview-before-commit: a visible label during a swipe gives the user a chance to back out, which speaks directly to the response-inhibition deficit Barkley describes.<sup><a href="#ref-barkley-inhibition">10</a></sup> And effort-matched-to-consequence: the low-stakes default is cheap, the high-stakes deliberate action asks for more intent.</p>
-
-      <p><em>What this design is not:</em> a medical intervention. The framing throughout is "design that respects how these cognitive profiles work," not "treatment."</p>
-    </div>
-  </section>
-
-  <!-- 05 Principles -->
-  <section class="cs-section" data-title="Principles" data-tldr="Seven constraints written as tests the design must pass, from LinkedIn-native fidelity to closure without scolding, with the accessibility receipts measured rather than claimed.">
-    <aside class="cs-section-aside">
-      <span class="cs-section-num">05</span>
-      <span class="cs-section-kicker">Principles</span>
-    </aside>
-    <div class="cs-section-body">
-      <h2>Seven <em>falsifiable</em> principles</h2>
-      <p>The constraints held throughout. Each one is a test the design must pass rather than a vague aspiration.</p>
-      <ol>
-        <li><strong>Embedded, not bolted on.</strong> Every visual, every interaction, every piece of copy reads as something LinkedIn could ship. No competing identity. No wellness-app pastel.</li>
-        <li><strong>Beauty in simplicity.</strong> If a screen needs more than its data and structure to be understood, the design has failed. No marketing copy on operational screens.</li>
-        <li><strong>Research-grounded.</strong> Every mechanic traces to a cited finding, a documented HCI principle, or an explicit designer's hypothesis marked as such.</li>
-        <li><strong>Respects the business model.</strong> The design preserves LinkedIn's social signal: reactions fire normally, notifications go out, content reaches authors. It improves engagement quality without attacking engagement quantity.</li>
-        <li><strong>Respects scroll muscle memory.</strong> Every swipe and drag moves in the direction the thumb already travels on a feed, so nothing has to be unlearned.</li>
-        <li><strong>Accessible by default.</strong> Every gesture has a tap-based fallback. Motor coordination differences are accommodated. <code>prefers-reduced-motion</code> is honored everywhere, and the fallbacks stay meaningful instead of stripped-down.</li>
-        <li><strong>Closure, not abandonment.</strong> Sessions end with a calm finish, not a "you've been here too long" scold.</li>
-      </ol>
-
-      <div class="cs-a11y" role="group" aria-labelledby="cs-a11y-head">
-        <div class="cs-a11y-head" id="cs-a11y-head">Accessibility, with receipts</div>
-        <p class="cs-a11y-lede">Principle six is only worth stating if it holds up to a meter. Three things it has to clear:</p>
-        <dl class="cs-a11y-grid">
-          <div class="cs-a11y-item">
-            <dt>Contrast, measured</dt>
-            <dd>Body text is ink on paper at <strong>16.6:1</strong>, well past the WCAG AA floor of 4.5:1. The coral accent reads <strong>4.07:1</strong> on paper, so it is reserved for large display type and decorative marks where the 3:1 large-text bar applies, and never carries small body copy. Links keep their underline so color is not the only signal.</dd>
-          </div>
-          <div class="cs-a11y-item">
-            <dt>Every gesture has a tap</dt>
-            <dd>Reacting works by dragging the card to a slot or by tapping the React FAB and tapping a reaction. Skipping works by swipe or by the top skip target. No interaction in the session is reachable by gesture alone, so motor-coordination differences are never a wall.</dd>
-          </div>
-          <div class="cs-a11y-item">
-            <dt>The resurface count is announced</dt>
-            <dd>When a reaction seeds the queue, the visible &#8635; topbar count ticks up and a polite <code>aria-live</code> region speaks it ("Reacted insightful to Maya Chen's post. Saved to resurface."), so the badge is never the only way to know the post was saved.</dd>
-          </div>
-        </dl>
-        <p class="cs-a11y-foot"><code>prefers-reduced-motion</code> is honored across the prototype, the screens, and this page, with calm fallbacks rather than dropped state.</p>
+      <p class="cs-tldr">A voluntary LinkedIn session with two visible bounds: elapsed time and posts viewed. The product succeeds when people finish intentionally and remember what mattered.</p>
+      <div class="cs-detail">
+        <p class="cs-lede">People often need LinkedIn for job search, professional identity, and weak-tie maintenance. The same feed that provides that access is designed without a natural stopping point. For someone already managing attention regulation, the cost is not simply screen time. It is losing the original task.</p>
+        <div class="cs-brief-grid">
+          <article><span>USER NEED</span><h3>Reach professional value without surrendering the session.</h3></article>
+          <article><span>PLATFORM CONSTRAINT</span><h3>Preserve familiar posts, reactions, and creator signals.</h3></article>
+          <article><span>SUCCESS</span><h3>Recall, comprehension, intentional completion, settledness.</h3></article>
+          <article><span>NON-GOAL</span><h3>Diagnose attention, moralize use, or optimize engagement.</h3></article>
+        </div>
+        <div class="cs-principle">
+          <p>Design question</p>
+          <strong>Can LinkedIn keep its professional utility while making the end of a visit visible from the start?</strong>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- 06 The option space -->
-  <section class="cs-section" data-title="The option space" id="option-space" data-tldr="Eight directions tried on the way here: what was kept, what was killed, and why. Every cell is verifiable in the commit history and the exploration archive.">
-    <aside class="cs-section-aside">
-      <span class="cs-section-num">06</span>
-      <span class="cs-section-kicker">The option space</span>
-    </aside>
-    <div class="cs-section-body" style="max-width: none;">
-      <h2>The option <em>space</em></h2>
-      <p class="cs-ov-lede">A finished design reads as inevitable, which hides the part worth evaluating: the directions considered and the reasons they lived or died. This is that map. Nothing here is reconstructed for the writeup; each cell survives in the commit history or the exploration archive.</p>
-
-      <div class="cs-options">
-        <div class="cs-option">
-          <span class="cs-ov cs-ov-killed">killed</span>
-          <h4>Always-on reaction tray</h4>
-          <p>Six standing targets on every card is exactly the decision load Hick's Law warns about, placed on the audience least able to pay it. Reacting is the rare action; it was crowding the common one.</p>
-        </div>
-        <div class="cs-option">
-          <span class="cs-ov cs-ov-kept">kept</span>
-          <h4>Corner action dock</h4>
-          <p>Two resting FABs, with the full reaction set one tap or one drag away. The common path carries zero decisions; the richer set opens only on demand.</p>
-        </div>
-        <div class="cs-option">
-          <span class="cs-ov cs-ov-killed">killed</span>
-          <h4>Metaball goo connector</h4>
-          <p>A gooey blob stretched between card and reaction as you dragged. It demoed beautifully, centered the mechanism instead of the decision, and could not honor reduced motion. Reverted in one commit.</p>
-        </div>
-        <div class="cs-option">
-          <span class="cs-ov cs-ov-killed">killed</span>
-          <h4>Horizontal card grammar</h4>
-          <p>Early sketches dealt cards sideways on the horizontal axis. It fought years of vertical feed muscle memory, so the grammar moved to the axis thumbs already travel.</p>
-        </div>
-        <div class="cs-option">
-          <span class="cs-ov cs-ov-killed">killed</span>
-          <h4>Editorial closure screen</h4>
-          <p>The first end-of-session screen was sleek and magazine-grade, and wrong: it read as a brand moment inside a product surface. Rebuilt LinkedIn-native; three versions sit in the archive.</p>
-        </div>
-        <div class="cs-option">
-          <span class="cs-ov cs-ov-evolved">evolved</span>
-          <h4>Time-only session bound</h4>
-          <p>A single time box ignored volume doomscrolling. The shipped session is bounded by time and a post cap, whichever lands first.</p>
-        </div>
-        <div class="cs-option">
-          <span class="cs-ov cs-ov-evolved">evolved</span>
-          <h4>Width-animated tray reveal</h4>
-          <p>The first reveal animated the tray's geometry over live glass and stalled real GPUs. The shipped reveal is a static mask with slots staggering in on the compositor.</p>
-        </div>
-        <div class="cs-option">
-          <span class="cs-ov cs-ov-evolved">evolved</span>
-          <h4>Proximity magnification</h4>
-          <p>The activation radius was tightened mid-build after neighboring reactions kept responding to drags meant elsewhere. Fitts's Law is a starting point; thumbs are the tiebreaker.</p>
-        </div>
-      </div>
-
-      <p class="cs-ov-foot">The fork that mattered most, the tray becoming the dock, is unpacked in the walkthrough below.</p>
-    </div>
-  </section>
-
-  <!-- 07 Walkthrough -->
-  <section class="cs-section" data-title="Walkthrough" id="walkthrough" data-tldr="Entry, setup, the active session, check-in, closure. The live demo stays below; the fork that turned an always-on tray into the corner dock is unpacked here.">
-    <aside class="cs-section-aside">
-      <span class="cs-section-num">07</span>
-      <span class="cs-section-kicker">Walkthrough</span>
-    </aside>
+  <section class="cs-section cs-section-demo" id="demo" aria-labelledby="demo-heading" data-title="Prototype" data-keep="true" data-tldr="The embedded prototype is an Action Dock interaction study. It tests tap, drag, keyboard, and reaction feedback, not the full end-to-end product.">
+    <div class="cs-section-aside"><span>02</span><p>Try it</p></div>
     <div class="cs-section-body">
-      <h2>The product, <em>screen by screen</em></h2>
-
-      <h3>Entry point</h3>
-      <p>The ADHD Mode entry is a card placed near the top of the LinkedIn home feed. Discoverable but quiet. The brand-gradient mark and the single-line description signal what the mode does without overselling it.</p>
-      <div class="cs-figure">
-        <iframe src="../screens/entry-point.html" title="Entry point" loading="lazy"></iframe>
-        <div class="cs-figure-caption">A discoverable card on LinkedIn home. The mode is opted into, not opted out of.</div>
+      <div class="cs-section-heading">
+        <p class="cs-kicker">CODED INTERACTION STUDY</p>
+        <h2 id="demo-heading">Can one dock keep the resting screen quiet?</h2>
       </div>
-
-      <h3>Session setup</h3>
-      <p>Two choices: mode (Focus or Re-engage) and length. Re-engage's tile copy ("Foggy or slow. More room per post.") is deliberately non-clinical. The user does not have to self-diagnose to use the right mode.</p>
-      <div class="cs-figure">
-        <iframe src="../screens/session-setup.html" title="Session setup" loading="lazy"></iframe>
-        <div class="cs-figure-caption">Two choices, then begin. Smart defaults so the impatient user can launch in one tap.</div>
+      <p class="cs-tldr">The embedded prototype is an Action Dock interaction study. It tests tap, drag, keyboard, and reaction feedback, not the full end-to-end product.</p>
+      <div class="cs-demo-notice">
+        <strong>Try this:</strong> open reactions, choose Support, then move to the next post. Keyboard: 1 through 6 reacts, Arrow Up moves on, Arrow Right flips to the profile.
       </div>
-
-      <h3>The active session  <em>(try it)</em></h3>
-      <p>One post at a time, full-bleed, with nothing in the periphery competing for attention. The bottom dock has two liquid-glass FABs at the corners: <strong>Comment</strong> on the left (tap to compose) and <strong>React</strong> on the right (tap to expand a reaction tray that grows leftward to reveal six reactions). The skip target at the top is a small teaching affordance that fades in once.</p>
-      <p>Two paths to the same outcome. Tap-friendly: tap the React FAB, then tap a reaction. Gesture-friendly: drag the card down toward the dock and the React FAB auto-expands; release on a slot to commit, with magnification and a floating preview tracking your thumb. Velocity carries into a spring on release, so a flick continues past your finger with momentum. Long-press a slot for a held preview.</p>
-
-      <p>This is the centerpiece screen, shown here at rest with one post tagged Insightful and its resurface affordance visible:</p>
-      <div class="cs-figure">
-        <iframe src="../screens/active-session.html" title="Active session, the centerpiece screen at rest" loading="lazy"></iframe>
-        <div class="cs-figure-caption">The active session at rest: bounded progress on both the time box and the post cap, a single focused post, and the Action Dock with the reaction tray expanded. The reacted post shows when it returns instead of a raw like count.</div>
-      </div>
-
-      <p>And the live version, where the physics are the point:</p>
-      <div class="cs-figure cs-figure-demo" id="demo" data-keep="true">
-        <div class="cs-live-chip" aria-hidden="true">Interactive  ·  drag the card</div>
-        <iframe src="../prototype/demo.html" title="Interactive demo, tap or drag to react" loading="lazy"></iframe>
-        <div class="cs-figure-caption">Try it. Tap the right-side React FAB to expand the tray, then tap a reaction. Or drag the card down past the activation threshold to auto-expand, with the floating preview tracking your thumb. The bottom dock proves the same component can serve both common (skip past) and rare (react or comment) actions without cluttering the screen.</div>
-      </div>
-
-      <h3>The fork in the road: how the dock got here</h3>
-      <p>The dock did not start as a dock. The first build of the active session sat a permanent six-emoji reaction tray across the bottom of every card, always open, plus a separate compose-prompt strip above it. The thinking was reasonable on paper: keep every reaction one tap away, never make the user hunt.</p>
-      <p>It failed against the second principle, beauty in simplicity, and it failed against the research. Six always-visible targets is exactly the standing decision load Hick's Law warns about: every card asked the user to scan and choose before they had even read it, and Barkley's work on response inhibition says that is the worst tax to put on this audience up front. A quick self-test settled it. Reacting is the rare action; skipping and reading are the common ones. A control surface sized for the rare case was crowding the common one on every single post.</p>
-      <p>The revision collapsed the strip into the corner Action Dock you see above: two resting FABs, with the full six-reaction set tucked behind the React FAB and revealed only on demand, by tap or by drag. The common path now carries zero decisions; the richer set is one gesture away when it is actually wanted. Same six reactions, a fraction of the resting load.</p>
-      <p>One detour inside that revision is worth admitting because it did not survive. While tuning the drag, I built a metaball goo effect, a gooey blob that stretched between the card and the reaction bubble so the two looked physically connected as you pulled them together. It demoed beautifully and it was the wrong call: it drew the eye to the mechanism instead of the decision, and it could not honor <code>prefers-reduced-motion</code> without becoming a different interaction entirely. I reverted it and kept the calmer floating preview. Restraint is a principle here, and the principle had to win over the trick.</p>
-
-      <h3>Mid-session check-in</h3>
-      <p>At the cap, the user is given a deliberate choice: wrap, extend, or pause. The primary action is "Wrap up", the easy default takes you to closure. Extending the session is the deliberate choice.</p>
-      <div class="cs-figure">
-        <iframe src="../screens/mid-session-checkin.html" title="Mid-session check-in" loading="lazy"></iframe>
-        <div class="cs-figure-caption">Notice the action hierarchy: closure is primary; extension is secondary.</div>
-      </div>
-
-      <h3>End of session</h3>
-      <p>The closure ritual. A calm card, a plain headline of the session in numbers, three summary stats, two items returning later, and a primary action that takes the user out of LinkedIn rather than back into more feed.</p>
-      <div class="cs-figure">
-        <iframe src="../screens/end-of-session.html" title="End of session" loading="lazy"></iframe>
-        <div class="cs-figure-caption">No celebration screen. No "great job!" The structure communicates completion; the design gives permission to leave.</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 08 Mechanic: Reactions -->
-  <section class="cs-section" data-title="Mechanic, reactions" id="mechanics" data-tldr="The six reactions LinkedIn already has become a private spaced-repetition layer. Insightful, Support, and Love schedule a post's return; Like stays cheap; nothing is penalized.">
-    <aside class="cs-section-aside">
-      <span class="cs-section-num">08</span>
-      <span class="cs-section-kicker">Mechanic, reactions</span>
-    </aside>
-    <div class="cs-section-body">
-      <h2>LinkedIn reactions <em>as spaced repetition</em></h2>
-      <p>The most distinctive move in the design. LinkedIn already has six reactions: Like, Celebrate, Support, Love, Insightful, Funny. Inside ADHD Mode they keep their social function (the notification still fires, the author still hears about it) and take on a second one in the background: scheduling the post into a private resurface queue.</p>
-
-      <table class="cs-table">
-        <thead>
-          <tr>
-            <th>Reaction</th>
-            <th>Social signal</th>
-            <th>Resurface behavior</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>💡 Insightful</td><td>Standard</td><td>About 3 days, then a fixed widening interval</td></tr>
-          <tr><td>🤝 Support</td><td>Standard</td><td>About 1 week</td></tr>
-          <tr><td>❤️ Love</td><td>Standard</td><td>About 2 weeks</td></tr>
-          <tr><td>🎉 Celebrate</td><td>Standard</td><td>Surfaces on next profile visit</td></tr>
-          <tr><td>👍 Like, 😄 Funny</td><td>Standard</td><td>No resurface</td></tr>
-          <tr><td><em>No reaction</em></td><td>None</td><td>No resurface, no penalty</td></tr>
-        </tbody>
-      </table>
-
-      <p>The mapping is deliberate. Insightful, Support, and Love are the three reactions whose emotional signal most strongly implies "I want to remember this" or "this person matters to me." Like and Funny are ephemeral acknowledgments; they don't deserve future attention bandwidth. Celebrate is moment-specific; it surfaces only when relevant (next profile visit).</p>
-
-      <div class="cs-callout">
-        <div class="cs-callout-kicker">A second fork, hidden in the tray order</div>
-        <p>The reaction order is not LinkedIn's default. The three resurfacing reactions sit at the deliberate far end of the tray, and Like sits under the resting thumb, so the cheap acknowledgment is the easy reach and the reactions that schedule future attention take one beat more intent. The ergonomics enforce the memory mechanic; the layout is doing metric design.</p>
-      </div>
-
-      <h3>What ships, and what the research build adds</h3>
-      <p>The shipped mechanic is <strong>reaction-seeded fixed spaced intervals</strong>. A qualifying reaction seeds the post into the resurface queue and schedules it on a fixed widening curve (about three days, then a week, then longer). It is deterministic and inspectable: the same reaction always produces the same schedule, so the user can predict and trust it. This is not the SM-2 algorithm. It is the simplest scheduler that does the job.</p>
-      <p>The research build evolves the scheduler toward <strong>SM-2</strong>, where grade-driven ease factors stretch or compress each interval. The grade comes from a short recall probe at the second touch: the user states the post's core claim before it is re-shown. That probe earns its keep twice over. It tunes the spacing, and it yields a capability signal we can measure (recall accuracy on resurfaced posts versus a non-resurfaced control). The shipped version trades that signal away for simplicity and trust; the research version buys it back.</p>
-
-      <p>The scheduling stays out of the way. The user does not see "this returns Tuesday." A small &#8635; counter in the session topbar grows during a session. The full queue is browsable in settings, and every item in it can be inspected or removed; no resurface item announces its arrival.</p>
-
-      <p class="cs-pull">Your past attention <em>curates</em> your present attention. The mechanism is invisible. The benefit is not.</p>
-    </div>
-  </section>
-
-  <!-- 09 Mechanic: Reflow -->
-  <section class="cs-section" data-title="Mechanic, reflow" data-tldr="Long posts become TL;DR-first paged cards, so the reader decides before sinking cost. The focus mode on this page is the same move, applied to itself.">
-    <aside class="cs-section-aside">
-      <span class="cs-section-num">09</span>
-      <span class="cs-section-kicker">Mechanic, reflow</span>
-    </aside>
-    <div class="cs-section-body">
-      <h2>Long-post <em>reflow</em></h2>
-      <p>LinkedIn posts above ~60 words are reflowed in ADHD Mode into a chunked, paged structure. The first card is always a TL;DR; subsequent cards are body chunks split on narrative beats. This addresses the wall-of-text overwhelm and the sunk-cost trap simultaneously.</p>
-
-      <p>The TL;DR-first ordering is the key move. "See more" hides text but forces a sunk-cost decision: once you start reading, ADHD users feel obligated to finish even when the post is not paying off. TL;DR-first lets you decide before starting. If the summary is not for you, skip the post entirely. If it is, the paged structure means you always know how much further the post goes and you can choose to continue or wrap.</p>
-
-      <div class="cs-reflow-compare" role="img" aria-label="Comparison of a long post as one unbroken block with a see-more link, versus the same post reflowed as a TL;DR-first paged card">
-        <div class="cs-reflow-panel">
-          <div class="cs-reflow-head">The wall</div>
-          <div class="cs-reflow-mock">
-            <span class="cs-rl" style="width:94%"></span>
-            <span class="cs-rl" style="width:88%"></span>
-            <span class="cs-rl" style="width:96%"></span>
-            <span class="cs-rl" style="width:82%"></span>
-            <span class="cs-rl" style="width:91%"></span>
-            <span class="cs-rl" style="width:86%"></span>
-            <span class="cs-rl" style="width:93%"></span>
-            <span class="cs-rl" style="width:64%"></span>
-            <span class="cs-rl-more">...see more</span>
-          </div>
-          <p class="cs-reflow-note">One block, one sunk-cost decision, no sense of how deep it goes.</p>
+      <div class="cs-demo-layout">
+        <div class="cs-demo-frame">
+          <iframe src="../prototype/demo.html" title="ADHD Mode Action Dock interaction study" loading="lazy"></iframe>
         </div>
-        <div class="cs-reflow-panel">
-          <div class="cs-reflow-head">Reflowed</div>
-          <div class="cs-reflow-mock">
-            <span class="cs-rl-tag">tl;dr</span>
-            <span class="cs-rl cs-rl-ink" style="width:78%"></span>
-            <span class="cs-rl cs-rl-ink" style="width:52%"></span>
-            <span class="cs-rl-dots"><i class="on"></i><i></i><i></i><i></i></span>
-          </div>
-          <p class="cs-reflow-note">Summary first, beats paged, and you always know how far it goes.</p>
-        </div>
-      </div>
-
-      <p>The pipeline is five steps: detect and classify, generate TL;DR (third-person referent so the summary reads as orientation rather than the author's voice), chunk by beat (paragraph boundaries and narrative breaks, not arbitrary word counts), preserve visual hierarchy (lists stay together, quotes stay intact), and in Re-engage mode only, prepend a "what you'll find" comprehension scaffold.</p>
-    </div>
-  </section>
-
-  <!-- 10 AI boundary -->
-  <section class="cs-section" data-title="AI boundary" id="ai-boundary" data-tldr="AI summarizes and scaffolds. It never chooses what resurfaces, never ranks for engagement, and never sets the session bound.">
-    <aside class="cs-section-aside">
-      <span class="cs-section-num">10</span>
-      <span class="cs-section-kicker">AI boundary</span>
-    </aside>
-    <div class="cs-section-body">
-      <h2>Where AI <em>stops</em></h2>
-      <p class="cs-pull">AI orients and scaffolds. It does not decide what you re-see, and it never optimizes for time on app.</p>
-      <p>The mode uses a model in a few narrow places, and the line around it is drawn on purpose. The scheduling that gives the feature its point stays deterministic and user-owned, so the parts a person needs to trust are the parts a person can inspect.</p>
-
-      <div class="cs-boundary">
-        <div class="cs-boundary-col cs-boundary-may">
-          <div class="cs-boundary-head">AI may</div>
+        <aside class="cs-demo-proof">
+          <span class="cs-proof-tag">BUILT</span>
+          <h3>What this proves</h3>
           <ul>
-            <li>Generate the per-post TL;DR for long posts (an LLM call in production).</li>
-            <li>Power the optional recall and comprehension probes in the research build, writing the question and grading the free-text answer.</li>
-            <li>Draft an optional reflection prompt at closure, which the user can ignore or edit.</li>
+            <li>On-demand Action Dock behavior</li>
+            <li>Tap, drag, and keyboard paths</li>
+            <li>Reaction-to-saved feedback</li>
+            <li>Reduced-motion state parity</li>
           </ul>
-        </div>
-        <div class="cs-boundary-col cs-boundary-mustnot">
-          <div class="cs-boundary-head">AI must not</div>
+          <span class="cs-proof-tag cs-proof-tag-open">NOT YET PROVEN</span>
           <ul>
-            <li>Choose what resurfaces. That is driven by the user's own reactions, deterministically and transparently, and the queue is always visible and editable.</li>
-            <li>Rank or curate the feed for engagement. The session preserves native chronological order or the user's existing feed order, and adds no engagement-optimizing ranker.</li>
-            <li>Set or nudge session length. The user sets the bound.</li>
+            <li>End-to-end user value</li>
+            <li>LinkedIn integration</li>
+            <li>Human recall or comprehension outcomes</li>
           </ul>
+          <a class="cs-button" href="../prototype/demo.html">Open full-screen prototype</a>
+          <a class="cs-text-link" href="../prototype/">Open the separate full-flow prototype</a>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="cs-section" id="system" aria-labelledby="system-heading" data-title="System" data-tldr="The product has four modules: Bound the session, Focus the feed, Return chosen posts, and Close without scolding.">
+    <div class="cs-section-aside"><span>03</span><p>System anatomy</p></div>
+    <div class="cs-section-body">
+      <div class="cs-section-heading">
+        <p class="cs-kicker">FRAME / MODULE / JOINT / TRACE</p>
+        <h2 id="system-heading">The finish line is product infrastructure.</h2>
+      </div>
+      <p class="cs-tldr">The product has four modules: Bound the session, Focus the feed, Return chosen posts, and Close without scolding.</p>
+      <div class="cs-detail">
+        <ol class="cs-system-steps">
+          <li><span>01 / BOUND</span><h3>Choose time and post limits.</h3><p>Five, 12, or 20 minutes map to eight, 15, or 25 posts. The first limit reached closes the session.</p></li>
+          <li><span>02 / FOCUS</span><h3>Make one post the active module.</h3><p>Progress, time, and the saved count stay visible. Secondary actions appear only after intent.</p></li>
+          <li><span>03 / RETURN</span><h3>Let reactions seed future attention.</h3><p>Insightful, Support, and Love place the post into a private fixed-interval queue. Like, Celebrate, and Funny remain ephemeral.</p></li>
+          <li><span>04 / CLOSE</span><h3>End cleanly at either boundary.</h3><p>A midpoint check-in appears once. Closure summarizes what happened and lets the person leave, review saved posts, or choose a new session.</p></li>
+        </ol>
+        <div class="cs-trace-card">
+          <div><span>TRACE</span><strong>Authored prototype defaults</strong></div>
+          <div class="cs-trace" role="img" aria-label="Three, seven, and fourteen day prototype intervals"><span>NOW</span><i></i><span>D+3</span><i></i><span>D+7</span><i></i><span>D+14</span></div>
+          <p>The literature supports spacing as a general memory strategy. It does not validate this exact schedule for social posts or ADHD. The intervals are design defaults to test.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 11 Business framing -->
-  <section class="cs-section" data-title="Business framing" data-tldr="Every revenue-relevant signal still fires. The mode improves the quality of attention without spending the business to do it.">
-    <aside class="cs-section-aside">
-      <span class="cs-section-num">11</span>
-      <span class="cs-section-kicker">Business framing</span>
-    </aside>
+  <section class="cs-section" id="decisions" aria-labelledby="decisions-heading" data-title="Decisions" data-tldr="Three decisions carry the concept: dual session bounds, an on-demand Action Dock, and reactions that make future attention explicit.">
+    <div class="cs-section-aside"><span>04</span><p>Key decisions</p></div>
     <div class="cs-section-body">
-      <h2>Why this is the <em>credible</em> version of the wellbeing promise</h2>
-      <p>The design carefully preserves the business model. Reactions still fire to authors. Notifications still escalate. Content still reaches the people who posted it. What changes is the <em>quality</em> of attention for users who would otherwise scroll-and-bounce or doom-loop without absorbing anything.</p>
-      <p>The case to make in a product review is that you can serve these users well without spending the business to do it. The capability metrics in the next section define whether the mode works. The engagement guardrails (7-day return, reaction mix, opt-in) only have to stay healthy enough to show the feature is not costing the business while capability moves. If the capability metrics hold and the guardrails stay flat or improve, the mode pays for itself. If capability does not move, the design needs rework rather than incremental polish, and saying so plainly is part of the proposal.</p>
+      <div class="cs-section-heading">
+        <p class="cs-kicker">LOAD-BEARING CHOICES</p>
+        <h2 id="decisions-heading">Three decisions do most of the work.</h2>
+      </div>
+      <p class="cs-tldr">Three decisions carry the concept: dual session bounds, an on-demand Action Dock, and reactions that make future attention explicit.</p>
+      <div class="cs-detail cs-decision-list">
+        <article class="cs-decision">
+          <span class="cs-decision-num">01</span>
+          <div><h3>Two bounds, one actual stop.</h3><p><strong>Choice:</strong> expose time and post count together, then close at whichever arrives first.</p><p><strong>Why:</strong> a timer alone can become another demand. A post bound makes the amount of content legible; a time bound prevents slow content from turning the session infinite.</p><p><strong>Tradeoff:</strong> some sessions end before a person reaches a desired post. Starting another bounded session stays explicit.</p></div>
+        </article>
+        <article class="cs-decision">
+          <span class="cs-decision-num">02</span>
+          <div><h3>One dock, closed by default.</h3><p><strong>Choice:</strong> collapse six reaction choices behind one 56px Action Dock trigger.</p><p><strong>Why:</strong> reacting is the rare path. Six standing targets asked for a decision on every post before the person had read it.</p><p><strong>Tradeoff:</strong> reactions take one more action. The common reading and move-on paths get a much quieter resting state.</p></div>
+        </article>
+        <article class="cs-decision">
+          <span class="cs-decision-num">03</span>
+          <div><h3>Turn meaning into future attention.</h3><p><strong>Choice:</strong> reuse three semantically rich reactions as an explicit save-for-return action.</p><p><strong>Why:</strong> the signal already exists at the moment something matters. The user sees the consequence before committing and can remove queued items.</p><p><strong>Tradeoff:</strong> one reaction now has two meanings. Production copy, consent, retention, and queue controls are mandatory.</p></div>
+        </article>
+      </div>
     </div>
   </section>
 
-  <!-- 12 Measurement -->
-  <section class="cs-section" data-title="What I'd measure" data-tldr="Capability metrics are the success criteria, engagement is demoted to guardrails, and three harm counter-metrics are wired to fail loudly. The pipeline that computes them ships in the repo.">
-    <aside class="cs-section-aside">
-      <span class="cs-section-num">12</span>
-      <span class="cs-section-kicker">Measurement</span>
-    </aside>
+  <section class="cs-section" id="evidence" aria-labelledby="evidence-heading" data-title="Evidence" data-tldr="The repository proves interaction and implementation quality. It does not yet prove participant outcomes or platform viability.">
+    <div class="cs-section-aside"><span>05</span><p>Evidence map</p></div>
     <div class="cs-section-body">
-      <h2>What I would <em>measure</em></h2>
-      <p>This is the part most feed features get backwards. They pick engagement as the success metric, then call any lift a win. Here the order is inverted on purpose: capability and outcome come first, engagement sits underneath as a guardrail, and three counter-metrics are wired to fail loudly if the design is hurting.</p>
-      <p class="cs-statement">Engagement metrics here sit underneath as guardrails; the success criteria live one tier up. They confirm the feature is not draining the business while capability moves, and they never get to declare it a success.</p>
+      <div class="cs-section-heading">
+        <p class="cs-kicker">CLAIM ONLY WHAT THE ARTIFACT EARNS</p>
+        <h2 id="evidence-heading">Built, tested, synthetic, still open.</h2>
+      </div>
+      <p class="cs-tldr">The repository proves interaction and implementation quality. It does not yet prove participant outcomes or platform viability.</p>
+      <div class="cs-detail cs-evidence-grid">
+        <article class="is-built"><span>BUILT</span><h3>Interaction study</h3><p>Action Dock, gesture classifier, keyboard paths, reduced-motion behavior, focus management.</p></article>
+        <article class="is-tested"><span>TESTED LOGIC</span><h3>Product mechanics</h3><p>Session reducer, deterministic scheduler, resurfacing queue, long-post reflow, React component.</p></article>
+        <article class="is-static"><span>STATIC CONCEPT</span><h3>End-to-end screens</h3><p>Entry, setup, active session, midpoint, and closure screens. These are production-fidelity concepts, not integrated LinkedIn UI.</p></article>
+        <article class="is-synthetic"><span>SYNTHETIC</span><h3>Measurement rehearsal</h3><p>A fixed-seed event fixture exercises validation, transforms, and charts. Its apparent effects are authored and are not research results.</p></article>
+        <article class="is-open"><span>OPEN</span><h3>Human outcomes</h3><p>No representative-user study yet. Recall, comprehension, settledness, and perceived control remain hypotheses.</p></article>
+        <article class="is-open"><span>OPEN</span><h3>Platform viability</h3><p>No LinkedIn integration, privacy review, economic model, or production telemetry.</p></article>
+      </div>
+      <p class="cs-evidence-note">The coded artifact supports a design argument. It does not convert literature, synthetic fixtures, or implementation quality into evidence about people.</p>
+    </div>
+  </section>
 
-      <h3>Tier 1, capability and outcome (the success criteria)</h3>
-      <p>These define what "working" means. If they do not move, the feature has not earned its place, however good the engagement chart looks.</p>
-      <ul class="cs-metric-list">
-        <li><strong>Resurfaced-content recall.</strong> When a saved post resurfaces, an optional recall probe asks the user to state its core claim before it is re-shown. Instrument: recall accuracy on resurfaced posts versus a non-resurfaced control. <span class="cs-metric-tag">Research build</span></li>
-        <li><strong>Comprehension after reflow.</strong> A one-question probe after a long post shown TL;DR-first versus the same post shown full-text-first. Instrument: comprehension-accuracy delta between the two orderings. <span class="cs-metric-tag">Research build</span></li>
-        <li><strong>Intentional completion rate.</strong> Share of sessions ended by the closure ritual or by a time or post bound, versus sessions abandoned by leaving the app mid-session. Instrument: the <code>session_wrapped</code> reason field. A proxy for agency and self-regulation.</li>
-        <li><strong>Settledness delta.</strong> One self-report item before and after the session, "Right now I feel scattered" to "Right now I feel settled", on a 1-to-5 scale. Instrument: mean shift across the session.</li>
-      </ul>
+  <section class="cs-section" id="options" aria-labelledby="options-heading" data-title="Options" data-tldr="The permanent reaction tray, passive timer, and engagement-first success model were rejected because each weakened the core capability thesis.">
+    <div class="cs-section-aside"><span>06</span><p>Option space</p></div>
+    <div class="cs-section-body">
+      <div class="cs-section-heading">
+        <p class="cs-kicker">KILLED WITH REASONS</p>
+        <h2 id="options-heading">The quietest direction survived.</h2>
+      </div>
+      <p class="cs-tldr">The permanent reaction tray, passive timer, and engagement-first success model were rejected because each weakened the core capability thesis.</p>
+      <div class="cs-detail cs-option-grid">
+        <article><span>KILLED / A</span><h3>Permanent reaction tray</h3><p>Fast to discover, costly at rest. It placed six choices on every card, so the rare action dominated the common reading path.</p></article>
+        <article><span>KILLED / B</span><h3>Timer-only wellbeing mode</h3><p>Easy to ship, too easy to ignore or experience as a scolding overlay. It changed the chrome, not the feed's stopping structure.</p></article>
+        <article><span>KILLED / C</span><h3>Time-on-app as the primary KPI</h3><p>Simple for a dashboard, contradictory for the product. Engagement remains a business guardrail, never the success definition.</p></article>
+        <article class="is-selected"><span>SELECTED</span><h3>Bounded session + Action Dock</h3><p>More system work, but one coherent model: visible limits, a quiet resting state, meaningful return, and explicit closure.</p></article>
+      </div>
+    </div>
+  </section>
 
-      <figure class="cs-datafig">
-        <img src="../analytics/figures/fig1_capability_arms.png" width="910" height="546" loading="lazy" decoding="async" alt="Bar chart comparing recall accuracy for resurfaced posts against a non-resurfaced control, and comprehension for TL;DR-first against full-text-first ordering. Synthetic data." />
-        <figcaption>Output of the Python pipeline that ships in this repo, run on the synthetic event log and restyled in the same token palette as this page. Labeled synthetic everywhere; the point is that the capability metrics are computable, not that they are results.</figcaption>
-      </figure>
-
-      <h3>Tier 2, engagement (guardrails only)</h3>
-      <p>Opt-in rate, 7-day return, reaction-mix shift, and resurface acceptance rate. Their only job is to confirm the capability metrics are not moving at the cost of the business. The team keeps an eye on them without ever chasing them.</p>
-
-      <div class="cs-counters" role="group" aria-labelledby="cs-counters-eyebrow">
-        <div class="cs-counters-eyebrow" id="cs-counters-eyebrow">Target / hypothesis, not measured</div>
-        <div class="cs-counter">
-          <div class="cs-counter-num" data-target="40" data-suffix="%">0<span class="cs-counter-unit">%</span></div>
-          <div class="cs-counter-label">Opt-in (target)</div>
-          <div class="cs-counter-desc">Hypothesized take-up among LinkedIn users who self-identify as ADHD or CDS. Guardrail.</div>
+  <section class="cs-section" id="research" aria-labelledby="research-heading" data-title="Research" data-tldr="The literature informs design hypotheses about delay, working-memory load, CDS, spacing, target acquisition, and choice. It does not validate this product.">
+    <div class="cs-section-aside"><span>07</span><p>Research</p></div>
+    <div class="cs-section-body">
+      <div class="cs-section-heading">
+        <p class="cs-kicker">LITERATURE-INFORMED, NOT USER-VALIDATED</p>
+        <h2 id="research-heading">Sources narrow the hypothesis.</h2>
+      </div>
+      <p class="cs-tldr">The literature informs design hypotheses about delay, working-memory load, CDS, spacing, target acquisition, and choice. It does not validate this product.</p>
+      <div class="cs-detail">
+        <div class="cs-table-wrap" role="region" aria-label="Research to design response table" tabindex="0">
+          <table class="cs-research-table">
+            <thead><tr><th>Source area</th><th>Narrow finding used</th><th>Design response</th><th>Confidence</th></tr></thead>
+            <tbody>
+              <tr><td>ADHD delay aversion and self-regulation</td><td>Delayed outcomes and internally held goals can carry extra regulation cost.</td><td>Keep the boundary visible and make the next action external.</td><td>Literature-informed hypothesis</td></tr>
+              <tr><td>Cognitive Disengagement Syndrome</td><td>Research describes slowed or disengaged cognitive presentation; much of the cited work is pediatric.</td><td>Offer a lower-density Re-engage mode for future testing.</td><td>Adult generalization is open</td></tr>
+              <tr><td>Spacing and memory</td><td>Spacing supports memory across many learning contexts.</td><td>Prototype a private return queue.</td><td>Exact 3/7/14 schedule unvalidated</td></tr>
+              <tr><td>Fitts and Hick</td><td>Target acquisition and choice cost depend on size, distance, and option structure.</td><td>Use one large trigger and reveal six destinations on demand.</td><td>Interaction rationale, not outcome evidence</td></tr>
+            </tbody>
+          </table>
         </div>
-        <div class="cs-counter">
-          <div class="cs-counter-num" data-target="2.2" data-suffix="x">0<span class="cs-counter-unit">x</span></div>
-          <div class="cs-counter-label">7-day return (target)</div>
-          <div class="cs-counter-desc">Hypothesized return for opt-in users versus a matched control. Guardrail, not the goal.</div>
+        <details class="cs-references">
+          <summary>References and scope notes</summary>
+          <ol>
+            <li>Sonuga-Barke, E. J. S. (2002). Psychological heterogeneity in ADHD: a dual pathway model of behaviour and cognition.</li>
+            <li>Barkley, R. A. <cite>ADHD and the Nature of Self-Control.</cite> The Guilford Press.</li>
+            <li>Becker, S. P., et al. (2022). Consensus change in terminology to Cognitive Disengagement Syndrome. <a href="https://www.jaacap.org/article/S0890-8567(22)01246-1/fulltext">JAACAP</a>.</li>
+            <li>Mayes, S. D., et al. Neurocognition in children with Cognitive Disengagement Syndrome. Pediatric sample. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10474248/">PMC10474248</a>.</li>
+            <li>Ebbinghaus, H. (1885). <cite>Über das Gedächtnis.</cite></li>
+            <li>Adi-Japha, E., et al. (2017). Procedural memory consolidation in ADHD. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5540945/">PMC5540945</a>.</li>
+            <li>Fitts, P. M. (1954). The information capacity of the human motor system.</li>
+            <li>Hick, W. E. (1952). On the rate of gain of information.</li>
+          </ol>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="cs-section" id="measurement" aria-labelledby="measurement-heading" data-title="Evaluation" data-tldr="A future study should test capability first, treat engagement only as a guardrail, and define harm thresholds before enrollment.">
+    <div class="cs-section-aside"><span>08</span><p>Evaluation</p></div>
+    <div class="cs-section-body">
+      <div class="cs-section-heading">
+        <p class="cs-kicker">MEASUREMENT PLAN, NOT RESULTS</p>
+        <h2 id="measurement-heading">Test the riskiest assumption before the growth story.</h2>
+      </div>
+      <p class="cs-tldr">A future study should test capability first, treat engagement only as a guardrail, and define harm thresholds before enrollment.</p>
+      <div class="cs-detail">
+        <div class="cs-measure-grid">
+          <article><span>PRIMARY</span><h3>Did the session help?</h3><ul><li>Resurfaced-content recall</li><li>Comprehension after reflow</li><li>Intentional completion</li><li>Settledness change</li></ul></article>
+          <article><span>GUARDRAIL</span><h3>Did platform value collapse?</h3><ul><li>Opt-in and completion</li><li>Reaction-mix change</li><li>Resurface acceptance</li><li>Task completion</li></ul></article>
+          <article><span>HARM SIGNAL</span><h3>Did the design make things worse?</h3><ul><li>Compulsive re-entry</li><li>Dismissal after resurfacing</li><li>Worsened settledness</li><li>Loss of perceived control</li></ul></article>
         </div>
-        <div class="cs-counter">
-          <div class="cs-counter-num" data-target="3.5" data-suffix="x">0<span class="cs-counter-unit">x</span></div>
-          <div class="cs-counter-label">Reaction-mix shift (target)</div>
-          <div class="cs-counter-desc">Hypothesized lift in the Insightful, Support, and Love share inside the mode versus the default feed. Guardrail.</div>
+        <div class="cs-study-plan">
+          <h3>Proposed first study</h3>
+          <p>Run a counterbalanced task study with representative participants before testing retention. Compare bounded and standard-feed conditions on equivalent professional tasks. Set exclusion rules, primary outcomes, analysis, harm thresholds, and stop conditions before enrollment. Follow with interviews about control, trust, reaction meaning, and closure.</p>
+        </div>
+        <figure class="cs-analytics-figure">
+          <img src="../analytics/figures/fig1_capability_arms.png" width="910" height="546" loading="lazy" alt="Synthetic fixture chart comparing authored recall and comprehension arms" />
+          <figcaption><strong>SYNTHETIC FIXTURE, NOT EVIDENCE.</strong> The generator authors different probabilities, then verifies that event validation and metric transforms recover them. It is a measurement rehearsal.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="cs-section" id="responsibility" aria-labelledby="responsibility-heading" data-title="Responsibility" data-tldr="A production version requires explicit consent, legible queue consequences, deletion and pause controls, data minimization, and accessible alternatives.">
+    <div class="cs-section-aside"><span>09</span><p>Responsibility</p></div>
+    <div class="cs-section-body">
+      <div class="cs-section-heading">
+        <p class="cs-kicker">PRIVATE ATTENTION NEEDS PRIVATE RULES</p>
+        <h2 id="responsibility-heading">A private attention system has to behave like one.</h2>
+      </div>
+      <p class="cs-tldr">A production version requires explicit consent, legible queue consequences, deletion and pause controls, data minimization, and accessible alternatives.</p>
+      <div class="cs-detail cs-responsibility-grid">
+        <article><span>CONSENT</span><h3>Tell people what a reaction will do.</h3><p>The return consequence appears before commit. Participation is off by default and reversible.</p></article>
+        <article><span>CONTROL</span><h3>Make the queue visible, editable, pausable, and deletable.</h3><p>These controls are requirements for production, not features already implemented in the interaction study.</p></article>
+        <article><span>DATA</span><h3>Store the minimum and define retention.</h3><p>Do not train models on post text, reactions, attention patterns, or self-declared health context without separate informed consent.</p></article>
+        <article><span>ACCESS</span><h3>Every gesture needs an equivalent control.</h3><p>Tap and keyboard routes, visible focus, screen-reader names, reduced motion, and generous targets are part of the interaction contract.</p></article>
+      </div>
+      <div class="cs-ai-boundary">
+        <p>AI boundary</p>
+        <strong>Summarization or probe grading could be explored only after privacy review. Session bounds, reaction meaning, scheduling, queue ownership, and closure remain deterministic and user-controlled.</strong>
+      </div>
+    </div>
+  </section>
+
+  <section class="cs-section" id="build" aria-labelledby="build-heading" data-title="Build" data-tldr="The repository separates interaction, state, scheduling, reflow, React, tokens, and analytics so each claim can be inspected and tested independently.">
+    <div class="cs-section-aside"><span>10</span><p>Build + next</p></div>
+    <div class="cs-section-body">
+      <div class="cs-section-heading">
+        <p class="cs-kicker">DESIGN ENGINEERING AS EVIDENCE</p>
+        <h2 id="build-heading">The implementation is part of the design argument.</h2>
+      </div>
+      <p class="cs-tldr">The repository separates interaction, state, scheduling, reflow, React, tokens, and analytics so each claim can be inspected and tested independently.</p>
+      <div class="cs-detail">
+        <div class="cs-build-grid">
+          <a href="../lib/session-state.js"><span>STATE</span><strong>Bounded session reducer</strong><small>Midpoint once, time cap, post cap, voluntary close</small></a>
+          <a href="../lib/spaced-repetition.js"><span>SCHEDULE</span><strong>Deterministic return logic</strong><small>Reaction meaning and fixed intervals</small></a>
+          <a href="../lib/reflow.js"><span>REFLOW</span><strong>Long-post chunking</strong><small>TL;DR-first paging rules</small></a>
+          <a href="../react/ActionDock.tsx"><span>COMPONENT</span><strong>Typed React Action Dock</strong><small>Focus, keyboard, and visual-order contract</small></a>
+          <a href="../design-system/tokens.source.json"><span>SYSTEM</span><strong>Generated design tokens</strong><small>LinkedIn product roles + Exposed Logic shell roles</small></a>
+          <a href="../analytics/README.md"><span>MEASUREMENT</span><strong>Executable rehearsal</strong><small>Typed events, fixed-seed fixture, transforms, charts</small></a>
+        </div>
+        <div class="cs-next">
+          <p class="cs-kicker">NEXT, IN ORDER</p>
+          <ol><li>Unify the Action Dock with the full bounded flow.</li><li>Run manual VoiceOver, TalkBack, zoom, forced-colors, and switch-control checks.</li><li>Test reaction meaning, perceived control, and closure with representative participants.</li><li>Only then specify platform economics and a production data model.</li></ol>
         </div>
       </div>
-      <p class="cs-counters-note">No figure above has been measured. Each is a pre-registered hypothesis to test against a matched control, shown so the bar is set in public before any data exists.</p>
-
-      <h3>Harm counter-metrics (these must fail loudly)</h3>
-      <p>If any of these rises, the design is doing damage and has to be reworked at the root, well past anything polish could fix.</p>
-      <ul class="cs-metric-list">
-        <li><strong>Compulsive re-entry.</strong> Rate of starting another session within two minutes of a closure. Detects the bound becoming a binge enabler rather than a stop.</li>
-        <li><strong>Resurface anxiety.</strong> Resurface-queue opt-out rate plus dismiss-without-view rate on resurfaced items. Detects the queue becoming a guilt backlog.</li>
-        <li><strong>Rumination increase.</strong> Share of users whose settledness delta runs the wrong way, more scattered after the session than before. Detects the session leaving people worse than it found them.</li>
-      </ul>
-
-      <figure class="cs-datafig">
-        <img src="../analytics/figures/fig3_guardrails.png" width="1300" height="546" loading="lazy" decoding="async" alt="Bar charts of engagement guardrails and the three harm counter-metrics computed from the synthetic event log. Synthetic data." />
-        <figcaption>The guardrails and harm counters from the same synthetic run. Guardrail and harm arms render in the muted grey on purpose: nothing on this chart is allowed to be the success story.</figcaption>
-      </figure>
     </div>
   </section>
+</main>
 
-  <!-- 13 The pattern, and a second surface -->
-  <section class="cs-section" data-title="The pattern" data-tldr="Three portable primitives, then the proof of portability: a concrete treatment of the same pattern on a streaming surface, mapped from signals the platform already has.">
-    <aside class="cs-section-aside">
-      <span class="cs-section-num">13</span>
-      <span class="cs-section-kicker">The pattern</span>
-    </aside>
-    <div class="cs-section-body">
-      <h2>The pattern, <em>and a second surface</em></h2>
-      <p>ADHD Mode is composed of three reusable design primitives that any feed-style surface could adopt:</p>
-      <ol>
-        <li><strong>The bounded session container with a closure ritual.</strong> Applies anywhere infinite content meets time-blind users.</li>
-        <li><strong>Existing engagement primitives repurposed as a private attention-scheduling layer.</strong> Applies to any platform with reactions, ratings, or saves.</li>
-        <li><strong>The vertical gesture grammar with magnification.</strong> Applies to any card-based interface where users currently act by tap.</li>
-      </ol>
-      <p>A pattern claim is cheap until it survives contact with a second surface. So here is the same design worked through the nearest one: streaming, where autoplay-next is the infinite scroll, the episode boundary is the natural session unit, and "I have no idea what I just watched" is the same encoding failure this whole piece started from.</p>
-
-      <table class="cs-table cs-table-map">
-        <thead>
-          <tr>
-            <th>Primitive</th>
-            <th>On LinkedIn</th>
-            <th>On a streaming surface</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Bounded session</td>
-            <td>A time box and a post cap, whichever lands first, then a closure card.</td>
-            <td>A chosen-length viewing session. Autoplay-next keeps firing inside the bound, capped by it; at the bound the countdown gives way to the closure moment. Time blindness does not care whether the content is posts or episodes.</td>
-          </tr>
-          <tr>
-            <td>Attention scheduling</td>
-            <td>Insightful, Support, and Love seed a private resurface queue on fixed widening intervals.</td>
-            <td>No new controls invented. The signals already exist: a watchlist add seeds a short-interval return, a finished documentary plus a positive rating seeds a stuck-with-me return in a week or two, and an abandoned episode seeds nothing and costs nothing.</td>
-          </tr>
-          <tr>
-            <td>Gesture grammar</td>
-            <td>Swipe up moves on, drag down reacts, with magnification and a preview before commit.</td>
-            <td>Row browsing keeps the same axis: swipe up dismisses a suggestion, a short drag down saves it, with magnification choosing the queue: tonight, with the kids, or the long weekend.</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <h3>The session taxonomy streaming actually has</h3>
-      <p>Feeds have one boundary; streaming has four, and the pattern lands differently on each. Mid-episode pause and resume stays untouched, that is the platform doing its job. End-of-episode is the autoplay moment: inside an active session the next episode still plays, because interrupting a chosen binge would be the scolding this design refuses to do; the bound simply caps how long the chain can run. End-of-season and the session bound are the two true closure points, and both get the ritual: what was watched, one thing queued for a future session, and a primary action that ends the evening cleanly instead of opening another row. On a kids profile the bound belongs to the parent and the closure screen belongs to the child, a calm off-ramp rather than a cliff.</p>
-
-      <h3>The measurement inversion, translated</h3>
-      <p>The same tier structure from the measurement section, with viewing words in it. Tier one, the success criteria: recall of what was watched when a documentary resurfaces, intentional session completion (ended by choice or by the bound, versus abandoned mid-episode), and settledness after an evening of viewing. Tier two, guardrails only: hours watched, completion rate, retention: watched, never chased. The harm counters translate one to one: instant re-entry after a closure screen, and a watchlist curdling into a guilt backlog.</p>
-
-      <p class="cs-caveat">This is a treatment, not a shipped design. It exists to show the primitives carry across a surface with different physics, and the open questions below say plainly where the transfer is still hypothesis.</p>
-    </div>
-  </section>
-
-  <!-- 14 Open questions -->
-  <section class="cs-section" data-title="Open questions" data-tldr="CDS spacing intervals, reaction-mix authenticity, sub-mode selection friction, and the honest limits of the streaming treatment.">
-    <aside class="cs-section-aside">
-      <span class="cs-section-num">14</span>
-      <span class="cs-section-kicker">Open questions</span>
-    </aside>
-    <div class="cs-section-body">
-      <h2>What I'd <em>test next</em></h2>
-      <ul>
-        <li><strong>CDS spacing intervals.</strong> No empirical research yet exists for optimal long-term spacing in CDS populations. The current design adapts the encoding phase only; the long-term curve is identical across sub-modes. This is a stated designer's hypothesis to validate post-launch.</li>
-        <li><strong>Reaction-mix authenticity.</strong> If most users gravitate to Insightful for everything, the resurface queue over-triggers. Mitigations: the queue cap (4 exposures) and the secondary metric of resurface acceptance rate.</li>
-        <li><strong>Sub-mode selection friction.</strong> Asking users to self-classify puts cognitive load up front. Worth testing a smart default that uses prior-session signals.</li>
-        <li><strong>Generalization validity.</strong> The streaming treatment in the pattern section is exactly that, a treatment. Validation requires building the same primitives inside a different surface and observing whether the mechanics still hold.</li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- 15 References -->
-  <section class="cs-section" data-title="References" id="refs" data-tldr="Ten citations, split per distinct claim, with the pediatric-to-adult generalization flagged exactly where it is used.">
-    <aside class="cs-section-aside">
-      <span class="cs-section-num">15</span>
-      <span class="cs-section-kicker">References</span>
-    </aside>
-    <div class="cs-section-body">
-      <h2>References</h2>
-      <p class="cs-refs-note">Citations are split per distinct claim, so the Barkley work appears twice (once for the executive-function model, once for response inhibition) rather than once as a blanket reference.</p>
-      <ol class="cs-refs">
-        <li id="ref-prevalence">Adult ADHD prevalence in the United States, about 4.4 percent. See Kessler, R. C., et al. (2006). The Prevalence and Correlates of Adult ADHD in the United States: Results From the National Comorbidity Survey Replication. <em>American Journal of Psychiatry,</em> 163(4), 716 to 723. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2859678/">PMC2859678</a></li>
-        <li id="ref-sonuga">Sonuga-Barke, E. J. S. (2002). Psychological heterogeneity in ADHD: a dual pathway model of behaviour and cognition, including the delay-aversion account. <em>Behavioural Brain Research,</em> 130(1 to 2), 29 to 36.</li>
-        <li id="ref-barkley-ef">Barkley, R. A. <em>ADHD and the Nature of Self-Control.</em> The Guilford Press. Executive-function and working-memory model (the self-regulation framework, Part II).</li>
-        <li id="ref-becker2022">Becker, S. P., et al. (2022). Report of a Work Group on Sluggish Cognitive Tempo: Key Research Directions and a Consensus Change in Terminology to Cognitive Disengagement Syndrome. <em>Journal of the American Academy of Child &amp; Adolescent Psychiatry.</em> <a href="https://www.jaacap.org/article/S0890-8567(22)01246-1/fulltext">jaacap.org</a></li>
-        <li id="ref-mayes">Mayes, S. D., et al. Neurocognition in Children with Cognitive Disengagement Syndrome: Accurate but Slow. Pediatric sample; generalization to adults is flagged in the text as a hypothesis. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10474248/">PMC10474248</a></li>
-        <li id="ref-ebbinghaus">Ebbinghaus, H. (1885). <em>Über das Gedächtnis.</em> The original forgetting-curve work.</li>
-        <li id="ref-adijapha">Adi-Japha, E., et al. (2017). Procedural Memory Consolidation in Attention-Deficit/Hyperactivity Disorder Is Promoted by Scheduling of Practice to Evening Hours. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5540945/">PMC5540945</a></li>
-        <li id="ref-fitts">Fitts, P. M. (1954). The information capacity of the human motor system in controlling the amplitude of movement. <em>Journal of Experimental Psychology,</em> 47(6), 381 to 391.</li>
-        <li id="ref-hick">Hick, W. E. (1952). On the rate of gain of information. <em>Quarterly Journal of Experimental Psychology,</em> 4(1), 11 to 26. (Hyman, R. (1953) extends the result.)</li>
-        <li id="ref-barkley-inhibition">Barkley, R. A. <em>ADHD and the Nature of Self-Control.</em> The Guilford Press. Response-inhibition deficit (behavioral-inhibition chapter, Part I).</li>
-      </ol>
-    </div>
-  </section>
-
-  <!-- CLOSING SPREAD -->
-  <section class="cs-closing">
-    <div class="cs-closing-eyebrow">End of case study</div>
-    <h2 class="cs-closing-title">Designed for people whose <em>attention works differently</em>.</h2>
-    <p class="cs-closing-reflection">I built this because the wellbeing promise these platforms make is one I want to see kept, and because designing for the edge of attention tends to produce a calmer product for everyone in the middle.</p>
-    <p class="cs-closing-sub">Built with research, restraint, and a respect for muscle memory. Ready to talk about how this thinking applies to your product.</p>
-    <a class="cs-closing-contact" href="https://github.com/globalanomalyindex">Get in touch  ↗</a>
-  </section>
-
-</article>
-
-<footer class="cs-foot">
-  <p>ADHD Mode for LinkedIn  ·  Christopher Robin Fiore  ·  2026</p>
-  <p>Built with HTML, CSS, vanilla JavaScript, Source Sans 3, Instrument Serif, JetBrains Mono. No build step. <a href="https://github.com/globalanomalyindex/adhd-mode-linkedin">View repository</a>. <a href="../docs/superpowers/specs/2026-05-16-adhd-mode-linkedin-design.md">Read the design spec</a>.</p>
-  <p>This page ships a focus mode because the argument should survive its own constraint.</p>
+<footer class="cs-footer">
+  <div><span>ADHD MODE / LINKEDIN</span><strong>Capability over capture.</strong></div>
+  <div class="cs-footer-links">
+    <a href="https://github.com/globalanomalyindex/adhd-mode-linkedin">Repository</a>
+    <a href="../docs/build-canon.md">Build canon</a>
+    <a href="../figma-spec/screens.md">Figma specification</a>
+  </div>
+  <p>Independent concept by Christopher Robin Fiore. MIT licensed code and documentation. LinkedIn is a trademark of LinkedIn Corporation.</p>
 </footer>
 
 <script>
-  // ============================================================
-  // Scroll-reveal sections (one-shot fade-and-rise)
-  // ============================================================
-  const supportsIO = 'IntersectionObserver' in window;
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  if (supportsIO && !reduced) {
-    const io = new IntersectionObserver((entries) => {
-      for (const e of entries) {
-        if (e.isIntersecting) {
-          e.target.classList.add('cs-visible');
-          io.unobserve(e.target);
-        }
-      }
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
-    document.querySelectorAll('.cs-section').forEach(s => io.observe(s));
-  } else {
-    document.querySelectorAll('.cs-section').forEach(s => s.classList.add('cs-visible'));
-  }
-
-  // ============================================================
-  // Sticky nav: appears once past hero; current section text updates
-  // ============================================================
-  const stickyNav = document.getElementById('sticky-nav');
-  const stickySection = document.getElementById('sticky-section');
+(() => {
+  const body = document.body;
+  const sections = Array.from(document.querySelectorAll('.cs-section'));
+  const toggles = Array.from(document.querySelectorAll('.cs-focus-toggle'));
   const stickyCount = document.getElementById('sticky-count');
-  const progressFill = document.getElementById('cs-progress-fill');
-  const hero = document.querySelector('.cs-hero');
+  const stickySection = document.getElementById('sticky-section');
+  const progress = document.getElementById('cs-progress-fill');
 
-  function updateSticky() {
-    if (!stickyNav || !hero) return;
-    const heroBottom = hero.getBoundingClientRect().bottom;
-    if (heroBottom < 0) {
-      stickyNav.classList.add('visible');
-      stickyNav.setAttribute('aria-hidden', 'false');
-    } else {
-      stickyNav.classList.remove('visible');
-      stickyNav.setAttribute('aria-hidden', 'true');
-    }
-
-    // Find the section nearest to top of viewport
-    const sections = document.querySelectorAll('.cs-section[data-title]');
-    let current = null, currentIdx = 0;
-    let i = 0;
-    for (const s of sections) {
-      i += 1;
-      const r = s.getBoundingClientRect();
-      if (r.top < window.innerHeight * 0.4) { current = s; currentIdx = i; }
-    }
-    if (current && stickySection) {
-      const t = current.dataset.title;
-      if (stickySection.textContent !== t) stickySection.textContent = t;
-    }
-    if (stickyCount) {
-      const label = String(Math.max(currentIdx, 1)).padStart(2, '0') + ' / ' + String(sections.length).padStart(2, '0');
-      if (stickyCount.textContent !== label) stickyCount.textContent = label;
-    }
-    // Reading progress: the page's own session bound, made visible.
-    if (progressFill) {
-      const max = document.documentElement.scrollHeight - window.innerHeight;
-      const p = max > 0 ? Math.min(window.scrollY / max, 1) : 0;
-      progressFill.style.transform = 'scaleX(' + p.toFixed(4) + ')';
-    }
-  }
-
-  let scrollTicking = false;
-  window.addEventListener('scroll', () => {
-    if (!scrollTicking) {
-      requestAnimationFrame(() => { updateSticky(); scrollTicking = false; });
-      scrollTicking = true;
-    }
-  }, { passive: true });
-  updateSticky();
-
-  // ============================================================
-  // Number counters in the measurement section
-  // ============================================================
-  const easeOut = t => 1 - Math.pow(1 - t, 3);
-
-  function animateCounter(el) {
-    const target = parseFloat(el.dataset.target);
-    const suffix = el.dataset.suffix || '';
-    const isFloat = !Number.isInteger(target);
-    if (reduced) {
-      el.innerHTML = (isFloat ? target.toFixed(1) : target) + '<span class="cs-counter-unit">' + suffix + '</span>';
-      return;
-    }
-    const duration = 1400;
-    const start = performance.now();
-    function tick(now) {
-      const t = Math.min((now - start) / duration, 1);
-      const v = easeOut(t) * target;
-      const shown = isFloat ? v.toFixed(1) : Math.round(v);
-      el.innerHTML = shown + '<span class="cs-counter-unit">' + suffix + '</span>';
-      if (t < 1) requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-  }
-
-  if (supportsIO) {
-    const counterIO = new IntersectionObserver((entries) => {
-      for (const e of entries) {
-        if (e.isIntersecting) {
-          animateCounter(e.target);
-          counterIO.unobserve(e.target);
-        }
-      }
-    }, { threshold: 0.4 });
-    document.querySelectorAll('.cs-counter-num').forEach(el => counterIO.observe(el));
-  } else {
-    document.querySelectorAll('.cs-counter-num').forEach(animateCounter);
-  }
-
-  // ============================================================
-  // Focus reading mode: the product's TL;DR-first reflow, applied
-  // to this page. Every section collapses to a hand-written
-  // summary with depth on demand; the live demo stays. The full
-  // text remains in the DOM (display toggling only), so screen
-  // readers, find-in-page after expand, and copy keep working.
-  // ============================================================
-  const csLive = document.createElement('div');
-  csLive.className = 'cs-vh';
-  csLive.setAttribute('aria-live', 'polite');
-  document.body.appendChild(csLive);
-  const csAnnounce = (msg) => { requestAnimationFrame(() => { csLive.textContent = msg; }); };
-
-  const collapsible = Array.from(document.querySelectorAll('.cs-section[data-tldr]'));
-  for (const s of collapsible) {
-    s.classList.add('cs-collapsible');
-    const body = s.querySelector('.cs-section-body');
-    if (!body) continue;
-    const wrap = document.createElement('div');
-    wrap.className = 'cs-tldr';
-    const line = document.createElement('p');
-    line.textContent = s.dataset.tldr;
-    const more = document.createElement('button');
-    more.className = 'cs-tldr-more';
-    more.textContent = 'Read this section';
-    more.addEventListener('click', () => {
-      s.classList.add('cs-expanded');
-      csAnnounce(s.dataset.title + ' expanded.');
+  sections.forEach((section) => {
+    section.classList.add('cs-collapsible');
+    const bodyContent = section.querySelector('.cs-section-body');
+    if (!bodyContent) return;
+    const button = document.createElement('button');
+    button.className = 'cs-expand-toggle';
+    button.type = 'button';
+    button.textContent = 'Read this section';
+    button.setAttribute('aria-expanded', 'false');
+    button.addEventListener('click', () => {
+      const expanded = section.classList.toggle('cs-expanded');
+      button.setAttribute('aria-expanded', String(expanded));
+      button.textContent = expanded ? 'Collapse section' : 'Read this section';
     });
-    wrap.appendChild(line);
-    wrap.appendChild(more);
-    body.insertBefore(wrap, body.firstChild);
-  }
+    bodyContent.append(button);
+  });
 
-  const modeToggles = ['focus-toggle', 'focus-toggle-sticky']
-    .map(id => document.getElementById(id)).filter(Boolean);
-
-  function setFocusMode(on) {
-    document.body.classList.toggle('cs-focus', on);
-    for (const s of collapsible) s.classList.remove('cs-expanded');
-    for (const b of modeToggles) {
-      b.setAttribute('aria-pressed', String(on));
-      b.textContent = on
-        ? 'Full read'
-        : (b.id === 'focus-toggle' ? 'Short on time? Focus read' : 'Focus read');
-    }
-    csAnnounce(on
-      ? 'Focus reading on. Sections collapsed to summaries; the live demo stays. Each section can be expanded.'
-      : 'Full reading restored.');
-    if (history.replaceState) {
-      history.replaceState(null, '', on ? '#focus' : location.pathname + location.search);
-    }
-    updateSticky();
-  }
-
-  for (const b of modeToggles) {
-    b.addEventListener('click', () => setFocusMode(!document.body.classList.contains('cs-focus')));
-  }
-
-  // A shareable fast path: linking to #focus opens the bounded read.
-  if (location.hash === '#focus') setFocusMode(true);
-
-  // ============================================================
-  // Warm the centerpiece. loading="lazy" is right for the five
-  // secondary screens but wrong for the demo: it scheduled the
-  // demo's entire boot at the exact moment the reader clicked
-  // "live demo", so the first click landed on a blank frame for
-  // seconds (measured: the demo finished loading last, about four
-  // seconds after a cold click). After the page's own assets
-  // settle, script flips the demo to eager during idle time, then
-  // the screen that shares its landing viewport. Lazy stays in the
-  // markup for no-script visitors, and slow-data users are left
-  // alone.
-  // ============================================================
-  if (!(navigator.connection && navigator.connection.saveData)) {
-    window.addEventListener('load', () => {
-      const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 700));
-      idle(() => {
-        const warm = (el) => new Promise((resolve) => {
-          if (!el || el.loading !== 'lazy') { resolve(); return; }
-          let settled = false;
-          const finish = () => { if (!settled) { settled = true; resolve(); } };
-          el.addEventListener('load', finish, { once: true });
-          setTimeout(finish, 4000); // do not stall the queue on a dead frame
-          el.loading = 'eager';
-        });
-        warm(document.querySelector('#demo iframe'))
-          .then(() => warm(document.querySelector('iframe[src*="active-session"]')));
+  function setFocusRead(enabled) {
+    body.classList.toggle('cs-focus', enabled);
+    if (!enabled) {
+      sections.forEach((section) => section.classList.remove('cs-expanded'));
+      document.querySelectorAll('.cs-expand-toggle').forEach((button) => {
+        button.setAttribute('aria-expanded', 'false');
+        button.textContent = 'Read this section';
       });
+    }
+    toggles.forEach((button) => {
+      button.setAttribute('aria-pressed', String(enabled));
+      button.textContent = enabled ? 'Show full case study' : button.id === 'focus-toggle' ? 'Short on time? Focus read' : 'Focus read';
     });
+    window.localStorage.setItem('adhd-mode-focus-read', enabled ? 'true' : 'false');
   }
-</script>
 
+  toggles.forEach((button) => button.addEventListener('click', () => {
+    setFocusRead(!body.classList.contains('cs-focus'));
+  }));
+
+  setFocusRead(window.localStorage.getItem('adhd-mode-focus-read') === 'true');
+
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      const visible = entries.filter((entry) => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (!visible) return;
+      const index = sections.indexOf(visible.target);
+      stickyCount.textContent = String(index + 1).padStart(2, '0') + ' / ' + String(sections.length).padStart(2, '0');
+      stickySection.textContent = visible.target.dataset.title || '';
+    }, { rootMargin: '-28% 0px -58% 0px', threshold: [0, 0.25, 0.5] });
+    sections.forEach((section) => observer.observe(section));
+  }
+
+  function updateProgress() {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const value = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+    progress.style.transform = 'scaleX(' + value + ')';
+  }
+  updateProgress();
+  window.addEventListener('scroll', updateProgress, { passive: true });
+})();
+</script>
 </body>
 </html>

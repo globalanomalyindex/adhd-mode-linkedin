@@ -1,174 +1,211 @@
 # Action Dock · Component Specification
 
-The bottom UI of the focus session card view. Replaces the previous "full reaction tray" pattern with two focused FABs that preserve gesture interactions while making tap interactions discoverable and standard.
+The Action Dock is the built interaction study for the focus-session card. It keeps comment and reaction actions visible without leaving six reactions on screen at all times. Gesture input is an accelerator; every commit also has a standard button path.
 
-## Why the redesign
+## Evidence boundary
 
-The previous tray (six emoji icons always visible at the bottom) was always-on visual noise that only made sense during the rare moment when the user wanted to react. The new model: two circular FABs at the corners ("Comment" left, "React" right) keep the bottom clean. Tapping the React FAB expands a tray leftward to reveal the six reactions. Dragging the card down still auto-expands the tray for the gestural path. Tap-friendly AND gesture-friendly.
+- **Built in `prototype/demo.html`:** collapsed and expanded Action Dock, tap and drag reaction paths, visual magnification, a real tap-to-skip button, keyboard access, manual comment selection, and in-session saved count feedback.
+- **Tested as standalone logic:** gesture classification, reaction-to-resurface rules, scheduling, queue advancement, session bounds, and long-post reflow live in `lib/` and are not all wired into this interaction study.
+- **Static concepts:** setup, midpoint, and closure screens illustrate the intended end-to-end session around the study.
+- **Proposed production behavior:** queue opt-in, pause, delete, retention, duplicate handling, recovery, persistence, and LinkedIn integration are not built.
+
+Do not present the Action Dock study as evidence that the complete product, a production resurface queue, or LinkedIn integration exists.
+
+## Why this model
+
+The earlier permanent tray made a low-frequency choice consume the full bottom edge. The Action Dock reduces the resting interface to two 52px controls: Comment on the left and React on the right. Tapping React expands the reactions leftward; dragging the card into the react zone opens the same destination set. A separate top-center Move on button makes skip discoverable without removing the upward-swipe shortcut.
 
 ## Atoms
 
 ### Icon · Comment
-- Source: speech-bubble (Lucide `message-circle`)
-- Stroke width: 2.0px
+
+- Source: speech bubble (Lucide `message-circle`)
+- Stroke width: 2px
 - Size: 24×24
 
 ### Icon · Smile
+
 - Source: smile (Lucide `smile`)
-- Stroke width: 2.0px
+- Stroke width: 2px
 - Size: 24×24
 - Used in the React FAB's collapsed state
 
 ### Icon · Close
+
 - Source: × (Lucide `x`)
 - Stroke width: 2.4px
 - Size: 22×22
-- Used in the React FAB's expanded state (replaces the Smile)
+- Used in the React FAB's expanded state
 
-### Reaction Emoji
+### Icon · Move on
+
+- Source: upward chevron
+- Stroke width: 2.4px
+- Size: 24×24
+- Used inside a native button at the top center of the stage
+
+### Reaction emoji
+
 - Source: native emoji
-- Six variants: Insightful 💡, Support 🤝, Love ❤️, Celebrate 🎉, Like 👍, Funny 😄
-- Rendered at 22px in resting, 36px when magnified
+- Visual order, **left to right:** Insightful 💡, Support 🤝, Love ❤️, Celebrate 🎉, Like 👍, Funny 😄
+- Resting size: 22px
+- Magnified size: up to 36px during a user-controlled drag
+
+The first three reactions seed the tested standalone resurface scheduler. Celebrate, Like, and Funny are ephemeral in the current rules. The visual order is deliberate and must be passed explicitly anywhere the data order differs.
 
 ## Molecules
 
-### FAB · Round (base)
-The shared base for both Comment FAB and React FAB.
+### FAB · Round
 
-**Size:** 52×52 (collapsed)
-**Shape:** `border-radius: 999` (pill, infinite radius)
-**Background:** liquid glass
-```
+The shared base for Comment and React.
+
+**Size:** 52×52
+
+**Shape:** `border-radius: 999px`
+
+**Background:** translucent session surface with an opaque fallback at narrow widths
+
+```text
 fill:           rgba(255, 255, 255, 0.62)
 backdrop-blur:  40px
-backdrop-saturate: 180%
 border:         1px solid rgba(255, 255, 255, 0.45)
 shadow-outer:   0 14px 36px rgba(0, 0, 0, 0.12)
 shadow-inner:   inset 0 1px 0 rgba(255, 255, 255, 0.6)
 ```
 
-**States**
-
 | State | Transform | Background | Notes |
 |---|---|---|---|
-| Resting | none | base glass | default |
-| Hover | translateY(-1px) | brighter (0.78 alpha) | desktop only |
-| Pressed | scale(0.96) | base | tap feedback |
-| Disabled | none, 38% opacity | base | rare |
+| Resting | none | base surface | default |
+| Hover | translateY(-1px) | brighter surface | pointer hover only |
+| Pressed | scale(0.96) | base surface | direct response to input |
+| Disabled | none, 38% opacity | base surface | uncommon |
 
 ### FAB · Comment
-**Composition:** FAB Round base + `Icon / Comment` centered, ink color `rgba(0,0,0,0.85)`.
-**Behavior:** tap → opens compose bottom sheet for a top-level reply to the post.
 
-### FAB · React (collapsed)
-**Composition:** FAB Round base + `Icon / Smile` centered, ink color `rgba(0,0,0,0.85)`.
-**Behavior:** tap → expands the dock to reveal the reaction tray.
+**Composition:** FAB Round + Comment icon.
 
-### FAB · React (expanded)
-**Width:** 264 (was 52). Animates via width transition.
-**Composition (right to left):**
-1. `Icon / Close` in the same position the Smile occupied (right edge)
-2. Six `Reaction Slot` molecules, evenly distributed across the remaining width
+**Behavior:** tap opens the compose sheet. The dock stays collapsed.
 
-**Behavior:** Smile icon morphs to Close icon. Reaction slots stagger in from right to left at 40ms intervals. Each slot is tappable to commit.
+### FAB · React, collapsed
 
-### Reaction Slot
-**Size:** 40×40 tap target (visual emoji 22px)
-**States**
+**Composition:** FAB Round + Smile icon.
+
+**Behavior:** tap expands the dock and sets `aria-expanded="true"`.
+
+### FAB · React, expanded
+
+**Width:** 264px, grown leftward from the fixed right edge.
+
+**Composition, left to right:** Insightful, Support, Love, Celebrate, Like, Funny, then Close in the trigger position.
+
+**Behavior:** each reaction is a button. Selecting one commits the reaction and collapses the dock.
+
+### Reaction slot
+
+**Target:** 40×40px minimum; visual emoji is 22px.
 
 | State | Emoji scale | Background | Trigger |
 |---|---|---|---|
-| Resting | 1.0 | transparent | default in expanded tray |
-| Magnified | 2.0 (peak) | brand-tint at 6% | thumb proximity ≤50px AND card in react zone |
-| Pressed | 0.94 | brand-tint at 8% | tap-down |
-| Committing | 1.04 → 1.0 spring | transparent | release on slot |
+| Resting | 1 | transparent | dock expanded |
+| Magnified | up to 2 | brand tint at 6% | pointer proximity within 50px during drag |
+| Pressed | 0.94 | brand tint at 8% | pointer down |
+| Committing | 1.04 → 1 | transparent | successful user selection |
 
-### Comment Chip (cycling)
-Above the action dock. Unchanged from prior pass. Cycles 3 comments per post with 280ms crossfade.
+### Move on button
 
-## Organism
+**Position:** top center of the card stage.
 
-### Action Dock
+**Target:** 56×56px native `<button>`.
+
+**Behavior:** tap, click, Enter, or Space advances the post. An upward card drag arms and commits the same action. Proximity growth is feedback for the drag path, not the only way to skip.
+
+### Comment preview
+
+The preview changes only when the user selects a pagination dot. It does not auto-rotate. Opening it leads to the comment thread; it is not an ambient carousel.
+
+## Organism · Action Dock
+
 **Position:** absolute, `bottom: 26px`, `left: 18px`, `right: 18px`
-**Layout:** auto-layout horizontal, justify space-between, align center
-**Height:** 52
 
-**Composition**
-- LEFT: FAB · Comment (52)
-- (flex gap: auto)
-- RIGHT: FAB · React (52 collapsed / 264 expanded)
+**Layout:** horizontal auto layout, space between, center aligned
 
-**Variants**
+**Height:** 52px
 
-| Variant | When | Visible |
+- Left: Comment FAB, fixed 52px
+- Right: React FAB, 52px collapsed or 264px expanded
+- Expanded reaction order: Insightful, Support, Love, Celebrate, Like, Funny
+
+| Variant | Trigger | Visible state |
 |---|---|---|
-| `state = collapsed` | default + idle | Both FABs as circles |
-| `state = expanded` | tap React FAB OR card drag enters react zone | Comment FAB unchanged, React FAB widened with slots visible |
+| `collapsed` | default | Comment and React circles |
+| `expanded · tap` | React button | six reaction buttons and Close |
+| `expanded · drag` | downward drag enters react zone | same six destinations with proximity feedback |
 
-The dock width budget when expanded:
-- Comment FAB: 52 (left:18 → right edge at 70)
-- Gap: 12
-- React FAB expanded: extends right edge at right:18, grows leftward to x ≈ 82
-- Width = 396 − 18 − 18 − 52 − 12 (gap to comment FAB) = ~296 max
-- Actual width used: 264 (leaves room to spare)
+At 396px wide, the maximum right-side budget is approximately 296px after the outer insets, Comment FAB, and 12px gap. The 264px expanded control stays within that budget.
 
-### Skip Target (unchanged)
-Top-center circle. Liquid glass. Scales + activates with upward drag proximity. Documented in prior pass.
+## Session frame and dual bounds
 
-## State Machine (Action Dock)
+The dock sits inside a bounded session, not an infinite feed. The topbar must expose both active limits at the same time:
 
-```
+| Time choice | Post cap | Midpoint shown once |
+|---|---:|---:|
+| 5 minutes | 8 posts | after post 4 |
+| 12 minutes | 15 posts | after post 8 |
+| 20 minutes | 25 posts | after post 13 |
+
+The session closes when either the timer or the post cap is reached. The midpoint checkpoint appears once per session; continuing must not create a checkpoint loop.
+
+## Interaction states
+
+```text
 [collapsed]
-  │
-  ├──tap React FAB──> [expanded · tap-source]
-  ├──drag enters react zone──> [expanded · drag-source]
-  ├──tap Comment FAB──> opens compose sheet (dock stays collapsed)
-  └──card swipe up──> commits skip (dock stays collapsed)
+  ├── React button ───────────────> [expanded · tap]
+  ├── drag enters react zone ─────> [expanded · drag]
+  ├── Comment button ─────────────> compose sheet
+  ├── Move on button ─────────────> next post
+  └── upward drag ────────────────> next post
 
-[expanded · tap-source]
-  │
-  ├──tap React FAB (now Close)──> [collapsed]
-  ├──tap outside dock──> [collapsed]
-  ├──tap a slot──> commit reaction → [collapsed]
-  └──post advances / sheet opens / compose opens──> [collapsed]
+[expanded · tap]
+  ├── Close / Escape / outside ───> [collapsed]
+  └── reaction button ────────────> commit → [collapsed]
 
-[expanded · drag-source]
-  │
-  ├──drag exits react zone──> [collapsed]
-  ├──release on a slot──> commit reaction → [collapsed]
-  └──drag converts to skip (dy < 0)──> [collapsed], skip system takes over
+[expanded · drag]
+  ├── drag exits react zone ──────> [collapsed]
+  ├── release on a slot ──────────> commit → [collapsed]
+  └── drag changes to skip ───────> [collapsed] → Move on
 ```
 
-## Motion specifications
+## Quiet motion
 
-| Transition | Duration | Easing | Notes |
-|---|---|---|---|
-| Dock width expand | 400ms | `cubic-bezier(0.34, 1.56, 0.64, 1)` (gentle spring) | exit is the same direction reversed |
-| Dock width collapse | 280ms | `ease-out-expo` | per `exit-faster-than-enter` |
-| Smile→Close icon morph | 240ms | `ease-out-expo` | crossfade + 90° rotation |
-| Reaction Slot reveal | 240ms each | spring | stagger 40ms right→left when expanding, 30ms left→right when collapsing |
-| Reaction Slot hover magnify | 180ms | spring | radius 50px (existing) |
-| Tap feedback (any FAB) | 120ms | ease-out | scale 0.96 on press |
+Motion explains a user-triggered state change, then settles. There is no ambient status pulse, idle card wobble, auto-rotating comment preview, or perpetual end-state animation.
+
+| Transition | Duration | Easing | Purpose |
+|---|---:|---|---|
+| Dock expand | 320 to 400ms | gentle spring | reveal destinations after explicit input |
+| Dock collapse | 240 to 280ms | ease out | settle after selection or dismissal |
+| Smile → Close | 200 to 240ms | ease out | communicate mode change |
+| Reaction reveal | up to 240ms | gentle spring | identify the destination set |
+| Proximity magnification | up to 180ms | gentle spring | follow pointer position |
+| Press feedback | 120ms | ease out | confirm direct input |
+
+For `prefers-reduced-motion: reduce`, remove transform-based flourishes and stagger delays. State changes and announcements must remain perceivable without movement.
 
 ## Accessibility
 
-- Comment FAB: `role="button"`, `aria-label="Write a comment"`, hitSlop 8px
-- React FAB: `role="button"`, `aria-label="Add a reaction"`, `aria-expanded` syncs with state
-- Reaction Slots: each gets `role="button"` + `aria-label` (e.g. "React with Insightful")
-- Keyboard: Tab focuses FABs; Enter/Space activates; when React FAB is expanded, Arrow keys move focus across reaction slots, Escape collapses
-- `prefers-reduced-motion`: collapse animations to 0.01ms; opacity-only transitions on icon morph and slot reveal
+- Comment, React, Move on, and every reaction use native buttons.
+- React has `aria-expanded` synchronized with visual state.
+- Each reaction has a specific label, such as “React with Insightful.”
+- Tab reaches Comment, React, Move on, and expanded reaction destinations.
+- Enter and Space activate buttons; Escape collapses the dock and returns focus to React.
+- Number keys 1 through 6 follow the visible order: Insightful, Support, Love, Celebrate, Like, Funny.
+- Commit results use an `aria-live` region. Saved feedback must state that the reaction was saved to revisit; it must not imply production persistence.
+- The upward drag is optional. The Move on button is the equivalent non-gesture path.
 
-## Anti-patterns avoided
+## Figma build notes
 
-- **No always-visible tray of six emojis** taking up bottom real estate when 95% of the time the user doesn't react. The dock now serves both common (skip / swipe by) and rare (react / comment) actions without visual noise.
-- **No hidden-only-gesture interactions.** Both Comment and React have visible standard tap affordances at the corners; the gesture is a power-user enhancement, not the only path.
-- **No fake-input compose prompt** stretching across the bottom. That pattern is honest only if it does what it looks like (an input). A FAB is a more accurate signal: tap to enter compose mode.
-- **Symmetric thumb ergonomics.** Both FABs at the corners are reachable on either hand; the React FAB sits on the right where most right-handed users' thumbs naturally rest.
+Build `Action Dock / state` with `collapsed`, `expanded-tap`, and `expanded-drag` variants. Inside, use horizontal auto layout with:
 
-## Notes for the Figma build
+1. `FAB / Comment`, fixed at 52px
+2. `FAB / React`, fixed at 52px or expanded to 264px
 
-Build as a single component set `Action Dock / state` with Boolean property `expanded`. Inside, use auto-layout horizontal with two children:
-1. A `FAB / Comment` instance (fixed width 52)
-2. A `FAB / React` component-set with its own `state` variant (collapsed = 52, expanded = 264)
-
-Use Smart Animate between dock variants to get the width transition for free. Each Reaction Slot is its own component with `state` variant for magnified previews; instances reference it inside the expanded React FAB.
+Build each reaction as a `Reaction Slot / state` instance. Keep the left-to-right order explicit. Build Move on as a separate button component above the card; do not recreate the removed arc or merge it into the dock.

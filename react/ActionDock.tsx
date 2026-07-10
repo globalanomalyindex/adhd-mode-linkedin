@@ -2,8 +2,8 @@
 //
 // The Action Dock as a typed, accessible React component. This is the
 // React-stack twin of the zero-dependency vanilla prototype in
-// prototype/demo.html; both share the Reaction type from lib/types and
-// implement the same interaction documented in figma-spec/action-dock.md.
+// prototype/demo.html; both use the canonical thumb-ergonomic visual order
+// and implement the interaction documented in figma-spec/action-dock.md.
 //
 // The spec's accessibility contract previously lived only in prose. This
 // component makes it real, testable code:
@@ -34,19 +34,18 @@ import './ActionDock.css';
 // ---------------------------------------------------------------------------
 // Reaction order + presentation
 //
-// Order mirrors lib/gestures.js REACTIONS_ORDER exactly (canon section 10):
-// the shared contract is the single source of truth so the React dock and the
-// vanilla lib stay in lockstep. Kept inline (not imported) because gestures.js
-// is plain ESM JS; importing the value would not change the order and would
-// couple the component to the lib's runtime. The order is asserted in tests.
+// The dock's visual and screen-reader order is intentionally different from
+// lib/gestures.js REACTIONS_ORDER, which is the gesture engine's data order.
+// Resurfacing reactions sit on the deliberate-reach left; Like sits close to
+// the right-thumb trigger. The order is asserted in tests.
 // ---------------------------------------------------------------------------
 
-const REACTIONS_ORDER: readonly Reaction[] = [
-  'like',
-  'celebrate',
+const ACTION_DOCK_VISUAL_ORDER: readonly Reaction[] = [
+  'insightful',
   'support',
   'love',
-  'insightful',
+  'celebrate',
+  'like',
   'funny',
 ] as const;
 
@@ -112,7 +111,7 @@ function dockReducer(state: DockState, action: DockAction): DockState {
 export interface ActionDockProps {
   /**
    * Reactions to render as slots, in display order. Defaults to the canonical
-   * REACTIONS_ORDER (lib/gestures.js) so a bare <ActionDock /> matches the lib.
+   * thumb-ergonomic visual order from docs/build-canon.md section 4.
    */
   reactions?: Reaction[];
   /** Called with the chosen reaction when a slot is activated. */
@@ -197,7 +196,7 @@ function CloseIcon() {
 // ---------------------------------------------------------------------------
 
 export function ActionDock({
-  reactions = [...REACTIONS_ORDER],
+  reactions = [...ACTION_DOCK_VISUAL_ORDER],
   onReact,
   onComment,
   expanded: expandedProp,

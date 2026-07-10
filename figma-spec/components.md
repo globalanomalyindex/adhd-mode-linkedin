@@ -1,116 +1,209 @@
 # ADHD Mode Component Specifications
 
-Specifications for the components that compose every screen. Organized atomic to molecular to organism. Use these to build the Figma component library.
+Handoff specifications for the current bounded-session concept. The product UI stays LinkedIn-native while Exposed Logic makes its real mechanics visible: time and post bounds, the current action zone, an on-demand reaction module, and explicit state transitions.
 
-## Atomic
+## Artifact status
+
+| Status | What the handoff may claim |
+|---|---|
+| Built Action Dock study | The interaction in `prototype/demo.html`: Action Dock, real Move on button, tap/keyboard alternatives, drag classification, reaction magnification, and local feedback |
+| Tested standalone logic | Reducer, duration and post bounds, gesture rules, scheduler, queue advancement, and reflow in `lib/`; these are not all connected to the study |
+| Static concept | Setup, midpoint, closure, and annotated feed frames in `screens/`; they communicate intent but are not a working flow |
+| Proposed production behavior | Queue opt-in, pause/delete controls, persistence, retention, duplicate handling, recovery, permissions, and LinkedIn integration |
+
+## Foundations
 
 ### Color
-See `tokens.json` `color` group. Use as Figma color variables.
+
+Use the variables in `tokens.json`. Reserve cobalt for the active session and current selection, near-black for structure, and muted trace colors for boundaries and history. Reaction color must communicate a real state or destination, not decorate the frame.
 
 ### Typography
-**Font:** Source Sans 3 (Google Fonts)
 
-| Variable | Size | Weight | Letter-spacing | Line-height |
-|---|---|---|---|---|
-| display | 32 | 600 | -0.015em | 1.15 |
-| heading | 20 | 600 | -0.01em  | 1.2 |
-| body    | 14 | 400 | 0        | 1.4 |
-| small   | 13 | 400 | 0        | 1.6 |
-| meta    | 12 | 600 | 0.04em   | 1.2 |
-| tiny    | 11 | 400 | 0        | 1.3 |
+**Font:** Source Sans 3
 
-### Spacing scale
-4, 8, 12, 16, 20, 24, 32, 40, 56 pixels. Stored as `space.1` through `space.9`.
+| Variable | Size | Weight | Letter spacing | Line height |
+|---|---:|---:|---:|---:|
+| display | 32px | 600 | -0.015em | 1.15 |
+| heading | 20px | 600 | -0.01em | 1.2 |
+| body | 14px | 400 | 0 | 1.4 |
+| small | 13px | 400 | 0 | 1.6 |
+| meta | 12px | 600 | 0.04em | 1.2 |
+| tiny | 11px | 400 | 0 | 1.3 |
 
-### Radius scale
-sm: 4, md: 8, lg: 12, pill: 999.
+Use tabular numerals only for the real timer, post count, and queue count. Avoid filler microtype.
 
-## Molecular
+### Spacing
 
-### Button, Primary
-**Auto layout:** horizontal, 24h x 10v padding.
-**Background:** `color.brand` to `color.brand-hover` on hover.
-**Text:** 15/600/white.
+4, 8, 12, 16, 20, 24, 32, 40, and 56px, stored as `space.1` through `space.9`.
+
+### Radius
+
+- `sm`: 4px
+- `md`: 8px
+- `lg`: 12px
+- `pill`: 999px
+
+## Molecular components
+
+### Button · Primary
+
+**Layout:** horizontal auto layout, 24px horizontal and 10px vertical padding.
+
+**Background:** `color.brand`, changing to `color.brand-hover` on hover.
+
+**Text:** 15px/600/white.
+
 **Radius:** `radius.pill`.
-**Effect:** translateY(-1px) and shadow `0 4 12 0 rgba(10,102,194,0.25)` on hover.
-**Variants:** Default, Hover, Pressed, Disabled.
 
-### Button, Text
-**Auto layout:** horizontal, 4h x 8v padding.
-**Text:** 14/600/`color.brand`.
-**Underline:** 1px underline expands from left on hover (animated; in Figma, document as a hover-state property).
-**Variants:** Default, Hover, Pressed.
+Variants: default, hover, pressed, disabled, and focus-visible. Motion is limited to direct feedback; no idle animation.
+
+### Button · Text
+
+**Layout:** horizontal auto layout, 4px horizontal and 8px vertical padding.
+
+**Text:** 14px/600/`color.brand`.
+
+**Focus:** visible outline independent of color.
+
+Variants: default, hover, pressed, and focus-visible.
 
 ### Avatar
-**Shape:** circle. **Sizes:** 32, 36, 40, 44.
-**Fill:** linear-gradient placeholder (135deg, two-stop) when no image. Use one of these themes: blue, red, yellow, green, purple, grey, teal (see `prototype/sample-feed.js` `avatarTheme`).
+
+Circle at 32, 36, 40, or 44px. Use the theme placeholders from `prototype/sample-feed.js` when no image exists.
 
 ### Hairline divider
-1px solid `color.hairline`. Either horizontal or vertical.
 
-### Reaction icon
-The native emoji at 22px in a 36px circular tint background. Tint per reaction:
-- Insightful: `color.react-insightful`
-- Support: `color.react-support`
-- Love: `color.react-love`
-- Celebrate: `color.react-celebrate`
-- Like and Funny: `color.hairline` (no resurface tint)
+1px solid `color.hairline`, horizontal or vertical.
+
+### Reaction slot
+
+A native button with a target of at least 40×40px and a 22px native emoji. Visual order is fixed, left to right:
+
+1. Insightful 💡
+2. Support 🤝
+3. Love ❤️
+4. Celebrate 🎉
+5. Like 👍
+6. Funny 😄
+
+Insightful, Support, and Love seed the tested standalone resurface scheduler. Celebrate, Like, and Funny remain ephemeral in the current rules. Do not infer queue behavior from tint alone.
 
 ### Stat cell
-**Auto layout:** vertical, 22v x 12h padding, center-aligned.
-**Top:** number, 28/600/tabular-nums/`color.text`.
-**Bottom:** label, 13/400/`color.text-secondary`, 6px margin-top.
-**Border:** right 1px `color.hairline` (last child no border).
+
+**Layout:** vertical, 22px vertical and 12px horizontal padding, centered.
+
+**Value:** 28px/600/tabular numerals/`color.text`.
+
+**Label:** 13px/400/`color.text-secondary`, 6px below.
+
+**Border:** 1px right hairline except on the final cell.
 
 ### Tag
-The "TL;DR" pill, the "Promoted" pill, etc.
-**Auto layout:** horizontal, 8h x 3v padding.
-**Background:** `#eef3f8` for TL;DR (LinkedIn-blue tint), `color.react-insightful` for Promoted.
-**Text:** 10/600/letter-spacing 0.05em/uppercase.
-**Radius:** `radius.sm` (4).
 
-## Organism
+Used for TL;DR and other real content states. Horizontal auto layout, 8px horizontal and 3px vertical padding; 10px/600 uppercase text; `radius.sm`. Do not use a tag as decorative technical chrome.
 
-### Card, Post (active session)
-**Auto layout:** vertical, 22 inner padding, gap 14, fill `color.card`, radius `radius.lg` (12), shadow `shadow`.
-**Composition:**
-1. Author row (avatar 40 + name/role stack)
-2. Optional TL;DR pill
-3. Post content (body 14/400/`color.text`)
-4. Optional progress pips (4px height, evenly spaced, filled to `pageIndex+1`)
-5. Optional page label (tiny 11/400/`color.text-tertiary`)
+### Move on button
 
-**States:** Idle, Dragging (shadow upgrades to `shadow-drag`, cursor grabbing), Exiting (translate-Y 80, scale 0.9, opacity 0 over `duration.base` `easing.out`).
+**Element:** native `<button>`.
 
-### Reaction tray
-**Position:** absolute bottom: 14, left/right: 16.
-**Background:** `color.card`, radius 22, padding 10v x 6h, shadow `0 2 10 0 rgba(0,0,0,0.06)`.
-**Layout:** flex, justify-content space-around, align center.
-**Contents:** six Reaction icons.
+**Position:** top center of the card stage.
 
-### Skip arc
-**Position:** absolute top: 56, centered horizontally.
-**Idle state:** 160w x 24h, gradient `linear(to-bottom, rgba(0,0,0,0.04), transparent)`, radius `0 0 200 200`.
-**Active state:** 320w x 110h, radial gradient ellipse, plus a "Moved on" badge (background `color.skip-grey`, text white 12/600).
-**Transitions:** width, height, background over `duration.base` `easing.out`.
+**Target:** 56×56px.
+
+**Contents:** 24px upward chevron with accessible name “Move on to the next post.”
+
+Tap, click, Enter, and Space advance the post. An upward drag may arm and commit the same action. The visible button is the non-gesture equivalent and remains present at rest.
+
+### Comment preview
+
+The comment preview is user-controlled. Pagination dots are buttons with an accessible group label. Selecting a dot changes the preview; comments do not rotate automatically.
+
+## Organisms
+
+### Card · Post
+
+**Layout:** vertical, 22px inner padding, 14px gap, `color.card` fill, `radius.lg`, `shadow`.
+
+**Composition:** author row, optional TL;DR tag, post content, optional chunk progress, optional page label.
+
+| State | Presentation |
+|---|---|
+| Resting | stable, no wobble or pulse |
+| Dragging | `shadow-drag`, grabbing cursor, follows pointer |
+| Exiting | direction follows committed input; settles on next card |
+
+### Action Dock
+
+See `action-dock.md` for detailed behavior.
+
+**Resting composition:** Comment button at left, React button at right.
+
+**Expanded composition:** Comment stays fixed; React grows leftward to show Insightful, Support, Love, Celebrate, Like, Funny, then Close.
+
+**Open triggers:** React button or a downward drag entering the react zone.
+
+**Close triggers:** Close, Escape, outside tap, post change, or committed reaction.
+
+There is no always-visible six-reaction control.
+
+### Session bounds
+
+The frame exposes two limits at once: remaining time and posts seen against the selected cap. The first limit reached ends the session.
+
+| Preset | Timer | Post cap | Single midpoint checkpoint |
+|---|---:|---:|---:|
+| Short | 5 minutes | 8 | after post 4 |
+| Standard | 12 minutes | 15 | after post 8 |
+| Extended | 20 minutes | 25 | after post 13 |
+
+The midpoint checkpoint is shown at most once. Selecting Continue returns to the active session without changing the cap or immediately reopening the checkpoint.
 
 ### Session topbar
-**Auto layout:** horizontal, 12v x 16h padding, justify space-between.
-**Background:** `color.card`, bottom border 1px `color.hairline`.
-**Left:** mode marker (6px brand dot, "Focus" label 13/600, " · Ended" or session state 13/400/`color.text-secondary`).
-**Right:** meta cluster, time remaining (tabular-nums), card progress (1/12), queue counter (↻ 3), 12px gaps, `color.text-tertiary`.
+
+**Layout:** horizontal, 12px vertical and 16px horizontal padding, space between.
+
+**Surface:** `color.card` with a 1px bottom hairline.
+
+**Left:** 6px brand marker, mode label, and state.
+
+**Right:** remaining time, post progress such as `6/15`, and local saved count.
+
+The brand marker is static. It does not pulse. The topbar makes both bounds legible rather than suggesting an unbounded feed.
+
+### Midpoint checkpoint
+
+Centered modal with the real midpoint count for the selected preset, optional grounding prompt, and three explicit choices: Keep going, Wrap up now, or Pause and come back later. It appears once per session.
 
 ### Setup mode tile
-**Auto layout:** vertical, 14 padding, gap 4, fill `color.card`, border 1.5px `color.hairline`, radius `radius.md`.
-**Selected/hover state:** border `color.brand`, fill `color.brand-tint`.
-**Contents:** mode name (15/600), mode description (12/400/`color.text-secondary`/1.4 line-height).
 
-### Duration pill
-**Auto layout:** horizontal, 10 padding, center.
-**Border:** 1.5px `color.hairline`, radius `radius.pill`.
-**Selected:** background `color.brand`, text white.
-**Hover (unselected):** border `color.brand`, text `color.brand`.
+Vertical auto layout with 14px padding and 4px gap. Selected state uses `color.brand` border and `color.brand-tint` fill. Focus and Re-engage are product hypotheses; do not claim validated pacing effects.
 
-## State machine notes
+### Duration control
 
-Components with motion (Card, Skip arc, Reaction tray, Buttons) should be built in Figma with separate variants per state. Transitions between states use Smart Animate with the durations and easings from `motion` tokens.
+Each choice displays both bounds:
+
+- 5 min · up to 8 posts
+- 12 min · up to 15 posts
+- 20 min · up to 25 posts
+
+Use native buttons with selected state communicated visually and programmatically.
+
+### Closure summary
+
+Shows the end reason, posts seen, elapsed time, reactions, and items saved to revisit. Any “Coming back” list is a static concept backed by standalone scheduler rules, not a production queue manager. Queue controls are proposed and must be labeled as such.
+
+## Quiet motion rules
+
+Motion belongs to a user-triggered transition:
+
+- card drag and commit
+- Action Dock expansion and collapse
+- reaction proximity magnification
+- button press and focus response
+- checkpoint or closure entering after a state change
+
+Do not add ambient status pulses, idle card wobble, auto-rotating comments, looping end-state effects, or decorative HUD motion. With reduced motion enabled, remove transforms and stagger while preserving visible state, focus, and live-region announcements.
+
+## Figma state notes
+
+Build components with explicit variants for resting, focus-visible, pressed, expanded, dragging, committing, checkpoint, and ended states. Smart Animate may illustrate direct transitions, but prototype playback must settle after the destination state. Keep built, tested, static, and proposed behaviors labeled in the frame notes.

@@ -2,6 +2,27 @@
 
 One source, two generated files, no drift.
 
+The source carries two related visual languages without confusing their jobs:
+
+- LinkedIn-native product roles keep the in-app interaction familiar.
+- Exposed Logic roles make the portfolio shell's real structure visible.
+
+## Semantic shell roles
+
+| Role | Meaning |
+| --- | --- |
+| `canvas` / `canvas-alt` | the warm working surface and secondary modules |
+| `structure` / `structure-soft` | frames, seams, and load-bearing modules |
+| `session-field` | the active bounded session |
+| `session-bound` | time, post, and saved-attention limits |
+| `signal-text` / `signal-field` | a scarce action, warning, or committed state |
+| `trace` | history and the future-return path |
+
+The roles are behavioral. Cobalt is not a general accent: it means the active
+session. Amber is not decoration: it marks a limit or saved-attention
+counterfield. Signal orange stays scarce. Product screens continue using the
+existing LinkedIn roles instead of inheriting the portfolio shell wholesale.
+
 ## Source of truth
 
 `tokens.source.json` is the only file you edit by hand. It is W3C / DTCG
