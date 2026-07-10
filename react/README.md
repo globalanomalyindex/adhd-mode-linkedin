@@ -8,27 +8,16 @@ the spec's accessibility contract real, executable code instead of prose.
 
 The zero-dependency vanilla prototype in
 [`prototype/demo.html`](../prototype/demo.html) is the zero-dependency variant of
-the same interaction; both it and this component share the `Reaction` type from
-[`lib/types`](../lib/types.d.ts), so the dock order stays in lockstep with
-`lib/gestures.js` `REACTIONS_ORDER`.
+the same interaction. Both use the canonical visual order from
+[`docs/build-canon.md`](../docs/build-canon.md): Insightful, Support, Love,
+Celebrate, Like, Funny. The gesture engine keeps a separate data order in
+`lib/gestures.js`.
 
 ## Usage
 
 ```tsx
 import { useState } from 'react';
 import { ActionDock, type Reaction } from './react';
-
-// Canonical dock VISUAL order, left to right (build-canon.md section 4):
-// resurfacing reactions sit on the deliberate-reach left, Like near the
-// right thumb. Pass this to match every other surface.
-const VISUAL_ORDER: Reaction[] = [
-  'insightful',
-  'support',
-  'love',
-  'celebrate',
-  'like',
-  'funny',
-];
 
 function SessionCard() {
   const [expanded, setExpanded] = useState(false);
@@ -37,7 +26,6 @@ function SessionCard() {
     <div style={{ position: 'relative' }}>
       {/* ...the post card... */}
       <ActionDock
-        reactions={VISUAL_ORDER}
         expanded={expanded}
         onExpandedChange={setExpanded}
         onReact={(r: Reaction) => commitReaction(r)}
@@ -52,7 +40,6 @@ Uncontrolled is just as valid; drop the `expanded` / `onExpandedChange` pair:
 
 ```tsx
 <ActionDock
-  reactions={VISUAL_ORDER}
   onReact={commitReaction}
   onComment={openComposeSheet}
 />
@@ -65,7 +52,7 @@ insets of `18px`, so place it inside a positioned container (the session card).
 
 | Prop               | Type                        | Default            | Notes                                                                                  |
 | ------------------ | --------------------------- | ------------------ | -------------------------------------------------------------------------------------- |
-| `reactions`        | `Reaction[]`                | lib data order     | Slots render in this exact order. Defaults to `lib/gestures.js` `REACTIONS_ORDER` (the DATA order). Pass the VISUAL order (`insightful, support, love, celebrate, like, funny`, canon section 4) to match every other surface. |
+| `reactions`        | `Reaction[]`                | canonical visual order | Slots render in this exact order. Override only when a host product deliberately needs a different presentation. |
 | `onReact`          | `(r: Reaction) => void`     | required           | Called when a slot is activated (click, Enter, or Space). The dock then collapses.      |
 | `onComment`        | `() => void`                | required           | Called when the Comment FAB is activated. The dock stays collapsed.                     |
 | `expanded`         | `boolean`                   | undefined          | Controlled expanded state. When set, the component is controlled.                       |

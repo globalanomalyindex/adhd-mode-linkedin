@@ -1,111 +1,210 @@
 # Screen Specifications
 
-One frame per screen. Each spec lists artboard size, composition, and key spacing.
+One frame per screen. Each frame must carry an evidence note so a static concept cannot be mistaken for a built or validated behavior.
 
-## Screen 1: Entry point
+## Evidence labels
 
-**Artboard:** Mobile 390 x 844.
-**Reference HTML:** `screens/entry-point.html`.
+- **Built interaction study:** usable in `prototype/demo.html`.
+- **Tested standalone logic:** covered in `lib/`, but not necessarily connected to the study.
+- **Static concept:** a presentation screen in `screens/`, not a working flow.
+- **Proposed production behavior:** not implemented, persisted, or integrated with LinkedIn.
 
-**Composition (top to bottom, 8px gaps between cards):**
-1. LinkedIn nav stripe, 32x32 logo, search field flex.
-2. **ADHD Mode entry card**, 44x44 brand-gradient mark + name/desc stack + Primary Button "Begin", inside `surface-card` with 24 padding.
-3. Two sample feed posts, author row + body excerpt.
+No frame represents participant validation. The analytics artifacts are synthetic measurement rehearsal, not observed outcomes.
 
-**Notes:** the ADHD Mode entry card sits second in the feed (right after nav), not as a banner. Calm, discoverable, not loud.
+## Screen 1 · Entry point
 
-## Screen 2: Session setup
+**Status:** Static concept
 
-**Artboard:** Mobile 390 x 844 with centered modal.
-**Reference HTML:** `screens/session-setup.html`.
+**Artboard:** Mobile 390×844
 
-**Composition (modal card, 480 max-width on desktop, full-bleed on mobile):**
-1. Title "Start a focus session" (display 32).
-2. Subtitle (small 13/`color.text-secondary`).
-3. Mode group label "MODE" (meta 12/`color.text-secondary`/uppercase).
-4. Mode picker, two tiles side-by-side (`Setup mode tile` component).
-5. Length group label "LENGTH".
-6. Duration picker, three pills (`Duration pill` component).
-7. Actions row, text "Cancel" left, Primary "Begin" right.
+**Reference:** `screens/entry-point.html`
 
-**Padding:** 32 top, 24 sides, 24 bottom.
+### Composition
 
-## Screen 3: Focus session, card view
+1. LinkedIn navigation stripe with 32×32 logo and flexible search field.
+2. ADHD Mode entry card with 44×44 mark, name and description, and Begin button.
+3. Two sample feed posts.
 
-**Artboard:** Mobile 390 x 844, full-bleed inside the LinkedIn shell.
-**Reference HTML:** `prototype/index.html` (the `.session` element).
+The entry sits after navigation as a calm feed card, not a takeover banner. Label it as an independent product concept rather than a production LinkedIn feature.
 
-**Composition:**
-1. Session topbar (12v x 16h padding).
-2. Card stage (flex 1) with absolute children:
-   - Skip arc (top 56, centered, idle dim variant).
-   - Card host (inset 80/16/100/16) containing the Card, Post component.
-3. Reaction tray (absolute bottom 14).
+## Screen 2 · Session setup
 
-**States to mock:** Idle, Dragging up (skip arc active variant + card opacity 0.6), Dragging down with hover on Insightful (Insightful icon scaled 1.8, others scaled 1.0).
+**Status:** Static concept; duration and cap mapping is tested standalone logic
 
-## Screen 4: Long-post reflow, TL;DR card
+**Artboard:** Mobile 390×844 with centered modal
 
-**Artboard:** Same as Screen 3.
-**Reference HTML:** the rendered first chunk of post `p1` (Maya Chen) in the prototype.
+**Reference:** `screens/session-setup.html`
 
-**Composition:** same as Screen 3 but the Card, Post body shows:
-- TL;DR pill (top of body)
-- Two-sentence summary in body 14/500 line-height 1.55
-- 3-pip progress bar at bottom (first pip filled)
-- Page label "Page 1 of 3 · tap to continue"
+### Composition
 
-## Screen 5: Mid-session check-in
+1. “Start a focus session” title.
+2. One-sentence explanation that the session ends at the first bound reached.
+3. Mode label and Focus/Re-engage tiles.
+4. Length label and three duration controls.
+5. Explicit dual-bound note.
+6. Cancel and Begin actions.
 
-**Artboard:** Mobile 390 x 844 with centered modal.
-**Reference HTML:** `screens/mid-session-checkin.html`.
+### Duration choices
 
-**Composition (modal card, 440 max-width):**
-1. Progress ring (64x64 SVG, brand stroke filled to `cardsSeen / postCap`).
-2. Headline "You've seen 12 posts." (24/600).
-3. Subtitle (small 13/`color.text-secondary`).
-4. Action stack, Primary "Wrap up" top, Secondary "Keep going for 5 more minutes", Tertiary "Pause and come back later".
+| Visible label | Time bound | Post cap |
+|---|---:|---:|
+| 5 min · up to 8 posts | 5 minutes | 8 |
+| 12 min · up to 15 posts | 12 minutes | 15 |
+| 20 min · up to 25 posts | 20 minutes | 25 |
 
-**Padding:** 32 top, 24 sides, 24 bottom.
+Both limits must be visible before Begin. Focus and Re-engage remain hypotheses about pacing and density, not validated outcomes.
 
-## Screen 6: End-of-session
+**Modal padding:** 32px top, 24px sides, 24px bottom.
 
-**Artboard:** Mobile 390 x 844 (mobile) and 1240 x 800 (desktop variant).
-**Reference HTML:** `screens/end-of-session.html`.
+## Screen 3 · Action Dock interaction study
 
-**Composition:**
-1. Header strip, brand dot + "Focus session · Ended" + tabular time "12:00" right-aligned.
-2. Hero block, "Done." (display 32/600).
-3. Stats strip, three Stat cells with hairline dividers.
-4. Coming back section header (meta 12/`color.text-secondary`/uppercase).
-5. Three resurface queue items, emoji avatar + author/snippet stack + ambient "when".
-6. Actions row, text "Start another session" left, Primary "Close LinkedIn" right.
+**Status:** Built interaction study
 
-**Padding:** 32 top, 24 sides, 24 bottom. Card max-width 560 on desktop.
+**Artboard:** Mobile 390×844, full bleed inside the LinkedIn shell
 
-## Screen 7: Case-study artifact, annotated "before" feed
+**Reference:** `prototype/demo.html`
 
-**Artboard:** Wider (1280x900) for the case-study presentation context.
-**Reference HTML:** `screens/before-feed-annotated.html`.
+### Composition
 
-**Composition:**
-- Left: phone-frame mockup of a busy LinkedIn home feed.
-- Overlaid: nine numbered red annotation pins.
-- Right: legend panel pairing each pin with the labeled cost (one paragraph each).
-- Above the legend: a yellow "Case study hook" callout with the selective-attention demo framing.
+1. Static session topbar with mode, sample-post progress, and local saved count.
+2. Card stage:
+   - real top-center Move on button
+   - centered Post card
+   - user-selected comment preview
+3. Action Dock:
+   - Comment button at left
+   - React button at right
+   - expanded order, left to right: Insightful, Support, Love, Celebrate, Like, Funny
 
-This is the only screen that uses chrome outside the design system (the red annotation pins are case-study chrome).
+### States to mock
 
-## Motion specs
+- Resting: Move on, Comment, and React controls visible; no ambient pulse or card wobble.
+- React expanded by tap: six reaction buttons visible in the canonical visual order.
+- Dragging down: nearest reaction magnifies as pointer proximity changes.
+- Dragging up: Move on button arms as feedback for the same action available by tap.
+- Comment preview changed through a user-selected dot; never auto-rotating.
 
-For each screen with reveal animations, see the Motion table in the design spec (Section 9). Use Figma Smart Animate between variants with these durations:
+This frame demonstrates the Action Dock interaction only. Its sample-post counter is not the bounded-session reducer, and its local saved count is not a persistent production queue.
 
-| Transition | Duration | Easing |
-|---|---|---|
-| Card load | 400 | out |
-| Stat rise (per cell) | 400 | out, +40ms stagger |
-| Drag classify (visual updates) | 240 | in-out |
-| Reaction commit (icon spring) | 240 | spring |
-| Skip arc activate | 240 | out |
-| Card exit | 240 | out |
-| Hover on button | 150 | in-out |
+## Screen 4 · Long-post reflow
+
+**Status:** Tested standalone logic with a concept presentation; not wired into the Action Dock study
+
+**Behavior reference:** `lib/reflow.js`
+
+Use the Screen 3 shell and current Action Dock. Do not copy controls from the older `prototype/index.html` harness.
+
+### Card composition
+
+- TL;DR tag
+- first-paragraph summary stub, clearly labeled as prototype behavior
+- paged body chunk
+- progress pips
+- “Page 1 of N · tap to continue” label
+
+The current summary is a deterministic first-paragraph stub, not an LLM summary or evidence of production content processing.
+
+## Screen 5 · Single midpoint checkpoint
+
+**Status:** Static concept; one-checkpoint reducer rule is tested standalone logic
+
+**Artboard:** Mobile 390×844 with centered modal
+
+**Reference:** `screens/mid-session-checkin.html`
+
+### Trigger
+
+The checkpoint appears once, at the rounded-up midpoint of the selected post cap:
+
+| Preset | Checkpoint copy |
+|---|---|
+| 5 minutes / 8 posts | 4 posts in |
+| 12 minutes / 15 posts | 8 posts in |
+| 20 minutes / 25 posts | 13 posts in |
+
+For the standard concept frame, use `8/15`. Any earlier `6/15` reference is stale.
+
+### Composition
+
+1. 64×64 progress ring bound to the real midpoint count.
+2. Count and approximate time remaining.
+3. “Halfway through” explanation.
+4. Optional grounding prompt.
+5. Keep going, Wrap up now, and Pause and come back later actions.
+
+Continuing returns to the session and cannot immediately show the checkpoint again. The time or post cap still ends the session, whichever comes first.
+
+**Modal padding:** 32px top, 24px sides, 24px bottom.
+
+## Screen 6 · Session closure
+
+**Status:** Static concept backed by tested standalone scheduling rules
+
+**Artboard:** Mobile 390×844 and desktop 1240×800
+
+**Reference:** `screens/end-of-session.html`
+
+### Composition
+
+1. Header strip with mode, Ended state, and elapsed time.
+2. Calm summary such as “11 posts. 12 minutes. 2 saved to revisit.”
+3. Stats for posts seen, reactions, and saved items.
+4. “Coming back” preview with authored 3/7/14-day defaults where applicable.
+5. Back to my feed and See what I saved actions.
+
+The closure settles after entry. Do not pulse the ended marker or loop count-up motion. Under reduced motion, values appear immediately.
+
+The Coming back list is a static concept informed by standalone scheduling logic. The following remain proposed production requirements, not built controls:
+
+- explicit opt-in
+- pause and resume
+- delete one or all saved items
+- retention and privacy settings
+- duplicate handling and recovery
+- persistence and LinkedIn permissions
+
+## Screen 7 · Attention-cost comparison
+
+**Status:** Static case-study artifact
+
+**Artboard:** 1280×900
+
+**Reference:** `screens/before-feed-annotated.html`
+
+### Composition
+
+- Left: phone frame showing the existing-feed condition.
+- Overlaid: numbered annotations tied to observable interface costs.
+- Right: a concise legend mapping each annotation to the bounded-session response.
+- Header: product thesis, not a selective-attention test of the reviewer.
+
+Avoid diagnosing the viewer or treating a visual trick as participant evidence. This frame is product reasoning, not research data.
+
+## Screen 8 · Evidence anatomy
+
+**Status:** Portfolio documentation
+
+Use a four-row modular frame to make the implementation boundary legible:
+
+1. Built Action Dock interaction study
+2. Tested standalone session, gesture, scheduler, queue, and reflow logic
+3. Static setup, checkpoint, closure, and annotated-feed concepts
+4. Proposed production queue controls and integration
+
+This frame is the handoff counterpart to the repository evidence ladder. Keep synthetic analytics in a separate, explicitly labeled module.
+
+## Quiet motion specification
+
+Only user-triggered or state-triggered transitions move:
+
+| Transition | Duration | Easing | Notes |
+|---|---:|---|---|
+| Card follows drag | direct | pointer-linked | no motion at rest |
+| Drag classification feedback | up to 240ms | in-out | follows real threshold change |
+| Action Dock expand | 320 to 400ms | gentle spring | starts on tap or react-zone entry |
+| Reaction magnification | up to 180ms | gentle spring | follows proximity |
+| Reaction or skip commit | up to 240ms | out | ends in a stable next state |
+| Checkpoint or closure enter | up to 240ms | out | one-time state transition |
+| Button response | 120 to 150ms | out | direct feedback |
+
+Do not specify ambient status pulses, idle wobble, auto-rotating comments, looping end states, or decorative scanning effects. Reduced motion removes transforms and stagger while preserving destination state and meaning.

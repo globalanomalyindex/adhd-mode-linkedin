@@ -15,12 +15,27 @@
   --brand:             #0a66c2;
   --brand-hover:       #004182;
   --brand-tint:        rgba(10, 102, 194, 0.04);
+
+  /* Exposed Logic shell roles. These name product structure, not decoration. */
+  --canvas:            #f2efe7;
+  --canvas-alt:        #e6e0d4;
+  --structure:         #11100d;
+  --structure-soft:    #2a2822;
+  --ink-muted:         #4e4a41;
+  --trace:             #625d52;
+  --rule-strong:       #b8b0a2;
+  --session-field:     #0a66c2;
+  --session-bound:     #ffb000;
+  --signal-text:       #973714;
+  --signal-field:      #ff8b3d;
+
+  /* LinkedIn-native product roles. */
   --text:              rgba(0, 0, 0, 0.9);
   --text-secondary:    rgba(0, 0, 0, 0.6);
-  --text-tertiary:     rgba(0, 0, 0, 0.45);
+  --text-tertiary:     rgba(0, 0, 0, 0.62);
   --hairline:          rgba(0, 0, 0, 0.06);
   --hairline-2:        #e0dfdc;
-  --skip-grey:         rgba(0, 0, 0, 0.42);
+  --skip-grey:         rgba(0, 0, 0, 0.62);
   --skip-tint:         rgba(0, 0, 0, 0.06);
   --surface-2:         #f9fafb;
   --field-grey:        #eef3f8;

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-labelledby="title desc">
+  <title id="title">ADHD Mode for LinkedIn</title>
+  <desc id="desc">A finish line for the feed, an independent product design concept by Christopher Robin Fiore.</desc>
+  <rect width="1200" height="630" fill="#f2efe7" />
+  <rect x="28" y="28" width="1144" height="574" fill="none" stroke="#11100d" stroke-width="4" />
+  <path d="M28 104h1144M760 104v498" fill="none" stroke="#11100d" stroke-width="3" />
+  <text x="62" y="76" fill="#11100d" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" letter-spacing="2">CHRISTOPHER ROBIN FIORE / CASE 01</text>
+  <text x="1136" y="76" fill="#973714" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" text-anchor="end">INDEPENDENT CODED CONCEPT</text>
+  <text x="62" y="205" fill="#973714" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" letter-spacing="2">A FINISH LINE FOR THE FEED</text>
+  <text x="62" y="326" fill="#11100d" font-family="Arial, Helvetica, sans-serif" font-size="94" font-weight="400" letter-spacing="-6">ADHD Mode</text>
+  <text x="62" y="416" fill="#11100d" font-family="Arial, Helvetica, sans-serif" font-size="94" font-weight="400" letter-spacing="-6">for LinkedIn.</text>
+  <text x="62" y="494" fill="#4e4a41" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="600">Bound the session. Return what mattered.</text>
+  <text x="62" y="532" fill="#4e4a41" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="600">Close cleanly.</text>
+  <rect x="790" y="134" width="352" height="108" fill="#11100d" />
+  <text x="814" y="171" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" letter-spacing="2">FOCUS SESSION / ACTIVE</text>
+  <text x="1114" y="218" fill="#ffb000" font-family="Arial, Helvetica, sans-serif" font-size="48" font-weight="700" text-anchor="end">11:42</text>
+  <rect x="790" y="242" width="352" height="210" fill="#0a66c2" />
+  <text x="814" y="285" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" letter-spacing="2">CURRENT MODULE</text>
+  <text x="814" y="343" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="600">One post.</text>
+  <text x="814" y="387" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="600">One next action.</text>
+  <rect x="790" y="452" width="352" height="68" fill="#ffb000" />
+  <text x="814" y="493" fill="#11100d" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" letter-spacing="1">NOW  ·  D+3  ·  D+7  ·  D+14</text>
+  <text x="814" y="566" fill="#4e4a41" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">CAPABILITY OVER CAPTURE</text>
+</svg>

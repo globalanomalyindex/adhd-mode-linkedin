@@ -1,12 +1,18 @@
 # ADHD Mode for LinkedIn Implementation Plan
 
+> **Archive status:** This is the original implementation record, not the
+> current product contract. The repository now includes a separate Action Dock
+> interaction study, React component, analytics rehearsal, and generated token
+> pipeline. Use `docs/build-canon.md` for current behavior and `README.md` for
+> artifact status.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build three coordinated portfolio deliverables for the ADHD Mode for LinkedIn design: a working HTML/JS interactive prototype, a Figma-ready specification package, and a case study writeup.
 
 **Architecture:** A vanilla-JS, no-build single project. Pure logic lives in `lib/` as ES modules with colocated Vitest tests. Visual screens live as standalone HTML files in `screens/` that share a CSS-token design system. The interactive prototype assembles screens + lib modules. The Figma package is generated from the same tokens. The case study is its own HTML document that embeds the artifacts.
 
-**Tech Stack:** HTML, modern CSS (custom properties, container queries), vanilla JavaScript (ES modules), Vitest for logic tests, Source Sans 3 (Google Fonts). No bundler, no framework. Browser-native everything.
+**Tech Stack:** HTML, modern CSS (custom properties, container queries), vanilla JavaScript (ES modules), and Vitest for logic tests. The current repository also contains a typed React component, Playwright checks, and a Python analytics rehearsal.
 
 **Reference implementations:** the production-grade `end-of-session.html` (motion system + LinkedIn-native visual language) and the design spec at `docs/superpowers/specs/2026-05-16-adhd-mode-linkedin-design.md`.
 
@@ -3619,5 +3625,4 @@ Plan complete and saved to `docs/superpowers/plans/2026-05-16-adhd-mode-implemen
 **2. Inline Execution** , Execute tasks in this session using executing-plans, batch execution with checkpoints.
 
 **Which approach?**
-
 

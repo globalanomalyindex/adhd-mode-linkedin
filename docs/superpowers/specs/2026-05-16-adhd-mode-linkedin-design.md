@@ -4,8 +4,14 @@ A research-grounded Focus Session experience embedded inside LinkedIn's existing
 
 **Designer:** globalanomalyindex
 **Date:** 2026-05-16
-**Status:** Design specification, ready for implementation planning
+**Status:** Reference specification. Implementation has evolved; use `docs/build-canon.md` for the current product contract.
 **Audience for this document:** the designer (review), and through them, future hiring reviewers (Disney Streaming Principal Product Designer track and equivalent FAANG roles)
+
+> **Artifact note:** `prototype/demo.html` is the current Action Dock interaction
+> study. `prototype/index.html` is the separate older full-flow prototype. Static
+> screens, tested modules, and synthetic analytics are not one integrated product
+> build. See the case-study evidence map before treating a described behavior as
+> implemented or validated.
 
 ---
 
@@ -25,9 +31,9 @@ Two sub-modes (Focus for ADHD-C/H days, Re-engage for CDS days) adjust pacing, d
 
 **Deliverables for this portfolio piece:**
 
-- A working interactive prototype in HTML/CSS/JS demonstrating the full focus mode end-to-end (real drag physics, magnification, gesture commits)
+- A coded Action Dock interaction study plus a separate older full-flow prototype
 - A typed React component for the production-track Action Dock (`react/`), with co-located tests, so the interaction reads as buildable rather than as a one-off demo
-- A Python capability-analytics pipeline (`analytics/`) that defines the typed event schema, generates a synthetic event stream, and computes the Tier 1 capability metrics from it
+- A Python capability-analytics rehearsal (`analytics/`) over authored, fixed-seed synthetic data; it verifies the pipeline and is not human evidence
 - Figma-ready specification (component definitions, design tokens in W3C-compatible JSON, frame-by-frame specs for handoff)
 - Case study writeup with cited research, before/after analysis, and a "Pattern, Not Just a Feature" generalization argument extending to streaming surfaces
 

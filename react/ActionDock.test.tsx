@@ -14,9 +14,10 @@ import { ActionDock } from './ActionDock';
 
 afterEach(cleanup);
 
-// The canonical dock order from lib/gestures.js REACTIONS_ORDER.
-const ORDER = ['like', 'celebrate', 'support', 'love', 'insightful', 'funny'];
-const LABELS = ['Like', 'Celebrate', 'Support', 'Love', 'Insightful', 'Funny'];
+// Canonical thumb-ergonomic visual and screen-reader order. The gesture
+// engine keeps its separate data order in lib/gestures.js.
+const ORDER = ['insightful', 'support', 'love', 'celebrate', 'like', 'funny'];
+const LABELS = ['Insightful', 'Support', 'Love', 'Celebrate', 'Like', 'Funny'];
 
 function setup(props: Partial<Parameters<typeof ActionDock>[0]> = {}) {
   const onReact = vi.fn();
@@ -48,13 +49,13 @@ describe('ActionDock rendering + roles', () => {
     expect(reactFab).toHaveAttribute('aria-expanded', 'false');
   });
 
-  it('renders the slots in canonical REACTIONS_ORDER (lib lockstep)', () => {
+  it('renders slots in the canonical thumb-ergonomic visual order', () => {
     setup();
     const tray = screen.getByRole('group', { name: 'Reactions' });
     const slots = within(tray).getAllByRole('button', { hidden: true });
     const order = slots.map((s) => s.getAttribute('aria-label'));
     expect(order).toEqual(LABELS.map((l) => `React with ${l}`));
-    // and that maps onto the shared lib order
+    // The screen-reader order follows the same visual contract.
     expect(LABELS.map((l) => l.toLowerCase())).toEqual(ORDER);
   });
 
@@ -98,7 +99,7 @@ describe('expansion + aria-expanded sync', () => {
     // exactly one slot is tabbable (roving tabindex), the first by default
     const tabbable = slots.filter((s) => s.getAttribute('tabindex') === '0');
     expect(tabbable).toHaveLength(1);
-    expect(tabbable[0]).toHaveAccessibleName('React with Like');
+    expect(tabbable[0]).toHaveAccessibleName('React with Insightful');
   });
 
   it('clicking the React FAB again collapses it', () => {
@@ -116,7 +117,7 @@ describe('keyboard: roving focus + activation', () => {
     const reactFab = open();
     fireEvent.keyDown(reactFab, { key: 'ArrowRight' });
     expect(
-      screen.getByRole('button', { name: 'React with Like' }),
+      screen.getByRole('button', { name: 'React with Insightful' }),
     ).toHaveFocus();
   });
 
@@ -132,20 +133,20 @@ describe('keyboard: roving focus + activation', () => {
   it('ArrowRight moves roving focus to the next slot', () => {
     setup();
     const reactFab = open();
-    fireEvent.keyDown(reactFab, { key: 'ArrowRight' }); // -> Like (0)
-    const like = screen.getByRole('button', { name: 'React with Like' });
-    fireEvent.keyDown(like, { key: 'ArrowRight' }); // -> Celebrate (1)
+    fireEvent.keyDown(reactFab, { key: 'ArrowRight' }); // -> Insightful (0)
+    const insightful = screen.getByRole('button', { name: 'React with Insightful' });
+    fireEvent.keyDown(insightful, { key: 'ArrowRight' }); // -> Support (1)
     expect(
-      screen.getByRole('button', { name: 'React with Celebrate' }),
+      screen.getByRole('button', { name: 'React with Support' }),
     ).toHaveFocus();
   });
 
   it('ArrowLeft wraps roving focus around the ends', () => {
     setup();
     const reactFab = open();
-    fireEvent.keyDown(reactFab, { key: 'ArrowRight' }); // Like (0)
-    const like = screen.getByRole('button', { name: 'React with Like' });
-    fireEvent.keyDown(like, { key: 'ArrowLeft' }); // wraps to Funny (last)
+    fireEvent.keyDown(reactFab, { key: 'ArrowRight' }); // Insightful (0)
+    const insightful = screen.getByRole('button', { name: 'React with Insightful' });
+    fireEvent.keyDown(insightful, { key: 'ArrowLeft' }); // wraps to Funny (last)
     expect(
       screen.getByRole('button', { name: 'React with Funny' }),
     ).toHaveFocus();
@@ -154,27 +155,25 @@ describe('keyboard: roving focus + activation', () => {
   it('Home / End jump to the first and last slots', () => {
     setup();
     const reactFab = open();
-    fireEvent.keyDown(reactFab, { key: 'ArrowRight' }); // Like (0)
-    const like = screen.getByRole('button', { name: 'React with Like' });
-    fireEvent.keyDown(like, { key: 'End' });
+    fireEvent.keyDown(reactFab, { key: 'ArrowRight' }); // Insightful (0)
+    const insightful = screen.getByRole('button', { name: 'React with Insightful' });
+    fireEvent.keyDown(insightful, { key: 'End' });
     expect(
       screen.getByRole('button', { name: 'React with Funny' }),
     ).toHaveFocus();
     const funny = screen.getByRole('button', { name: 'React with Funny' });
     fireEvent.keyDown(funny, { key: 'Home' });
     expect(
-      screen.getByRole('button', { name: 'React with Like' }),
+      screen.getByRole('button', { name: 'React with Insightful' }),
     ).toHaveFocus();
   });
 
   it('Enter on a slot calls onReact with that reaction and collapses', () => {
     const { onReact, reactFab } = setup();
     open();
-    fireEvent.keyDown(reactFab, { key: 'ArrowRight' }); // Like (0)
-    let cur = screen.getByRole('button', { name: 'React with Like' });
-    fireEvent.keyDown(cur, { key: 'ArrowRight' }); // Celebrate (1)
-    cur = screen.getByRole('button', { name: 'React with Celebrate' });
-    fireEvent.keyDown(cur, { key: 'ArrowRight' }); // Support (2)
+    fireEvent.keyDown(reactFab, { key: 'ArrowRight' }); // Insightful (0)
+    let cur = screen.getByRole('button', { name: 'React with Insightful' });
+    fireEvent.keyDown(cur, { key: 'ArrowRight' }); // Support (1)
     cur = screen.getByRole('button', { name: 'React with Support' });
     fireEvent.keyDown(cur, { key: 'Enter' });
     expect(onReact).toHaveBeenCalledTimes(1);
@@ -185,10 +184,10 @@ describe('keyboard: roving focus + activation', () => {
   it('Space on a slot also activates it', () => {
     const { onReact, reactFab } = setup();
     open();
-    fireEvent.keyDown(reactFab, { key: 'ArrowRight' }); // Like
-    const like = screen.getByRole('button', { name: 'React with Like' });
-    fireEvent.keyDown(like, { key: ' ' });
-    expect(onReact).toHaveBeenCalledWith('like');
+    fireEvent.keyDown(reactFab, { key: 'ArrowRight' }); // Insightful
+    const insightful = screen.getByRole('button', { name: 'React with Insightful' });
+    fireEvent.keyDown(insightful, { key: ' ' });
+    expect(onReact).toHaveBeenCalledWith('insightful');
   });
 
   it('clicking a slot commits and collapses', () => {
@@ -205,9 +204,9 @@ describe('Escape + focus restoration', () => {
     const { reactFab } = setup();
     open();
     fireEvent.keyDown(reactFab, { key: 'ArrowRight' }); // focus a slot
-    const like = screen.getByRole('button', { name: 'React with Like' });
-    expect(like).toHaveFocus();
-    fireEvent.keyDown(like, { key: 'Escape' });
+    const insightful = screen.getByRole('button', { name: 'React with Insightful' });
+    expect(insightful).toHaveFocus();
+    fireEvent.keyDown(insightful, { key: 'Escape' });
     expect(reactFab).toHaveAttribute('aria-expanded', 'false');
     expect(reactFab).toHaveFocus();
   });

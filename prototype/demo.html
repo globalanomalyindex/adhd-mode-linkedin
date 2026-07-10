@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>ADHD Mode · Interactive demo</title>
+<title>ADHD Mode · Action Dock interaction study</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -39,7 +39,6 @@
     font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
-    touch-action: none;
   }
 
   body {
@@ -101,12 +100,6 @@
   .topbar-dot {
     width: 6px; height: 6px; border-radius: 50%;
     background: var(--brand);
-    box-shadow: 0 0 0 0 rgba(10, 102, 194, 0.35);
-    animation: pulse 2.4s var(--ease-out) infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(10, 102, 194, 0.35); }
-    50%      { box-shadow: 0 0 0 5px rgba(10, 102, 194, 0); }
   }
   .topbar-label { color: var(--text); font-weight: 600; }
   .topbar-meta {
@@ -133,8 +126,11 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.65);
     display: flex; align-items: center; justify-content: center;
     transform: translateX(-50%) scale(1);
-    opacity: 0.35;
-    pointer-events: none;
+    opacity: 0.72;
+    cursor: pointer;
+    padding: 0;
+    appearance: none;
+    -webkit-appearance: none;
     z-index: 12;
     transition:
       background 0.28s var(--ease-out),
@@ -143,6 +139,15 @@
       color 0.24s var(--ease-out);
     will-change: transform, opacity, background;
     color: rgba(0, 0, 0, 0.55);
+  }
+  .skip-target:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.82);
+  }
+  .skip-target:focus-visible {
+    outline: 3px solid var(--brand);
+    outline-offset: 3px;
+    opacity: 1;
   }
   .skip-target.armed {
     background: rgba(64, 64, 67, 0.88);
@@ -211,12 +216,6 @@
     overflow: hidden; /* clip the page slide */
   }
   .card.dragging { cursor: grabbing; }
-  .card.idle-wobble { animation: idleWobble 4.5s var(--ease-out) infinite; }
-  @keyframes idleWobble {
-    0%, 88%, 100% { transform: translateY(0) rotate(0); }
-    92%           { transform: translateY(-3px) rotate(-0.6deg); }
-    96%           { transform: translateY(0) rotate(0.4deg); }
-  }
   .card.wiggle-right { animation: wiggleRight 0.38s var(--ease-out); }
   .card.wiggle-left  { animation: wiggleLeft  0.38s var(--ease-out); }
   @keyframes wiggleRight {
@@ -407,7 +406,7 @@
   }
   .react-preview-label.resurface { background: var(--coral); }
 
-  /* ============ Comment chip (cycling) ============ */
+  /* ============ Comment chip + manual comment picker ============ */
   .comment-chip {
     position: absolute;
     top: 478px;
@@ -439,9 +438,7 @@
     pointer-events: none;
   }
   .comment-chip:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
-  .comment-chip.swap-out { opacity: 0; transform: translateY(-4px); }
-  .comment-chip.swap-in  { opacity: 0; transform: translateY(8px); }
-  .comment-chip:not(.hidden):not(.swap-out):not(.swap-in):hover {
+  .comment-chip:not(.hidden):hover {
     transform: translateY(-1px);
     box-shadow:
       0 1px 0 rgba(0,0,0,0.04),
@@ -481,19 +478,31 @@
 
   .comment-dots {
     position: absolute;
-    top: 468px; left: 50%; transform: translateX(-50%);
-    display: flex; gap: 4px;
+    top: 446px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 0;
     transition: opacity 0.28s var(--ease-out);
     z-index: 15;
   }
-  .comment-dots.hidden { opacity: 0; }
+  .comment-dots.hidden { opacity: 0; pointer-events: none; }
   .comment-dots .dot {
+    width: 28px; height: 28px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    padding: 0;
+  }
+  .comment-dots .dot::before {
+    content: '';
     width: 5px; height: 5px;
     border-radius: 50%;
-    background: rgba(0, 0, 0, 0.18);
+    background: rgba(0, 0, 0, 0.28);
     transition: background 0.2s ease, transform 0.2s ease;
   }
-  .comment-dots .dot.active { background: var(--brand); transform: scale(1.3); }
+  .comment-dots .dot.active::before { background: var(--brand); transform: scale(1.4); }
+  .comment-dots .dot:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
 
   /* ============ Action Dock (Comment FAB + React FAB) ============ */
   /* Shared FAB base, a liquid glass circle. The React FAB grows to a pill
@@ -940,6 +949,15 @@
   }
   .hint .hint-coral { color: var(--coral); font-weight: 500; }
   .hint .hint-arrow { display: inline-block; margin: 0 6px; transform: translateY(1px); }
+  .hint-divider { margin: 0 6px; opacity: 0.5; }
+
+  .sr-live {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
 
   /* ============ Reset link ============ */
   .reset-btn {
@@ -986,9 +1004,7 @@
       animation-delay: 0ms !important;
       transition-duration: 0.01ms !important;
     }
-    /* Decorative ambient loops have no destination, so kill them outright. */
-    .card.idle-wobble { animation: none; }
-    .topbar-dot { animation: none; }
+    /* The aura is state feedback; announce the result and skip its flourish. */
     .aura.pulse { animation: none; }
     /* The dock staggered reveal collapses to a single instant: clear the
        per-slot transition-delays so all six reactions appear together. */
@@ -1033,11 +1049,10 @@
 </head>
 <body>
 
-<button class="reset-btn" id="reset">↻ Restart</button>
+<button class="reset-btn" id="reset" type="button">↻ Restart</button>
 
 <!-- Screen-reader announcements for skip / react / resurface and sheet state. -->
-<div id="sr-live" aria-live="polite" aria-atomic="true"
-  style="position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;"></div>
+<div class="sr-live" id="sr-live" aria-live="polite" aria-atomic="true"></div>
 
 <div class="stage">
   <div class="device">
@@ -1055,15 +1070,15 @@
         </div>
       </div>
 
-      <div class="skip-target" id="skip-target" role="img" aria-label="Move on, skip this post. Press Arrow Up.">
+      <button class="skip-target" id="skip-target" type="button" aria-label="Move on to the next post">
         <svg class="skip-target-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M6 15l6-6 6 6"/>
         </svg>
-      </div>
+      </button>
       <div class="skip-label" id="skip-label" aria-hidden="true">Move on</div>
 
       <div class="card-stage">
-        <div class="card idle-wobble" id="card">
+        <div class="card" id="card">
           <div class="tap-hint-left"></div>
           <div class="tap-hint-right"></div>
 
@@ -1083,7 +1098,7 @@
 
             <!-- PROFILE PAGE -->
             <div class="page page-profile">
-              <button class="profile-back" id="profile-back" aria-label="Back to post">‹</button>
+              <button class="profile-back" id="profile-back" type="button" aria-label="Back to post">‹</button>
               <div class="profile-hero">
                 <div class="profile-avatar" id="profile-avatar"></div>
                 <div>
@@ -1094,8 +1109,8 @@
               <div class="profile-stats" id="profile-stats"></div>
               <div class="profile-about" id="profile-about">...</div>
               <div class="profile-actions">
-                <button class="profile-btn-primary">+ Connect</button>
-                <button class="profile-btn-secondary">View profile</button>
+                <button class="profile-btn-primary" type="button">+ Connect</button>
+                <button class="profile-btn-secondary" type="button">View profile</button>
               </div>
             </div>
 
@@ -1108,7 +1123,7 @@
         <div class="react-preview-label" id="react-preview-label">LIKE</div>
       </div>
 
-      <div class="comment-dots" id="comment-dots"></div>
+      <div class="comment-dots" id="comment-dots" role="group" aria-label="Choose a comment"></div>
 
       <div class="comment-chip" id="comment-chip" role="button" tabindex="0"
         aria-label="Open the comment thread">
@@ -1124,22 +1139,22 @@
       </div>
 
       <!-- Action Dock: two corner FABs. React FAB expands to reveal the tray. -->
-      <button class="fab comment-fab" id="comment-fab" aria-label="Write a comment">
+      <button class="fab comment-fab" id="comment-fab" type="button" aria-label="Write a comment">
         <svg class="fab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
         </svg>
       </button>
 
-      <div class="fab react-fab" id="react-fab" data-state="collapsed" aria-label="Add a reaction">
+      <div class="fab react-fab" id="react-fab" data-state="collapsed" role="group" aria-label="Add a reaction">
         <div class="react-fab-slots" id="react-fab-slots">
-          <button class="fab-slot" data-r="insightful" aria-label="React with Insightful, key 1" tabindex="-1" aria-hidden="true">💡</button>
-          <button class="fab-slot" data-r="support"    aria-label="React with Support, key 2" tabindex="-1" aria-hidden="true">🤝</button>
-          <button class="fab-slot" data-r="love"       aria-label="React with Love, key 3" tabindex="-1" aria-hidden="true">❤️</button>
-          <button class="fab-slot" data-r="celebrate"  aria-label="React with Celebrate, key 4" tabindex="-1" aria-hidden="true">🎉</button>
-          <button class="fab-slot" data-r="like"       aria-label="React with Like, key 5" tabindex="-1" aria-hidden="true">👍</button>
-          <button class="fab-slot" data-r="funny"      aria-label="React with Funny, key 6" tabindex="-1" aria-hidden="true">😄</button>
+          <button class="fab-slot" type="button" data-r="insightful" aria-label="React with Insightful, key 1" tabindex="-1" aria-hidden="true">💡</button>
+          <button class="fab-slot" type="button" data-r="support" aria-label="React with Support, key 2" tabindex="-1" aria-hidden="true">🤝</button>
+          <button class="fab-slot" type="button" data-r="love" aria-label="React with Love, key 3" tabindex="-1" aria-hidden="true">❤️</button>
+          <button class="fab-slot" type="button" data-r="celebrate" aria-label="React with Celebrate, key 4" tabindex="-1" aria-hidden="true">🎉</button>
+          <button class="fab-slot" type="button" data-r="like" aria-label="React with Like, key 5" tabindex="-1" aria-hidden="true">👍</button>
+          <button class="fab-slot" type="button" data-r="funny" aria-label="React with Funny, key 6" tabindex="-1" aria-hidden="true">😄</button>
         </div>
-        <button class="react-fab-trigger" id="react-fab-trigger" aria-expanded="false" aria-label="Toggle reactions">
+        <button class="react-fab-trigger" id="react-fab-trigger" type="button" aria-expanded="false" aria-label="Toggle reactions">
           <svg class="fab-icon icon-smile" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>
           </svg>
@@ -1154,12 +1169,12 @@
       <div class="toast" id="toast">Your comment was posted.</div>
 
       <!-- Comment thread sheet -->
-      <div class="sheet-backdrop" id="sheet-backdrop"></div>
-      <div class="sheet" id="sheet">
+      <div class="sheet-backdrop" id="sheet-backdrop" aria-hidden="true"></div>
+      <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" aria-hidden="true" inert>
         <div class="sheet-handle"></div>
         <div class="sheet-header">
-          <div class="sheet-title">Comment thread</div>
-          <button class="sheet-close" id="sheet-close" aria-label="Close">✕</button>
+          <div class="sheet-title" id="sheet-title">Comment thread</div>
+          <button class="sheet-close" id="sheet-close" type="button" aria-label="Close">✕</button>
         </div>
         <div class="sheet-content">
           <div class="sheet-original">
@@ -1184,25 +1199,25 @@
       </div>
 
       <!-- Compose sheet -->
-      <div class="compose-sheet" id="compose-sheet">
+      <div class="compose-sheet" id="compose-sheet" role="dialog" aria-modal="true" aria-labelledby="compose-context-text" aria-hidden="true" inert>
         <div class="sheet-handle"></div>
         <div class="compose-header">
           <div class="compose-context">
             <span id="compose-context-text">Commenting on <strong id="compose-context-author">Maya</strong>'s post</span>
           </div>
-          <button class="sheet-close" id="compose-close" aria-label="Close">✕</button>
+          <button class="sheet-close" id="compose-close" type="button" aria-label="Close">✕</button>
         </div>
         <div class="compose-body">
           <div class="compose-avatar"></div>
-          <textarea class="compose-textarea" id="compose-textarea"
+          <textarea class="compose-textarea" id="compose-textarea" aria-label="Comment text"
             placeholder="Share a thoughtful reply..."
             maxlength="280"></textarea>
         </div>
         <div class="compose-footer">
           <span class="compose-count" id="compose-count">0 / 280</span>
           <div class="compose-actions">
-            <button class="compose-cancel" id="compose-cancel">Cancel</button>
-            <button class="compose-post" id="compose-post" disabled>Post</button>
+            <button class="compose-cancel" id="compose-cancel" type="button">Cancel</button>
+            <button class="compose-post" id="compose-post" type="button" disabled>Post</button>
           </div>
         </div>
       </div>
@@ -1212,11 +1227,11 @@
 
   <div class="hint" id="hint">
     <span class="hint-arrow">↑</span> skip
-    <span style="margin: 0 6px; opacity: 0.5;">·</span>
+    <span class="hint-divider">·</span>
     drag <span class="hint-arrow">↓</span> to <span class="hint-coral">react</span>
-    <span style="margin: 0 6px; opacity: 0.5;">·</span>
+    <span class="hint-divider">·</span>
     tap left / right of post to flip
-    <span style="margin: 0 6px; opacity: 0.5;">·</span>
+    <span class="hint-divider">·</span>
     tap a comment to expand
   </div>
 </div>
@@ -1266,8 +1281,8 @@
   };
   const SKIP_TARGET = {
     scalePerProgress:   0.85, // growth of the skip target across the commit arc
-    opacityBase:        0.35, // resting opacity of the skip target
-    opacityPerProgress: 0.65, // opacity gained as the skip drag nears commit
+    opacityBase:        0.72, // discoverable resting opacity of the tap target
+    opacityPerProgress: 0.28, // opacity gained as the skip drag nears commit
   };
   const DEST_PEAK = 1.6; // peak extra scale of the nearest slot at full commit
 
@@ -1559,13 +1574,10 @@
   let composeOpen = false;
   let viewState = 'post'; // 'post' or 'profile'
 
-  const COMMENT_CYCLE_MS = 5500;
-  const COMMENT_SWAP_MS = 280;
-  let commentTimer = null;
-
   // True when the OS asks for reduced motion. The spring loop reads this each
   // frame to hard-settle instead of animating (canon section 8).
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const motionDelay = ms => reduceMotion.matches ? 0 : ms;
 
   // Local UI helper, not part of the lib. A spring per animated property,
   // integrated with a semi-implicit Euler step; constants come from SPRING.
@@ -1633,8 +1645,22 @@
   function renderCommentDots(n) {
     chipDots.innerHTML = '';
     for (let i = 0; i < n; i++) {
-      const d = document.createElement('div');
+      const d = document.createElement('button');
+      d.type = 'button';
       d.className = 'dot' + (i === commentIdx ? ' active' : '');
+      d.setAttribute('aria-label', `Show comment ${i + 1} of ${n}`);
+      d.setAttribute('aria-pressed', String(i === commentIdx));
+      d.addEventListener('click', () => {
+        commentIdx = i;
+        const comment = POSTS[postIdx].comments[commentIdx];
+        renderComment(comment);
+        Array.from(chipDots.querySelectorAll('.dot')).forEach((button, dotIdx) => {
+          const selected = dotIdx === commentIdx;
+          button.classList.toggle('active', selected);
+          button.setAttribute('aria-pressed', String(selected));
+        });
+        announce(`Showing comment ${i + 1} of ${n}, from ${comment.author}.`);
+      });
       chipDots.appendChild(d);
     }
   }
@@ -1660,7 +1686,7 @@
   // screen-reader user discovers the gestures that are otherwise pointer-only
   // (canon section 5 keeps the gestures honest; this makes them reachable).
   setTimeout(() => {
-    announce('Focus session ready. Skip a post with Arrow Up, react with number keys 1 through 6, flip to the author profile with Arrow Right.');
+    announce('Action Dock study ready. Move on with the button or Arrow Up, react with number keys 1 through 6, and flip to the author profile with Arrow Right.');
   }, 600);
 
   // ----- Spring loop -----
@@ -1719,40 +1745,16 @@
   // One initial pass settles the card into place, then the loop parks itself.
   kickLoop();
 
-  // ----- Cycling comment chip -----
-  function startCommentCycle() {
-    stopCommentCycle();
-    commentTimer = setTimeout(advanceComment, COMMENT_CYCLE_MS);
-  }
-  function stopCommentCycle() {
-    if (commentTimer) { clearTimeout(commentTimer); commentTimer = null; }
-  }
-  function advanceComment() {
-    if (sheetOpen || composeOpen || dragging || committing || viewState === 'profile') {
-      commentTimer = setTimeout(advanceComment, 500);
-      return;
-    }
-    const p = POSTS[postIdx];
-    chip.classList.add('swap-out');
-    setTimeout(() => {
-      commentIdx = (commentIdx + 1) % p.comments.length;
-      renderComment(p.comments[commentIdx]);
-      renderCommentDots(p.comments.length);
-      chip.classList.remove('swap-out');
-      chip.classList.add('swap-in');
-      requestAnimationFrame(() => { chip.classList.remove('swap-in'); });
-      startCommentCycle();
-    }, COMMENT_SWAP_MS);
-  }
-  startCommentCycle();
-
-  // Hide comment chip while held OR on profile view
+  // Comments stay still until the user picks one of the dot controls. Hide the
+  // chip and picker only while the card is held or the profile page is active.
   function refreshChipVisibility() {
     const hide = dragging || viewState === 'profile';
     chip.classList.toggle('hidden', hide);
     chipDots.classList.toggle('hidden', hide);
-    if (hide) stopCommentCycle();
-    else if (!sheetOpen && !composeOpen) startCommentCycle();
+    chip.inert = hide;
+    chipDots.inert = hide;
+    chip.setAttribute('aria-hidden', String(hide));
+    chipDots.setAttribute('aria-hidden', String(hide));
   }
 
   // ----- React FAB expand and collapse -----
@@ -1933,8 +1935,8 @@
     else skipLabel.classList.remove('visible');
   }
   function clearSkipTarget() {
-    skipTarget.style.transform = 'translateX(-50%) scale(1)';
-    skipTarget.style.opacity = '0.35';
+    skipTarget.style.removeProperty('transform');
+    skipTarget.style.removeProperty('opacity');
     skipTarget.classList.remove('armed');
     skipLabel.classList.remove('visible');
   }
@@ -2043,7 +2045,6 @@
     if (committing || sheetOpen || composeOpen) return;
     dragging = true;
     card.classList.add('dragging', 'show-tap-hints');
-    card.classList.remove('idle-wobble');
     hint.style.opacity = '0.3';
     sScale.setTarget(0.94);
     refreshChipVisibility();
@@ -2095,7 +2096,6 @@
       sX.setTarget(0); sY.setTarget(0); sRot.setTarget(0); sScale.setTarget(1);
       clearFeedback();
       refreshChipVisibility();
-      setTimeout(() => { if (!dragging) card.classList.add('idle-wobble'); }, 1200);
       return;
     }
 
@@ -2117,7 +2117,6 @@
       sRot.setTarget(0); sScale.setTarget(1);
       clearFeedback();
       refreshChipVisibility();
-      setTimeout(() => { if (!dragging) card.classList.add('idle-wobble'); }, 1200);
     }
   }
 
@@ -2149,7 +2148,7 @@
     sY.setTarget(-900);
     sRot.setTarget(sRot.value + (Math.random() > 0.5 ? -4 : 4));
     sOpacity.setTarget(0);
-    setTimeout(nextPost, 320);
+    setTimeout(nextPost, motionDelay(320));
   }
 
   function commitReaction(reaction, vel) {
@@ -2168,11 +2167,11 @@
       (resurfaces ? ' Saved to resurface.' : '')
     );
     sScale.setTarget(1.04);
-    setTimeout(() => sScale.setTarget(0.94), 110);
+    setTimeout(() => sScale.setTarget(0.94), motionDelay(110));
     sY.setVelocity(Math.max(vel.vy * 1000, THROW_CLAMP));
     sY.setTarget(900);
     sOpacity.setTarget(0);
-    setTimeout(nextPost, 320);
+    setTimeout(nextPost, motionDelay(320));
   }
 
   function nextPost() {
@@ -2187,21 +2186,34 @@
     // the lib's getPostById, the same lookup the shipped component uses).
     const canonical = getPostById(POSTS[postIdx].id);
     if (canonical) announce(`Now showing ${canonical.author}'s post.`);
-    sX.set(0); sY.set(40); sRot.set(0); sScale.set(0.96); sOpacity.set(0);
-    requestAnimationFrame(() => {
-      sY.setTarget(0); sScale.setTarget(1); sOpacity.setTarget(1);
-      kickLoop(); // ensure the entrance animation runs even if the loop parked
-    });
+    if (reduceMotion.matches) {
+      // Preserve the same post-change state without the entrance travel.
+      sX.set(0); sY.set(0); sRot.set(0); sScale.set(1); sOpacity.set(1);
+      kickLoop();
+    } else {
+      sX.set(0); sY.set(40); sRot.set(0); sScale.set(0.96); sOpacity.set(0);
+      requestAnimationFrame(() => {
+        sY.setTarget(0); sScale.setTarget(1); sOpacity.setTarget(1);
+        kickLoop(); // ensure the entrance animation runs even if the loop parked
+      });
+    }
     committing = false;
     pos = { x: 0, y: 0 };
     refreshChipVisibility();
-    setTimeout(() => { if (!dragging) card.classList.add('idle-wobble'); }, 1600);
   }
 
   card.addEventListener('pointerdown', onPointerDown);
   card.addEventListener('pointermove', onPointerMove);
   card.addEventListener('pointerup', onPointerUp);
   card.addEventListener('pointercancel', onPointerUp);
+
+  // The gesture has a persistent native-button equivalent. Click, tap, Enter,
+  // and Space all route through the same commit path as Arrow Up and swipe up.
+  skipTarget.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (committing || sheetOpen || composeOpen) return;
+    commitSkip({ vx: 0, vy: 0 });
+  });
 
   // ----- React FAB trigger: tap to expand/collapse -----
   reactFabTrigger.addEventListener('click', (e) => {
@@ -2329,12 +2341,18 @@
   // Remember what opened the comment sheet so focus returns there on close.
   let sheetReturnFocus = null;
 
+  function setDialogAvailable(dialog, available) {
+    dialog.inert = !available;
+    dialog.setAttribute('aria-hidden', String(!available));
+  }
+
   function openSheet() {
     if (sheetOpen) return;
     sheetOpen = true;
-    sheetReturnFocus = document.activeElement;
+    sheetReturnFocus = isVisibleTarget(document.activeElement) && document.activeElement !== document.body
+      ? document.activeElement
+      : chip;
     collapseReact();
-    stopCommentCycle();
     const p = POSTS[postIdx];
     const c = p.comments[commentIdx];
 
@@ -2360,6 +2378,7 @@
       sheetReplies.appendChild(div);
     }
 
+    setDialogAvailable(sheet, true);
     sheet.classList.add('open');
     sheetBackdrop.classList.add('open');
     announce(`Comment thread from ${c.author}. ${c.replies.length} replies.`);
@@ -2368,8 +2387,10 @@
   }
   function closeSheet() {
     if (!sheetOpen) return;
+    if (composeOpen) closeCompose();
     sheetOpen = false;
     sheet.classList.remove('open');
+    setDialogAvailable(sheet, false);
     sheetBackdrop.classList.remove('open');
     releaseFocusTrap();
     // Restore focus to the opener if it is still visible; the comment chip hides
@@ -2379,7 +2400,6 @@
     sheetReturnFocus = null;
     if (isVisibleTarget(opener)) opener.focus({ preventScroll: true });
     else commentFab.focus({ preventScroll: true });
-    if (!dragging && !composeOpen && viewState === 'post') startCommentCycle();
   }
   sheetClose.addEventListener('click', closeSheet);
   // Tapping outside dismisses the TOPMOST surface, matching the Escape key: if the
@@ -2404,9 +2424,10 @@
   function openCompose(ctx) {
     if (composeOpen) return;
     composeOpen = true;
-    composeReturnFocus = document.activeElement;
+    composeReturnFocus = isVisibleTarget(document.activeElement) && document.activeElement !== document.body
+      ? document.activeElement
+      : (ctx.kind === 'reply' ? sheetReplyInput : commentFab);
     collapseReact();
-    stopCommentCycle();
     if (ctx.kind === 'reply') {
       composeContextText.innerHTML = `Replying to <strong>${ctx.author}</strong>`;
       announce(`Composing a reply to ${ctx.author}.`);
@@ -2419,22 +2440,31 @@
     composeCount.classList.remove('over');
     composePost.disabled = true;
 
+    if (sheetOpen) setDialogAvailable(sheet, false);
+    setDialogAvailable(composeSheet, true);
     composeSheet.classList.add('open');
     sheetBackdrop.classList.add('open');
     trapFocus(composeSheet);
-    setTimeout(() => composeTextarea.focus({ preventScroll: true }), 320);
+    requestAnimationFrame(() => composeTextarea.focus({ preventScroll: true }));
   }
   function closeCompose() {
     if (!composeOpen) return;
     composeOpen = false;
     composeSheet.classList.remove('open');
+    setDialogAvailable(composeSheet, false);
     if (!sheetOpen) sheetBackdrop.classList.remove('open');
     // If the comment sheet is still open behind compose, keep its trap;
     // otherwise release and restore focus to whatever opened compose.
-    if (sheetOpen) trapFocus(sheet);
+    if (sheetOpen) {
+      setDialogAvailable(sheet, true);
+      trapFocus(sheet);
+    }
     else releaseFocusTrap();
-    if (composeReturnFocus && composeReturnFocus.focus) composeReturnFocus.focus({ preventScroll: true });
-    if (!dragging && !sheetOpen && viewState === 'post') startCommentCycle();
+    const opener = composeReturnFocus;
+    composeReturnFocus = null;
+    if (isVisibleTarget(opener)) opener.focus({ preventScroll: true });
+    else if (sheetOpen) sheetClose.focus({ preventScroll: true });
+    else commentFab.focus({ preventScroll: true });
   }
   composeClose.addEventListener('click', closeCompose);
   composeCancel.addEventListener('click', closeCompose);
@@ -2459,8 +2489,8 @@
 
   // ----- Reset -----
   resetBtn.addEventListener('click', () => {
-    closeSheet();
     closeCompose();
+    closeSheet();
     setView('post');
     postIdx = -1;
     commentIdx = 0;
@@ -2535,9 +2565,13 @@
     return !!a && (reactFab.contains(a) || commentFab.contains(a));
   }
 
-  document.addEventListener('keydown', (ev) => {
-    if (ev.target === composeTextarea) return; // let the user type freely
+  function isInteractiveTarget(target) {
+    return target instanceof Element && !!target.closest(
+      'button, a[href], input, textarea, select, summary, [role="button"], [contenteditable]:not([contenteditable="false"])'
+    );
+  }
 
+  document.addEventListener('keydown', (ev) => {
     // Escape closes the topmost open surface.
     if (ev.key === 'Escape') {
       if (composeOpen) { ev.preventDefault(); closeCompose(); return; }
@@ -2545,6 +2579,11 @@
       if (isReactExpanded()) { ev.preventDefault(); collapseReact(); reactFabTrigger.focus({ preventScroll: true }); return; }
       return;
     }
+
+    // Arrow keys belong to the focused control first. This prevents the global
+    // card layer from skipping or flipping while someone is operating a button,
+    // text field, link, or other interactive element.
+    if (ev.key.startsWith('Arrow') && isInteractiveTarget(ev.target)) return;
 
     // No card gestures while a sheet is open or a commit is mid-flight.
     if (sheetOpen || composeOpen || committing) return;

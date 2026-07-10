@@ -1,14 +1,14 @@
-"""Capability-first metrics over the synthetic event log.
+"""Metric transforms for an executable synthetic measurement rehearsal.
 
-WARNING: every number this prints and plots is computed from a SYNTHETIC log
-(see generate_events.py). It is illustrative. It is not a measured result and is
-not a claim about real users.
+Every number printed or plotted here comes from authored fixture probabilities
+in generate_events.py. The output verifies schema validation, aggregation,
+reporting, and chart generation. It is not a measured result, an effect
+estimate, or evidence about people.
 
-This script implements the canon section 5 measurement model, in the canon's own
-priority order:
+The transforms follow the canon section 5 priority order:
 
   Tier 1 (PRIMARY, what success means):
-    - Resurfaced-content recall accuracy vs a non-resurfaced control.
+    - Resurfaced-content recall accuracy vs an illustrative nonresurfaced arm.
     - Comprehension-after-reflow delta (TL;DR-first vs full-text-first).
     - Intentional completion rate.
     - Mean settledness delta.
@@ -16,13 +16,12 @@ priority order:
   Tier 2 (GUARDRAILS, must not be the success criteria):
     - Opt-in / reaction-mix / resurface acceptance style engagement reads.
 
-  Harm counter-metrics (must fail loudly if they rise):
+  Candidate harm signals for a future study:
     - Compulsive re-entry rate.
-    - Resurface anxiety (dismiss-without-view on resurfaced items).
-    - Rumination increase (share of sessions whose settledness delta is < 0).
+    - Resurface anxiety proxy (dismissal after a resurfaced-card impression).
+    - Worsened settledness (share of sessions whose settledness delta is < 0).
 
-The point the case study makes with this: capability is the headline, engagement
-is the guardrail. We print Tier 1 first and largest, on purpose.
+No alert thresholds or study-stop rules are implemented in this rehearsal.
 
 Run:
   python analytics/generate_events.py
@@ -36,7 +35,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from event_schema import EVENT_TYPES, RESURFACING_REACTIONS
+from event_schema import EventValidationError, validate_event
 
 HERE = Path(__file__).resolve().parent
 EVENTS_PATH = HERE / "sample_events.jsonl"
@@ -47,7 +46,7 @@ REENTRY_WINDOW_MS = 2 * 60 * 1000
 
 
 def load_events(path: Path = EVENTS_PATH) -> pd.DataFrame:
-    """Load the JSONL log into a DataFrame, validating the discriminator.
+    """Load JSONL only after validating every row against the runtime schema.
 
     Raises a clear error if the file is missing (the usual cause is forgetting
     to run the generator first).
@@ -63,60 +62,44 @@ def load_events(path: Path = EVENTS_PATH) -> pd.DataFrame:
             line = line.strip()
             if not line:
                 continue
-            obj = json.loads(line)
-            if obj.get("type") not in EVENT_TYPES:
-                raise ValueError(
-                    f"line {line_no}: unknown event type {obj.get('type')!r}. "
-                    "The log does not match canon section 9."
-                )
+            try:
+                obj = json.loads(line)
+            except json.JSONDecodeError as exc:
+                raise ValueError(f"line {line_no}: invalid JSON: {exc.msg}") from exc
+            try:
+                validate_event(obj, require_envelope=True)
+            except EventValidationError as exc:
+                raise EventValidationError(f"line {line_no}: {exc}") from exc
             rows.append(obj)
     df = pd.DataFrame(rows)
     return df
 
 
-def _wilson_ci(k: int, n: int, z: float = 1.96):
-    """Wilson score interval for a binomial proportion.
-
-    Reported alongside accuracies because the synthetic sample is small. A plain
-    point estimate would overstate how settled these numbers are.
-    """
-    if n == 0:
-        return (float("nan"), float("nan"))
-    phat = k / n
-    denom = 1 + z * z / n
-    center = (phat + z * z / (2 * n)) / denom
-    half = (z * ((phat * (1 - phat) / n + z * z / (4 * n * n)) ** 0.5)) / denom
-    return (max(0.0, center - half), min(1.0, center + half))
-
-
-def _split_probes(df: pd.DataFrame) -> dict:
-    """Separate the single recall_probe channel into its three arms.
-
-    The shipped taxonomy carries one probe event (canon section 9). The
-    generator encodes the arm in post_id with a suffix so we can split:
-      - "...#comp_tldrfirst" / "...#comp_fulltext": comprehension probes
-      - "...#control": non-resurfaced control recall probe
-      - everything else on a research-build, is_resurfaced second touch:
-        resurfaced recall probe
-    """
+def _recall_arms(df: pd.DataFrame) -> dict:
+    """Split recall fixtures into resurfaced and illustrative comparison arms."""
     probes = df[df["type"] == "recall_probe"].copy()
     if probes.empty:
         return {
             "recall_resurfaced": probes,
-            "recall_control": probes,
-            "comp_tldr": probes,
-            "comp_fulltext": probes,
+            "recall_comparison": probes,
         }
     probes["arm"] = "recall_resurfaced"
     pid = probes["post_id"].astype(str)
-    probes.loc[pid.str.endswith("#control"), "arm"] = "recall_control"
-    probes.loc[pid.str.endswith("#comp_tldrfirst"), "arm"] = "comp_tldr"
-    probes.loc[pid.str.endswith("#comp_fulltext"), "arm"] = "comp_fulltext"
+    probes.loc[pid.str.endswith("#comparison"), "arm"] = "recall_comparison"
     return {
         "recall_resurfaced": probes[probes["arm"] == "recall_resurfaced"],
-        "recall_control": probes[probes["arm"] == "recall_control"],
-        "comp_tldr": probes[probes["arm"] == "comp_tldr"],
-        "comp_fulltext": probes[probes["arm"] == "comp_fulltext"],
+        "recall_comparison": probes[probes["arm"] == "recall_comparison"],
+    }
+
+
+def _comprehension_arms(df: pd.DataFrame) -> dict:
+    """Split the distinct comprehension_probe event by presentation variant."""
+    probes = df[df["type"] == "comprehension_probe"].copy()
+    if probes.empty:
+        return {"comp_tldr": probes, "comp_fulltext": probes}
+    return {
+        "comp_tldr": probes[probes["variant"] == "tldr_first"],
+        "comp_fulltext": probes[probes["variant"] == "full_text_first"],
     }
 
 
@@ -124,26 +107,25 @@ def _accuracy(frame: pd.DataFrame):
     n = len(frame)
     k = int(frame["correct"].sum()) if n else 0
     acc = k / n if n else float("nan")
-    lo, hi = _wilson_ci(k, n)
-    return {"n": n, "correct": k, "accuracy": acc, "ci_lo": lo, "ci_hi": hi}
+    return {"n": n, "correct": k, "accuracy": acc}
 
 
 def tier1_recall(df: pd.DataFrame) -> dict:
-    """Resurfaced-content recall accuracy vs non-resurfaced control."""
-    arms = _split_probes(df)
+    """Resurfaced recall accuracy vs an illustrative nonresurfaced fixture arm."""
+    arms = _recall_arms(df)
     res = _accuracy(arms["recall_resurfaced"])
-    ctrl = _accuracy(arms["recall_control"])
+    comparison = _accuracy(arms["recall_comparison"])
     delta = (
-        res["accuracy"] - ctrl["accuracy"]
-        if not (pd.isna(res["accuracy"]) or pd.isna(ctrl["accuracy"]))
+        res["accuracy"] - comparison["accuracy"]
+        if not (pd.isna(res["accuracy"]) or pd.isna(comparison["accuracy"]))
         else float("nan")
     )
-    return {"resurfaced": res, "control": ctrl, "delta": delta}
+    return {"resurfaced": res, "comparison": comparison, "delta": delta}
 
 
 def tier1_comprehension(df: pd.DataFrame) -> dict:
     """Comprehension accuracy: TL;DR-first reflow vs full-text-first."""
-    arms = _split_probes(df)
+    arms = _comprehension_arms(df)
     tldr = _accuracy(arms["comp_tldr"])
     full = _accuracy(arms["comp_fulltext"])
     delta = (
@@ -198,11 +180,7 @@ def tier1_settledness(df: pd.DataFrame) -> dict:
 
 
 def tier2_engagement(df: pd.DataFrame) -> dict:
-    """Engagement guardrails: reaction mix, resurface seeding, dwell.
-
-    These confirm the feature is not quietly tanking the business. They are NOT
-    the success criteria (canon section 5).
-    """
+    """Exercise descriptive engagement transforms for future guardrail use."""
     reactions = df[df["type"] == "reaction_committed"]
     mix = (
         reactions["reaction"].value_counts(normalize=True).round(3).to_dict()
@@ -252,32 +230,41 @@ def harm_reentry(df: pd.DataFrame) -> dict:
 
 
 def harm_resurface_anxiety(df: pd.DataFrame) -> dict:
-    """Resurface anxiety proxy: dismiss-without-view on resurfaced items.
+    """Resurface anxiety proxy: dismissal after a resurfaced-card impression.
 
-    We read it as resurfaced cards that were seen but skipped (post_skipped)
-    rather than engaged. A rising value would mean the queue became a guilt
-    backlog (canon section 5).
+    A dismissal counts only when post_skipped follows that specific resurfaced
+    card before the next card_seen event in the same session. This avoids
+    misattributing a later fresh copy of the same post.
     """
-    resurfaced_cards = df[(df["type"] == "card_seen") & (df["is_resurfaced"] == True)]  # noqa: E712
-    resurfaced_ids = set(resurfaced_cards["post_id"].astype(str))
-    if not resurfaced_ids:
+    seen = 0
+    dismissed = 0
+    for _, session_rows in df.groupby("session_id", sort=False):
+        active_resurfaced_post = None
+        for event in session_rows.to_dict("records"):
+            event_type = event["type"]
+            if event_type == "card_seen":
+                if event.get("is_resurfaced") == True:  # noqa: E712
+                    seen += 1
+                    active_resurfaced_post = str(event["post_id"])
+                else:
+                    active_resurfaced_post = None
+            elif (
+                event_type == "post_skipped"
+                and active_resurfaced_post is not None
+                and str(event["post_id"]) == active_resurfaced_post
+            ):
+                dismissed += 1
+                active_resurfaced_post = None
+            elif event_type == "reaction_committed":
+                active_resurfaced_post = None
+
+    if seen == 0:
         return {"resurfaced_seen": 0, "dismissed": 0, "rate": float("nan")}
-    skips = df[df["type"] == "post_skipped"]
-    # Match on (session_id, post_id) so we only count a skip of a resurfaced card
-    # within the same session it was surfaced.
-    res_keys = set(
-        zip(resurfaced_cards["session_id"].astype(str), resurfaced_cards["post_id"].astype(str))
-    )
-    skip_keys = set(
-        zip(skips["session_id"].astype(str), skips["post_id"].astype(str))
-    )
-    dismissed = len(res_keys & skip_keys)
-    seen = len(res_keys)
     return {"resurfaced_seen": seen, "dismissed": dismissed, "rate": dismissed / seen}
 
 
-def harm_rumination(df: pd.DataFrame) -> dict:
-    """Rumination increase: share of sessions whose settledness delta is < 0."""
+def harm_worsened_settledness(df: pd.DataFrame) -> dict:
+    """Share of sessions with a lower settledness report after the session."""
     wraps = _real_wraps(df)
     deltas = wraps["settledness_delta"].dropna()
     n = len(deltas)
@@ -294,10 +281,7 @@ def _fmt_pct(x: float) -> str:
 def _fmt_acc(a: dict) -> str:
     if a["n"] == 0:
         return "no samples"
-    return (
-        f"{_fmt_pct(a['accuracy'])} "
-        f"(95% CI {_fmt_pct(a['ci_lo'])} to {_fmt_pct(a['ci_hi'])}, n={a['n']})"
-    )
+    return f"{_fmt_pct(a['accuracy'])} ({a['correct']} of {a['n']} generated rows)"
 
 
 def print_report(df: pd.DataFrame) -> dict:
@@ -309,12 +293,12 @@ def print_report(df: pd.DataFrame) -> dict:
     engagement = tier2_engagement(df)
     reentry = harm_reentry(df)
     anxiety = harm_resurface_anxiety(df)
-    rumination = harm_rumination(df)
+    worsened_settledness = harm_worsened_settledness(df)
 
     line = "=" * 68
     print(line)
-    print("FOCUS SESSION CAPABILITY REPORT")
-    print("ALL NUMBERS ARE SYNTHETIC AND ILLUSTRATIVE (not measured)")
+    print("FOCUS SESSION SYNTHETIC MEASUREMENT REHEARSAL")
+    print("AUTHORED FIXTURE OUTPUT, NOT MEASURED OR HUMAN EVIDENCE")
     print(line)
     n_real_sessions = _real_wraps(df)["session_id"].nunique()
     print(f"primary sessions analyzed: {n_real_sessions}")
@@ -322,12 +306,12 @@ def print_report(df: pd.DataFrame) -> dict:
     print(f"research-build rows (carry probes): {len(research_rows)} of {len(df)}")
     print()
 
-    print("TIER 1  capability and outcome metrics  (PRIMARY: what success means)")
+    print("TIER 1  proposed capability transforms  (generated fixture output)")
     print("-" * 68)
-    print("  1) Resurfaced-content recall vs non-resurfaced control")
+    print("  1) Resurfaced recall vs illustrative nonresurfaced comparison")
     print(f"       resurfaced : {_fmt_acc(recall['resurfaced'])}")
-    print(f"       control    : {_fmt_acc(recall['control'])}")
-    print(f"       delta      : {_fmt_pct(recall['delta'])} (resurfaced minus control)")
+    print(f"       comparison : {_fmt_acc(recall['comparison'])}")
+    print(f"       delta      : {_fmt_pct(recall['delta'])} (fixture-arm difference)")
     print()
     print("  2) Comprehension after reflow  (TL;DR-first vs full-text-first)")
     print(f"       tldr-first : {_fmt_acc(comp['tldr_first'])}")
@@ -351,7 +335,7 @@ def print_report(df: pd.DataFrame) -> dict:
         print("       mean       : no samples")
     print()
 
-    print("TIER 2  engagement metrics  (GUARDRAILS: must not be the success criteria)")
+    print("TIER 2  descriptive engagement transforms  (future guardrail inputs)")
     print("-" * 68)
     print(f"  reaction mix          : {engagement['reaction_mix']}")
     print(f"  resurface seed rate   : {_fmt_pct(engagement['resurface_seed_rate'])}")
@@ -360,7 +344,7 @@ def print_report(df: pd.DataFrame) -> dict:
     print(f"  mode mix              : {engagement['mode_mix']}")
     print()
 
-    print("HARM COUNTER-METRICS  (must fail loudly; rising = the design is hurting)")
+    print("CANDIDATE HARM SIGNALS  (no thresholds or alerts implemented)")
     print("-" * 68)
     print(
         f"  compulsive re-entry   : {_fmt_pct(reentry['rate'])} "
@@ -371,14 +355,12 @@ def print_report(df: pd.DataFrame) -> dict:
         f"({anxiety['dismissed']} of {anxiety['resurfaced_seen']} resurfaced cards dismissed)"
     )
     print(
-        f"  rumination increase   : {_fmt_pct(rumination['rate'])} "
-        f"({rumination['worse']} of {rumination['n']} sessions ended more scattered)"
+        f"  worsened settledness  : {_fmt_pct(worsened_settledness['rate'])} "
+        f"({worsened_settledness['worse']} of {worsened_settledness['n']} generated sessions)"
     )
     print(line)
-    print("Reading: Tier 1 is the headline. Tier 2 only confirms the feature is")
-    print("not tanking the business. The three harm metrics are the brake.")
-    print("Reminder: SYNTHETIC data. This demonstrates the measurement design,")
-    print("not an outcome.")
+    print("Reading: these authored differences exercise the pipeline end to end.")
+    print("They do not estimate an effect, validate a measure, or show an outcome.")
     print(line)
 
     return {
@@ -390,7 +372,7 @@ def print_report(df: pd.DataFrame) -> dict:
         "harm": {
             "reentry": reentry,
             "resurface_anxiety": anxiety,
-            "rumination": rumination,
+            "worsened_settledness": worsened_settledness,
         },
     }
 
@@ -412,48 +394,49 @@ def save_figures(df: pd.DataFrame, results: dict) -> list:
 
     FIG_DIR.mkdir(exist_ok=True)
     saved = []
-    title_tag = "SYNTHETIC, illustrative"
+    title_tag = "SYNTHETIC FIXTURE, not evidence"
 
-    # Case study identity: paper background, ink text, coral for the
-    # capability/treatment arm, muted warm grey for the control/guardrail arm.
-    PAPER = "#f4f2ee"
-    INK = (0.0, 0.0, 0.0, 0.85)
-    CORAL = "#c4523a"
-    WARM_GREY = "#8a857c"
-    GRID = "#ded9d0"
+    # Quiet Exposed Logic roles: a warm base, near-black structure, LinkedIn
+    # cobalt for the active fixture arm, muted traces, and a scarce harm signal.
+    CANVAS = "#f3f1e8"
+    STRUCTURE = "#171b18"
+    FIELD = "#0a66c2"
+    TRACE = "#868c85"
+    SIGNAL = "#b4482d"
+    GRID = "#d9d8cf"
 
     def _style_axes(ax_target):
-        """Apply the paper/ink identity to one axes: facecolor, spines, ticks, grid."""
-        ax_target.set_facecolor(PAPER)
+        """Apply semantic color roles to one axes."""
+        ax_target.set_facecolor(CANVAS)
         ax_target.spines["top"].set_visible(False)
         ax_target.spines["right"].set_visible(False)
-        ax_target.spines["left"].set_color(INK)
-        ax_target.spines["bottom"].set_color(INK)
-        ax_target.tick_params(colors=INK, labelcolor=INK)
-        ax_target.xaxis.label.set_color(INK)
-        ax_target.yaxis.label.set_color(INK)
-        ax_target.title.set_color(INK)
+        ax_target.spines["left"].set_color(STRUCTURE)
+        ax_target.spines["bottom"].set_color(STRUCTURE)
+        ax_target.tick_params(colors=STRUCTURE, labelcolor=STRUCTURE)
+        ax_target.xaxis.label.set_color(STRUCTURE)
+        ax_target.yaxis.label.set_color(STRUCTURE)
+        ax_target.title.set_color(STRUCTURE)
         ax_target.grid(True, axis="y", color=GRID, linewidth=0.8, zorder=0)
         ax_target.set_axisbelow(True)
 
     # Figure 1: Tier 1 capability bars (recall arms + comprehension arms).
     recall = results["recall"]
     comp = results["comprehension"]
-    labels = ["recall\ncontrol", "recall\nresurfaced", "comp\nfull-first", "comp\ntldr-first"]
+    labels = ["recall\ncomparison", "recall\nresurfaced", "comp\nfull-first", "comp\ntldr-first"]
     values = [
-        recall["control"]["accuracy"],
+        recall["comparison"]["accuracy"],
         recall["resurfaced"]["accuracy"],
         comp["fulltext_first"]["accuracy"],
         comp["tldr_first"]["accuracy"],
     ]
-    colors = [WARM_GREY, CORAL, WARM_GREY, CORAL]
+    colors = [TRACE, FIELD, TRACE, FIELD]
     fig, ax = plt.subplots(figsize=(7, 4.2))
-    fig.patch.set_facecolor(PAPER)
+    fig.patch.set_facecolor(CANVAS)
     _style_axes(ax)
     bars = ax.bar(labels, [v * 100 for v in values], color=colors, zorder=3)
-    ax.set_ylabel("accuracy (%)")
+    ax.set_ylabel("accuracy in generated fixture (%)")
     ax.set_ylim(0, 100)
-    ax.set_title(f"Tier 1 capability: probe accuracy by arm ({title_tag})")
+    ax.set_title("Authored probe rates through the metric transforms")
     for bar, v in zip(bars, values):
         ax.text(
             bar.get_x() + bar.get_width() / 2,
@@ -462,11 +445,12 @@ def save_figures(df: pd.DataFrame, results: dict) -> list:
             ha="center",
             va="bottom",
             fontsize=9,
-            color=INK,
+            color=STRUCTURE,
         )
-    fig.tight_layout()
+    fig.suptitle(title_tag, color=STRUCTURE, fontsize=10, fontweight="bold")
+    fig.tight_layout(rect=[0, 0, 1, 0.91])
     p1 = FIG_DIR / "fig1_capability_arms.png"
-    fig.savefig(p1, dpi=130, facecolor=PAPER)
+    fig.savefig(p1, dpi=130, facecolor=CANVAS)
     plt.close(fig)
     saved.append(p1)
 
@@ -474,66 +458,83 @@ def save_figures(df: pd.DataFrame, results: dict) -> list:
     settledness = results["settledness"]
     if settledness["n"]:
         fig, ax = plt.subplots(figsize=(7, 4.2))
-        fig.patch.set_facecolor(PAPER)
+        fig.patch.set_facecolor(CANVAS)
         _style_axes(ax)
         vals = settledness["values"]
         bins = range(-4, 6)
-        ax.hist(vals, bins=bins, color=CORAL, edgecolor=PAPER, align="left", zorder=3)
-        ax.axvline(0, color=WARM_GREY, linestyle="--", linewidth=1.2, label="no change")
+        ax.hist(vals, bins=bins, color=FIELD, edgecolor=CANVAS, align="left", zorder=3)
+        ax.axvline(0, color=TRACE, linestyle="--", linewidth=1.2, label="no change")
         ax.axvline(
             settledness["mean"],
-            color=INK,
+            color=STRUCTURE,
             linewidth=1.6,
             label=f"mean {settledness['mean']:+.2f}",
         )
         ax.set_xlabel("settledness delta (after minus before, 1..5 scale)")
         ax.set_ylabel("sessions")
-        ax.set_title(f"Settledness shift per session ({title_tag})")
+        ax.set_title("Generated settledness deltas exercise both directions")
         legend = ax.legend()
-        legend.get_frame().set_facecolor(PAPER)
-        legend.get_frame().set_edgecolor(INK)
+        legend.get_frame().set_facecolor(CANVAS)
+        legend.get_frame().set_edgecolor(STRUCTURE)
         for text in legend.get_texts():
-            text.set_color(INK)
-        fig.tight_layout()
+            text.set_color(STRUCTURE)
+        fig.suptitle(title_tag, color=STRUCTURE, fontsize=10, fontweight="bold")
+        fig.tight_layout(rect=[0, 0, 1, 0.91])
         p2 = FIG_DIR / "fig2_settledness_delta.png"
-        fig.savefig(p2, dpi=130, facecolor=PAPER)
+        fig.savefig(p2, dpi=130, facecolor=CANVAS)
         plt.close(fig)
         saved.append(p2)
 
-    # Figure 3: completion reasons + harm metrics, side by side.
+    # Figure 3: session end reasons + candidate harm signals, side by side.
     completion = results["completion"]
     harm = results["harm"]
     fig, axes = plt.subplots(1, 2, figsize=(10, 4.2))
-    fig.patch.set_facecolor(PAPER)
+    fig.patch.set_facecolor(CANVAS)
     _style_axes(axes[0])
     _style_axes(axes[1])
     reasons = completion["by_reason"]
     intentional = {"timebox", "postcap", "user_closed"}
     r_labels = list(reasons.keys())
     r_vals = [reasons[k] for k in r_labels]
-    r_colors = [CORAL if k in intentional else WARM_GREY for k in r_labels]
+    r_colors = [FIELD if k in intentional else TRACE for k in r_labels]
     axes[0].bar(r_labels, r_vals, color=r_colors, zorder=3)
-    axes[0].set_title(f"Session end reasons ({title_tag})")
+    axes[0].set_title("Session end reasons")
     axes[0].set_ylabel("sessions")
     axes[0].tick_params(axis="x", rotation=20)
 
-    h_labels = ["compulsive\nre-entry", "resurface\nanxiety", "rumination"]
+    h_labels = ["compulsive\nre-entry", "resurface\nanxiety", "worsened\nsettledness"]
     h_vals = [
         harm["reentry"]["rate"] * 100 if not pd.isna(harm["reentry"]["rate"]) else 0,
         harm["resurface_anxiety"]["rate"] * 100
         if not pd.isna(harm["resurface_anxiety"]["rate"])
         else 0,
-        harm["rumination"]["rate"] * 100 if not pd.isna(harm["rumination"]["rate"]) else 0,
+        harm["worsened_settledness"]["rate"] * 100
+        if not pd.isna(harm["worsened_settledness"]["rate"])
+        else 0,
     ]
-    axes[1].bar(h_labels, h_vals, color=WARM_GREY, zorder=3)
+    axes[1].bar(h_labels, h_vals, color=SIGNAL, zorder=3)
     axes[1].set_ylim(0, max(20, max(h_vals) * 1.4 + 1))
-    axes[1].set_title(f"Harm metrics, lower is better ({title_tag})")
+    axes[1].set_title("Candidate harm signals")
     axes[1].set_ylabel("rate (%)")
     for i, v in enumerate(h_vals):
-        axes[1].text(i, v + 0.4, f"{v:.0f}%", ha="center", va="bottom", fontsize=9, color=INK)
-    fig.tight_layout()
+        axes[1].text(
+            i,
+            v + 0.4,
+            f"{v:.0f}%",
+            ha="center",
+            va="bottom",
+            fontsize=9,
+            color=STRUCTURE,
+        )
+    fig.suptitle(
+        f"Session end reasons + harm signals ({title_tag})",
+        color=STRUCTURE,
+        fontsize=12,
+        fontweight="bold",
+    )
+    fig.tight_layout(rect=[0, 0, 1, 0.91])
     p3 = FIG_DIR / "fig3_guardrails.png"
-    fig.savefig(p3, dpi=130, facecolor=PAPER)
+    fig.savefig(p3, dpi=130, facecolor=CANVAS)
     plt.close(fig)
     saved.append(p3)
 

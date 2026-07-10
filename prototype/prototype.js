@@ -10,10 +10,16 @@ import { chunkPost } from '../lib/reflow.js';
 let session = createSession();
 let queue = createQueue();
 const setupChoice = { mode: 'focus', durationMin: 12 };
+const POST_CAP_BY_DURATION_MIN = new Map([
+  [5, 8],
+  [12, 15],
+  [20, 25],
+]);
 let timer = null;
 let currentPostIdx = 0;
 let currentPageIdx = 0;
 let currentChunks = [];
+let checkpointEl = null;
 
 // ---------- DOM helpers ----------
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -87,7 +93,7 @@ $('#start-setup-btn').addEventListener('click', () => {
 });
 
 $('#begin-btn').addEventListener('click', () => {
-  const postCap = setupChoice.mode === 'focus' ? 12 : 8;
+  const postCap = POST_CAP_BY_DURATION_MIN.get(setupChoice.durationMin) ?? 15;
   session = send(session, {
     type: 'BEGIN',
     mode: setupChoice.mode,
@@ -155,6 +161,8 @@ function presentCard() {
 
   if (session.state === 'checkpoint') {
     setTimeout(showCheckpoint, 400);
+  } else if (session.state === 'end') {
+    setTimeout(endSession, 400);
   }
 }
 
@@ -187,6 +195,11 @@ function renderCurrentChunk(post) {
 
 function endSession() {
   clearInterval(timer);
+  if (checkpointEl) {
+    checkpointEl.classList.remove('open');
+    checkpointEl.hidden = true;
+  }
+  document.removeEventListener('keydown', checkpointKeyHandler);
   $('#end-seen').textContent = session.cardsSeen;
   $('#end-react').textContent = session.reactionsSent;
   $('#end-queue').textContent = session.queueAdds;
@@ -196,8 +209,6 @@ function endSession() {
 // Non-blocking in-DOM checkpoint. The earlier window.confirm() froze the page
 // and the spring loop; this overlay lets the user read the count and choose
 // without halting the main thread. Built once, then shown on demand.
-let checkpointEl = null;
-
 function buildCheckpoint() {
   const el = document.createElement('div');
   el.className = 'checkpoint';
@@ -398,6 +409,10 @@ function advanceCard(action) {
     card.style.opacity = '0';
   }
   setTimeout(() => {
+    if (session.state === 'end') {
+      endSession();
+      return;
+    }
     if (session.state === 'checkpoint') {
       showCheckpoint();
       return;

@@ -1,16 +1,20 @@
 name: CI
 
-# Run on every push and pull request against main. Each check is a
-# separate step so a failure points straight at the cause.
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 jobs:
   verify:
-    name: Verify
+    name: Code, content, and generated artifacts
     runs-on: ubuntu-latest
 
     steps:
@@ -20,33 +24,71 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          # Node 22 LTS matches @types/node in devDependencies.
-          node-version: 22
+          node-version-file: .nvmrc
           cache: npm
 
-      - name: Install (clean, from lockfile)
+      - name: Install Node dependencies
         run: npm ci
 
-      - name: Unit tests
-        run: npm test
+      - name: Unit, type, lint, HTML, link, and copy checks
+        run: npm run ci
 
-      - name: Type check
-        run: npm run typecheck
+      - name: Test coverage
+        run: npm run test:coverage
 
-      - name: Lint
-        run: npm run lint
-
-      - name: No banned dashes
-        run: npm run check:dashes
-
-      # Token freshness gate. The committed token files are generated from
-      # design-system/tokens.source.json. Rebuild them, then fail if the
-      # working tree changed: a nonempty diff means someone edited a
-      # generated file by hand or forgot to rebuild after touching the
-      # source. The build is deterministic (no timestamps), so a fresh
-      # checkout that ran the build produces a clean diff.
-      - name: Tokens are fresh
+      - name: Rebuild tokens and visual assets
         run: |
           npm run tokens:build
-          git diff --exit-code design-system/ \
-            || (echo "::error::Token files are stale. Run 'npm run tokens:build' and commit design-system/tokens.css and tokens.json." && exit 1)
+          npm run render:assets
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install analytics dependencies
+        run: pip install -r requirements.txt
+
+      - name: Validate the synthetic analytics rehearsal
+        env:
+          MPLCONFIGDIR: /tmp/matplotlib
+        run: |
+          python -m py_compile analytics/event_schema.py analytics/generate_events.py analytics/capability_metrics.py
+          python analytics/event_schema.py
+          python analytics/generate_events.py
+          python analytics/capability_metrics.py
+
+      - name: Generated artifacts are current
+        run: |
+          git diff --exit-code -- \
+            design-system/tokens.css \
+            design-system/tokens.json \
+            case-study/og.png \
+            favicon-32.png \
+            apple-touch-icon.png \
+            analytics/sample_events.jsonl \
+            analytics/figures/
+
+  browser:
+    name: Chromium interaction and accessibility checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright and axe
+        run: npm run test:e2e

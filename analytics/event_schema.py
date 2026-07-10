@@ -1,53 +1,32 @@
-"""Event taxonomy as typed Python.
+"""Typed event taxonomy plus dependency-free runtime validation.
 
-This mirrors docs/build-canon.md section 9 (event taxonomy) and the TypeScript
-declarations in lib/types.d.ts. Field names match the canon EXACTLY so the JSONL
-the generator writes is the same shape the running app would emit from its
-reducer sink (lib/session-state.js send()).
+This mirrors docs/build-canon.md section 9 and lib/types.d.ts. The Python
+TypedDicts help static readers, while validate_event() enforces the same
+contract for every JSONL row at runtime.
 
-ALL DATA produced and consumed by this pipeline is SYNTHETIC and illustrative.
+All data produced and consumed by this pipeline is synthetic and illustrative.
 Nothing here is a measured result.
-
-The event union is discriminated on the literal "type" field, just like the TS
-SessionEvent union. We use TypedDict so the dicts round-trip to JSON with no
-serialization step, and so the field names stay literal in source where a
-reviewer can diff them against the canon.
 """
 
 from __future__ import annotations
 
+import math
 import sys
 
-# TypedDict with `Literal` lives in typing on 3.8+. On 3.9 (the interpreter this
-# repo ships against) both are present. We import defensively so the module also
-# loads on installs where typing_extensions backfills older runtimes.
 try:
-    from typing import Literal, TypedDict, Union
+    from typing import Callable, Literal, Mapping, TypedDict, Union
 except ImportError:  # pragma: no cover - only on very old runtimes
-    from typing_extensions import Literal, TypedDict, Union  # type: ignore
+    from typing_extensions import Callable, Literal, Mapping, TypedDict, Union  # type: ignore
 
 
-# The six LinkedIn reactions, in dock display order (canon section 4).
-# Order matches gestures.js REACTIONS_ORDER:
-#   like, celebrate, support, love, insightful, funny.
 Reaction = Literal["like", "celebrate", "support", "love", "insightful", "funny"]
-
-# The three reactions that seed a resurface (canon section 4).
 ResurfacingReaction = Literal["insightful", "support", "love"]
-
-# Session mode. Mirrors the analytics session_started.mode field.
 SessionMode = Literal["focus", "reengage"]
-
-# Why a session ended (canon section 9 session_wrapped.reason).
 WrapReason = Literal["timebox", "postcap", "user_closed", "abandoned"]
+ComprehensionVariant = Literal["tldr_first", "full_text_first"]
 
-# The set form is handy for the generator and metrics; keep it in lockstep with
-# the literal above. spaced-repetition.js RESURFACING_REACTIONS is the source of
-# truth in the running app.
+REACTIONS = frozenset({"like", "celebrate", "support", "love", "insightful", "funny"})
 RESURFACING_REACTIONS = ("insightful", "support", "love")
-
-# Reaction -> first resurface interval in days (canon section 4).
-# Non-resurfacing reactions are absent from this map.
 RESURFACE_INTERVAL_DAYS = {
     "insightful": 3,
     "support": 7,
@@ -102,10 +81,20 @@ class CheckpointShownEvent(TypedDict):
 
 
 class RecallProbeEvent(TypedDict):
-    """Research build only (canon section 5)."""
+    """Optional recall question in the research build."""
 
     type: Literal["recall_probe"]
     post_id: str
+    correct: bool
+    ts: int
+
+
+class ComprehensionProbeEvent(TypedDict):
+    """One-question comprehension check in the research build."""
+
+    type: Literal["comprehension_probe"]
+    post_id: str
+    variant: ComprehensionVariant
     correct: bool
     ts: int
 
@@ -116,18 +105,10 @@ class SessionWrappedEvent(TypedDict):
     posts_seen: int
     elapsed_s: int
     resurfaced_count: int
-    # settledness_delta is nullable in the canon: a session can end without a
-    # post self-report (for example an abandoned session).
     settledness_delta: "float | None"
     ts: int
 
 
-# The full event row written to one JSONL line. Every variant shares the
-# discriminating "type" key. We carry two non-canonical envelope fields the
-# running app would attach at the sink boundary, not inside the reducer:
-#   session_id: groups rows into a session for analysis
-#   build: "research" or "production" so probe-only metrics can be filtered
-# These are clearly outside canon section 9 and are documented as envelope-only.
 SessionEvent = Union[
     SessionStartedEvent,
     CardSeenEvent,
@@ -136,37 +117,229 @@ SessionEvent = Union[
     PostSkippedEvent,
     CheckpointShownEvent,
     RecallProbeEvent,
+    ComprehensionProbeEvent,
     SessionWrappedEvent,
 ]
 
 
-# Canonical event type names, for validation in the metrics loader.
-EVENT_TYPES = frozenset(
-    {
-        "session_started",
-        "card_seen",
-        "long_post_reflowed",
-        "reaction_committed",
-        "post_skipped",
-        "checkpoint_shown",
-        "recall_probe",
-        "session_wrapped",
-    }
-)
+class EventValidationError(ValueError):
+    """Raised when one event row violates the canonical runtime contract."""
+
+
+FieldRule = tuple[str, Callable[[object], bool]]
+
+
+def _is_string(value: object) -> bool:
+    return isinstance(value, str) and bool(value)
+
+
+def _is_bool(value: object) -> bool:
+    return type(value) is bool
+
+
+def _is_nonnegative_int(value: object) -> bool:
+    return type(value) is int and value >= 0
+
+
+def _is_finite_number_or_none(value: object) -> bool:
+    if value is None:
+        return True
+    return not isinstance(value, bool) and isinstance(value, (int, float)) and math.isfinite(value)
+
+
+STRING: FieldRule = ("a non-empty string", _is_string)
+BOOL: FieldRule = ("a boolean", _is_bool)
+NONNEGATIVE_INT: FieldRule = ("a non-negative integer", _is_nonnegative_int)
+NUMBER_OR_NONE: FieldRule = ("a finite number or null", _is_finite_number_or_none)
+
+
+EVENT_SCHEMAS: dict[str, dict[str, FieldRule]] = {
+    "session_started": {
+        "mode": STRING,
+        "time_box_s": NONNEGATIVE_INT,
+        "post_cap": NONNEGATIVE_INT,
+        "ts": NONNEGATIVE_INT,
+    },
+    "card_seen": {
+        "post_id": STRING,
+        "dwell_ms": NONNEGATIVE_INT,
+        "is_resurfaced": BOOL,
+        "ts": NONNEGATIVE_INT,
+    },
+    "long_post_reflowed": {
+        "post_id": STRING,
+        "expanded": BOOL,
+        "ts": NONNEGATIVE_INT,
+    },
+    "reaction_committed": {
+        "post_id": STRING,
+        "reaction": STRING,
+        "seeds_resurface": BOOL,
+        "via": STRING,
+        "ts": NONNEGATIVE_INT,
+    },
+    "post_skipped": {
+        "post_id": STRING,
+        "via": STRING,
+        "ts": NONNEGATIVE_INT,
+    },
+    "checkpoint_shown": {
+        "posts_seen": NONNEGATIVE_INT,
+        "elapsed_s": NONNEGATIVE_INT,
+        "ts": NONNEGATIVE_INT,
+    },
+    "recall_probe": {
+        "post_id": STRING,
+        "correct": BOOL,
+        "ts": NONNEGATIVE_INT,
+    },
+    "comprehension_probe": {
+        "post_id": STRING,
+        "variant": STRING,
+        "correct": BOOL,
+        "ts": NONNEGATIVE_INT,
+    },
+    "session_wrapped": {
+        "reason": STRING,
+        "posts_seen": NONNEGATIVE_INT,
+        "elapsed_s": NONNEGATIVE_INT,
+        "resurfaced_count": NONNEGATIVE_INT,
+        "settledness_delta": NUMBER_OR_NONE,
+        "ts": NONNEGATIVE_INT,
+    },
+}
+
+EVENT_TYPES = frozenset(EVENT_SCHEMAS)
+
+_LITERAL_VALUES = {
+    ("session_started", "mode"): frozenset({"focus", "reengage"}),
+    ("reaction_committed", "reaction"): REACTIONS,
+    ("reaction_committed", "via"): frozenset({"tap", "drag"}),
+    ("post_skipped", "via"): frozenset({"swipe", "key"}),
+    ("comprehension_probe", "variant"): frozenset({"tldr_first", "full_text_first"}),
+    ("session_wrapped", "reason"): frozenset(
+        {"timebox", "postcap", "user_closed", "abandoned"}
+    ),
+}
+
+_ENVELOPE_RULES: dict[str, FieldRule] = {
+    "session_id": STRING,
+    "build": STRING,
+}
+_BUILD_VALUES = frozenset({"research", "production"})
+_RESEARCH_ONLY_EVENTS = frozenset({"recall_probe", "comprehension_probe"})
 
 
 def seeds_resurface(reaction: str) -> bool:
-    """True when a reaction schedules the post to come back (canon section 4)."""
+    """Return whether a reaction schedules a later touch."""
     return reaction in RESURFACING_REACTIONS
 
 
+def validate_event(row: object, *, require_envelope: bool = False) -> None:
+    """Validate one canonical event, optionally requiring JSONL envelope fields.
+
+    The check is strict by design: required fields, primitive types, literal
+    values, and unexpected keys are validated before pandas can coerce them.
+    """
+    if not isinstance(row, Mapping):
+        raise EventValidationError("event must be a JSON object")
+
+    event_type = row.get("type")
+    if not isinstance(event_type, str):
+        raise EventValidationError("field 'type' must be a string")
+    if event_type not in EVENT_SCHEMAS:
+        raise EventValidationError(f"unknown event type {event_type!r}")
+
+    schema = EVENT_SCHEMAS[event_type]
+    required = {"type", *schema}
+    if require_envelope:
+        required.update(_ENVELOPE_RULES)
+
+    missing = sorted(required.difference(row))
+    if missing:
+        raise EventValidationError(f"{event_type}: missing required field(s): {', '.join(missing)}")
+
+    allowed = required.union(_ENVELOPE_RULES)
+    unexpected = sorted(set(row).difference(allowed))
+    if unexpected:
+        raise EventValidationError(f"{event_type}: unexpected field(s): {', '.join(unexpected)}")
+
+    for field, (expected, predicate) in schema.items():
+        value = row[field]
+        if not predicate(value):
+            raise EventValidationError(
+                f"{event_type}.{field} must be {expected}; got {type(value).__name__}"
+            )
+
+    for field, (expected, predicate) in _ENVELOPE_RULES.items():
+        if field in row and not predicate(row[field]):
+            raise EventValidationError(
+                f"{event_type}.{field} must be {expected}; got {type(row[field]).__name__}"
+            )
+
+    if "build" in row and row["build"] not in _BUILD_VALUES:
+        raise EventValidationError(
+            f"{event_type}.build must be one of {sorted(_BUILD_VALUES)}; got {row['build']!r}"
+        )
+
+    for (literal_event, field), values in _LITERAL_VALUES.items():
+        if event_type == literal_event and row[field] not in values:
+            raise EventValidationError(
+                f"{event_type}.{field} must be one of {sorted(values)}; got {row[field]!r}"
+            )
+
+    if event_type == "reaction_committed":
+        expected_seed = seeds_resurface(str(row["reaction"]))
+        if row["seeds_resurface"] is not expected_seed:
+            raise EventValidationError(
+                "reaction_committed.seeds_resurface does not match the reaction mapping"
+            )
+
+    if event_type in _RESEARCH_ONLY_EVENTS and row.get("build") not in (None, "research"):
+        raise EventValidationError(f"{event_type} is allowed only in a research build")
+
+
+def _self_check_rows() -> list[dict]:
+    envelope = {"session_id": "self-check", "build": "research"}
+    events = [
+        {"type": "session_started", "mode": "focus", "time_box_s": 300, "post_cap": 8, "ts": 1},
+        {"type": "card_seen", "post_id": "p1", "dwell_ms": 1200, "is_resurfaced": False, "ts": 2},
+        {"type": "long_post_reflowed", "post_id": "p1", "expanded": False, "ts": 3},
+        {"type": "reaction_committed", "post_id": "p1", "reaction": "support", "seeds_resurface": True, "via": "tap", "ts": 4},
+        {"type": "post_skipped", "post_id": "p2", "via": "key", "ts": 5},
+        {"type": "checkpoint_shown", "posts_seen": 4, "elapsed_s": 150, "ts": 6},
+        {"type": "recall_probe", "post_id": "p1", "correct": True, "ts": 7},
+        {"type": "comprehension_probe", "post_id": "p1", "variant": "tldr_first", "correct": True, "ts": 8},
+        {"type": "session_wrapped", "reason": "timebox", "posts_seen": 7, "elapsed_s": 300, "resurfaced_count": 1, "settledness_delta": 1.0, "ts": 9},
+    ]
+    return [{**envelope, **event} for event in events]
+
+
 if __name__ == "__main__":
-    # Tiny self-check so `python analytics/event_schema.py` is not a silent no-op.
-    assert seeds_resurface("insightful") is True
-    assert seeds_resurface("like") is False
-    # The eight canon section 9 event types are all present.
-    assert len(EVENT_TYPES) == 8
-    assert "recall_probe" in EVENT_TYPES
-    # The resurfacing reactions and their interval map agree.
+    rows = _self_check_rows()
+    for sample in rows:
+        validate_event(sample, require_envelope=True)
+    assert {row["type"] for row in rows} == EVENT_TYPES
     assert set(RESURFACING_REACTIONS) == set(RESURFACE_INTERVAL_DAYS)
-    print("event_schema: SYNTHETIC taxonomy OK on Python", sys.version.split()[0])
+
+    try:
+        invalid = dict(rows[0])
+        del invalid["ts"]
+        validate_event(invalid, require_envelope=True)
+    except EventValidationError:
+        pass
+    else:  # pragma: no cover - protects the validator self-check itself
+        raise AssertionError("missing-field validation did not run")
+
+    try:
+        invalid = dict(rows[1], dwell_ms=True)
+        validate_event(invalid, require_envelope=True)
+    except EventValidationError:
+        pass
+    else:  # pragma: no cover
+        raise AssertionError("type validation did not run")
+
+    print(
+        f"event_schema: {len(EVENT_TYPES)} event types and runtime validation OK "
+        f"on Python {sys.version.split()[0]}"
+    )
